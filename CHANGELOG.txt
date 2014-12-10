@@ -1,0 +1,18 @@
+v0.2 (12/03/2014):
+-  Added optional settings button that links to a Cardboard app for managing headset parameters.
+-  Added optional alignment marker to help center the screen under the lenses.
+-  Rearranged the contents of the Cardboard folder.
+-  Added support for Image Effects and Deferred Rendering in stereo.
+-  Added support for drawing OnGUI()-based UI in stereo.
+-  Allow user head tracking + magnetic trigger to activate OnGUI UI elements.
+-  Added support for directional lens flares in stereo.
+-  Added CardboardHead.Gaze property to help with gaze tracking.
+-  Fixed bug in IPD scaling code: did not include eye offset in stereo comfort calculation.
+
+v0.3 (12/04/2014):
+-  Removed AutoEnableVR because it relies on NFC and was not triggering
+   reliably for all Cardboard/phone combinations.
+
+v0.4 (12/10/2014):
+-  Fixed bug in the alignment marker rendering.
+-  Fixed bug converting mouse click to magnet trigger when playing in the editor.
