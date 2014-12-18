@@ -16,3 +16,6 @@ v0.3 (12/04/2014):
 v0.4 (12/10/2014):
 -  Fixed bug in the alignment marker rendering.
 -  Fixed bug converting mouse click to magnet trigger when playing in the editor.
+
+v0.4.1 (12/18/2014):
+-  The CardboardGUI script automatically disables itself in Unity Free.
