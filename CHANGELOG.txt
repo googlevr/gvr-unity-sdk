@@ -19,3 +19,17 @@ v0.4 (12/10/2014):
 
 v0.4.1 (12/18/2014):
 -  The CardboardGUI script automatically disables itself in Unity Free.
+
+v0.4.5 (2/26/2015):
+-  Added Cardboard.SDK.nativeDistortionCorrection to toggle built-in distortion correction on/off.
+-  Added Cardboard.SDK.Recenter() to reset the head tracker to the current direction.
+-  Added Cardboard.SDK.CreateScreen(x,y) to init the stereo rendertexture at given resolution.
+-  Added Cardboard.SDK.BackButtonExitsApp to control how the back button is handled.
+-  Added CardboardEye.toggleCullingMask to turn on or off specific layers in each eye.
+-  Added StereoController.matchByZoom to match the mono FOV by zooming rather than translating.
+-  Added SkyboxMesh.layer to set the layer of the generated skybox mesh.
+-  The x86 architecture is now supported.
+-  The message ‘Unable to find Unity Activity’ has been fixed.
+-  The aspect ratio is determined by the device configuration, regardless of screen size.
+-  The UI layer (alignment marker and settings button) work in Unity Free.
+
