@@ -33,3 +33,17 @@ v0.4.5 (2/26/2015):
 -  The aspect ratio is determined by the device configuration, regardless of screen size.
 -  The UI layer (alignment marker and settings button) work in Unity Free.
 
+v0.4.9 (3/27/2015):
+-  Added Cardboard.SDK.AutoDriftCorrection to turn gyro drift correction on/off (default on).
+-  Added GazeInputModule for using gaze and magnet to interact with uGUI elements.
+-  Added Cardboard.SDK.NeckModelScale to control the scale of the built-in neck model.
+-  Added CardboardHead.trackRotation/trackPosition to control specific types of head tracking.
+-  The entire screen is correctly cleared in VR mode.
+-  Unity 5 import errors and warnings have been fixed; it will still ask to upgrade (say Yes).
+-  The alignment marker is also drawn in the editor.
+-  Distortion correction is applied in the editor.
+-  Deprecated CardboardGUI scripts: not needed in Unity 5, moved to Legacy folder.
+-  Deprecated SkyboxMesh and StereoLensFlare scripts: ditto.
+-  Demo scene now uses uGUI instead of OnGUI.
+-  Original demo scene using CardboardGUI moved to Legacy folder.
+
