@@ -126,13 +126,33 @@ public class StereoController : MonoBehaviour {
 
   private Material material;
 
+#if !UNITY_EDITOR
+  // Cache for speed, except in editor (don't want to get out of sync with the scene).
+  private CardboardEye[] eyes;
+#endif
+
   // Returns the CardboardEye components that we control.
   public CardboardEye[] Eyes {
     get {
-      return GetComponentsInChildren<CardboardEye>(true)
-             .Where(eye => eye.Controller == this)
-             .ToArray();
+#if UNITY_EDITOR
+      CardboardEye[] eyes = null;  // Local variable rather than member, so as not to cache.
+#endif
+      if (eyes == null) {
+        eyes = GetComponentsInChildren<CardboardEye>(true)
+               .Where(eye => eye.Controller == this)
+               .ToArray();
+      }
+      return eyes;
     }
+  }
+
+  // Clear the cached array of CardboardEye children.
+  // NOTE: Be sure to call this if you programmatically change the set of CardboardEye children
+  // managed by this StereoController.
+  public void InvalidateEyes() {
+#if !UNITY_EDITOR
+    eyes = null;
+#endif
   }
 
   // Returns the nearest CardboardHead that affects our eyes.
@@ -242,8 +262,12 @@ public class StereoController : MonoBehaviour {
     }
   }
 
-  void Start() {
+  void OnEnable() {
     StartCoroutine("EndOfFrame");
+  }
+
+  void OnDisable() {
+    StopCoroutine("EndOfFrame");
   }
 
   void OnPreCull() {
@@ -287,7 +311,7 @@ public class StereoController : MonoBehaviour {
       FillScreenRect(4, ScreenHeight - 80, Color.gray);
     }
 
-    // Remember to reenable
+    // Remember to reenable.
     renderedStereo = true;
   }
 
@@ -327,9 +351,5 @@ public class StereoController : MonoBehaviour {
       }
       yield return new WaitForEndOfFrame();
     }
-  }
-
-  void OnDestroy() {
-    StopCoroutine("EndOfFrame");
   }
 }

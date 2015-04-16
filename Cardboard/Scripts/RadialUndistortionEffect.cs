@@ -22,7 +22,9 @@ using System.Collections;
 [RequireComponent(typeof(Camera))]
 public class RadialUndistortionEffect : MonoBehaviour {
 
+#if UNITY_EDITOR
   private StereoController controller;
+#endif
   private Material material;
 
   void Awake() {
@@ -38,12 +40,14 @@ public class RadialUndistortionEffect : MonoBehaviour {
     material = new Material(shader);
   }
 
+#if UNITY_EDITOR
   void Start() {
     var eye = GetComponent<CardboardEye>();
     if (eye != null) {
       controller = eye.Controller;
     }
   }
+#endif
 
   void OnRenderImage(RenderTexture source, RenderTexture dest) {
     // Check if we found our shader, and that native distortion correction is OFF (except maybe in

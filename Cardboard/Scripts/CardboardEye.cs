@@ -20,6 +20,9 @@ using System.Reflection;
 // projection based on the head-tracking data from the Cardboard.SDK object.
 // To enable a stereo camera pair, enable the parent mono camera and set
 // Cardboard.SDK.VRModeEnabled = true.
+// NOTE: If you programmatically change the set of CardboardEyes belonging to a
+// StereoController, be sure to call InvalidateEyes() on it in order to reset its
+// cache.
 [RequireComponent(typeof(Camera))]
 public class CardboardEye : MonoBehaviour {
   // Whether this is the left eye or the right eye.
@@ -51,6 +54,16 @@ public class CardboardEye : MonoBehaviour {
     }
   }
 
+#if UNITY_5
+  // For backwards source code compatibility, since we refer to the camera component A LOT in
+  // this script.
+  new private Camera camera;
+
+  void Awake() {
+    camera = GetComponent<Camera>();
+  }
+#endif
+
   void Start() {
     var ctlr = Controller;
     if (ctlr == null) {
@@ -73,7 +86,6 @@ public class CardboardEye : MonoBehaviour {
   private void FixProjection(ref Matrix4x4 proj, float near, float far, float ipdScale) {
     // Adjust for non-fullscreen camera.  Cardboard SDK assumes fullscreen,
     // so the aspect ratio might not match.
-    Camera camera = GetComponent<Camera>();
     float aspectFix = camera.rect.height / camera.rect.width / 2;
     proj[0, 0] *= aspectFix;
 
@@ -89,13 +101,12 @@ public class CardboardEye : MonoBehaviour {
     proj[2, 3] = 2 * near * far / (near - far);
   }
 
-  public void Render() {
+  private void Setup() {
     // Shouldn't happen because of the check in Start(), but just in case...
     if (controller == null) {
       return;
     }
 
-    var camera = GetComponent<Camera>();
     var monoCamera = controller.GetComponent<Camera>();
     Matrix4x4 proj = Cardboard.SDK.Projection(eye);
 
@@ -155,11 +166,7 @@ public class CardboardEye : MonoBehaviour {
                              new Vector4(p.device.distortion.k1, p.device.distortion.k2));
     }
 
-    RenderTexture stereoScreen = controller.StereoScreen;
-    int screenWidth = stereoScreen ? stereoScreen.width : Screen.width;
-    int screenHeight = stereoScreen ? stereoScreen.height : Screen.height;
-
-    if (stereoScreen == null) {
+    if (controller.StereoScreen == null) {
       Rect rect = camera.rect;
       if (!Cardboard.SDK.nativeDistortionCorrection || Application.isEditor) {
         // We are rendering straight to the screen.  Use the reported rect that is visible
@@ -175,7 +182,7 @@ public class CardboardEye : MonoBehaviour {
       }
       if (Application.isEditor) {
         // The Game window's aspect ratio may not match the fake device parameters.
-        float realAspect = (float)screenWidth / screenHeight;
+        float realAspect = (float)Screen.width / Screen.height;
         float fakeAspect = Cardboard.SDK.Profile.screen.width / Cardboard.SDK.Profile.screen.height;
         float aspectComparison = fakeAspect / realAspect;
         if (aspectComparison < 1) {
@@ -188,6 +195,12 @@ public class CardboardEye : MonoBehaviour {
       }
       camera.rect = rect;
     }
+  }
+
+  // Called by StereoController to run the whole render pipeline for this camera.
+  public void Render()
+  {
+    Setup();
 
     // Use the "fast" or "slow" method.  Fast means the camera draws right into one half of
     // the stereo screen.  Slow means it draws first to a side buffer, and then the buffer
@@ -195,7 +208,7 @@ public class CardboardEye : MonoBehaviour {
     // don't work if you draw to only part of the window.
     if (controller.directRender) {
       // Redirect to our stereo screen.
-      camera.targetTexture = stereoScreen;
+      camera.targetTexture = controller.StereoScreen;
       // Draw!
       camera.Render();
     } else {
@@ -203,6 +216,9 @@ public class CardboardEye : MonoBehaviour {
       Rect pixRect = camera.pixelRect;
       camera.rect = new Rect (0, 0, 1, 1);
       // Redirect to a temporary texture.  The defaults are supposedly Android-friendly.
+      RenderTexture stereoScreen = controller.StereoScreen;
+      int screenWidth = stereoScreen ? stereoScreen.width : Screen.width;
+      int screenHeight = stereoScreen ? stereoScreen.height : Screen.height;
       int depth = stereoScreen ? stereoScreen.depth : 16;
       RenderTextureFormat format = stereoScreen ? stereoScreen.format : RenderTextureFormat.RGB565;
       camera.targetTexture = RenderTexture.GetTemporary((int)pixRect.width, (int)pixRect.height,
@@ -228,6 +244,19 @@ public class CardboardEye : MonoBehaviour {
     camera.targetTexture = null;
   }
 
+  // Alternate means of rendering stereo, when you don't plan to switch in and out of VR mode:
+  // In the editor, disable the MainCamera's camera component.  Enable the two stereo eye
+  // camera components.  Note: due to a quirk of Unity, there must be at least one camera
+  // not rendering to a texture, preferably last in order.  If necessary, add a dummy camera
+  // to the scene with a high depth value, it's clear flags set to "Don't Clear", and culling mask
+  // set to Nothing.
+  void OnPreCull() {
+    if (camera.enabled) {
+      Setup();
+      camera.targetTexture = controller.StereoScreen;
+    }
+  }
+
   // Helper to copy camera settings from the controller's mono camera.
   // Used in OnPreCull and the custom editor for StereoController.
   // The parameters parx and pary, if not left at default, should come from a
@@ -235,8 +264,6 @@ public class CardboardEye : MonoBehaviour {
   // They affect the apparent depth of the camera's window.  See OnPreCull().
   public void CopyCameraAndMakeSideBySide(StereoController controller,
                                           float parx = 0, float pary = 0) {
-    var camera = GetComponent<Camera>();
-
     // Sync the camera properties.
     camera.CopyFrom(controller.GetComponent<Camera>());
     camera.cullingMask ^= toggleCullingMask.value;

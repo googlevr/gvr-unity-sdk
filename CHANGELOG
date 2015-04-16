@@ -47,3 +47,9 @@ v0.4.9 (3/27/2015):
 -  Demo scene now uses uGUI instead of OnGUI.
 -  Original demo scene using CardboardGUI moved to Legacy folder.
 
+v0.4.10 (4/16/2015):
+-  StereoController now caches the Eyes array.  Call InvalidateEyes() to reset the cache.
+-  Moved coroutine management in Cardboard and StereoController to OnEnable()/OnDisable().
+-  Fixed CardboardGUI's Head property in the Legacy demo scene.
+-  Fixed the neck model Z offset in the Editor.
+-  Fixed a bug in CardboardEditor which failed to save the Editor-only settings.

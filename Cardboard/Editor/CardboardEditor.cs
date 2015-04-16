@@ -102,10 +102,6 @@ public class CardboardEditor : Editor {
     cardboard.BackButtonExitsApp =
       EditorGUILayout.Toggle(backButtonExitsAppLabel, cardboard.BackButtonExitsApp);
 
-    if (GUI.changed) {
-      EditorUtility.SetDirty(cardboard);
-    }
-
     EditorGUILayout.Separator();
 
     EditorGUILayout.LabelField(editorSettingsLabel);
@@ -121,6 +117,10 @@ public class CardboardEditor : Editor {
 
     cardboard.deviceType = (CardboardProfile.DeviceTypes)
       EditorGUILayout.EnumPopup(deviceTypeLabel, cardboard.deviceType);
+
+    if (GUI.changed) {
+      EditorUtility.SetDirty(cardboard);
+    }
 
     if (EditorApplication.isPlaying) {
       bool newInCardboard = EditorGUILayout.Toggle("Is In Cardboard", cardboard.InCardboard);

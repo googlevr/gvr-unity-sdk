@@ -249,7 +249,7 @@ Prefab:
     - target: {fileID: 11400004, guid: dcd8898a5b8c54c59a1b18bcf72ebd37, type: 2}
       propertyPath: head
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 299255874}
     - target: {fileID: 11400004, guid: dcd8898a5b8c54c59a1b18bcf72ebd37, type: 2}
       propertyPath: pointerSize.x
       value: 8
@@ -340,6 +340,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f1578549c7fcc4f6fa1b063992091672, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  trackRotation: 1
+  trackPosition: 1
   target: {fileID: 0}
   updateEarly: 0
 --- !u!1 &334714608
@@ -1952,7 +1954,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f06724eec91fb4704a525c71a8e8deea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  head: {fileID: 0}
+  head: {fileID: 299255874}
   pointerImage: {fileID: 2800000, guid: 53a9e781f887f46e1817489bff4b661d, type: 3}
   pointerSize: {x: 8, y: 8}
   pointerSpot: {x: 4, y: 4}

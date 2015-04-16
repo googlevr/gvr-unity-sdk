@@ -198,7 +198,7 @@ public class Cardboard : MonoBehaviour {
   public RenderTexture StereoScreen {
     get {
       // Don't need it except for distortion correction.
-      if (!nativeDistortionCorrection || !vrModeEnabled) {
+      if (!nativeDistortionCorrection || !vrModeEnabled || captureFramebuffer) {
         return null;
       }
       if (stereoScreen == null) {
@@ -209,6 +209,7 @@ public class Cardboard : MonoBehaviour {
   }
 
   private RenderTexture stereoScreen;
+  private bool captureFramebuffer;
 
   // Describes the current device, including phone screen.
   public CardboardProfile Profile { get; private set; }
@@ -317,11 +318,6 @@ public class Cardboard : MonoBehaviour {
           supportsAndroidRenderEvent = isAtLeastUnity4_5 && isAndroid;
       }
 
-      public bool canApplyDistortionCorrection() {
-          return supportsRenderTextures && supportsAndroidRenderEvent
-              && canAccessActivity;
-      }
-
       public string getDistortionCorrectionDiagnostic() {
           List<string> causes = new List<string>();
           if (!isAndroid) {
@@ -373,8 +369,21 @@ public class Cardboard : MonoBehaviour {
           SetInCardboard(true);
       }
 #endif
+  }
 
-      StartCoroutine("EndOfFrame");
+  void OnEnable() {
+    StartCoroutine("EndOfFrame");
+  }
+
+  void OnDisable() {
+    StopCoroutine("EndOfFrame");
+  }
+
+  void OnApplicationPause(bool paused) {
+    if (!paused) {
+      // Device configuration may have changed.
+      UpdateScreenData();
+    }
   }
 
   void Update() {
@@ -426,24 +435,27 @@ public class Cardboard : MonoBehaviour {
   }
 
   public void CreateStereoScreen(int x, int y) {
-    if (config.canApplyDistortionCorrection()) {
-      Debug.Log("Creating new cardboard screen texture.");
-      if (stereoScreen != null) {
-        stereoScreen.Release();
-      }
-      stereoScreen = new RenderTexture(x, y, 16, RenderTextureFormat.RGB565);
-      stereoScreen.Create();
-    } else {
+    if (stereoScreen != null) {
+      stereoScreen.Release();
       stereoScreen = null;
-      if (!Application.isEditor) {
-        nativeDistortionCorrection = false;
-        Debug.LogWarning("Lens distortion-correction disabled. Causes: [" +
-                         config.getDistortionCorrectionDiagnostic() + "]");
+    }
+    captureFramebuffer = false;
+    if (config.canAccessActivity && config.supportsAndroidRenderEvent) {
+      if (config.supportsRenderTextures) {
+        Debug.Log("Creating new cardboard screen texture.");
+        stereoScreen = new RenderTexture(x, y, 16, RenderTextureFormat.RGB565);
+        stereoScreen.Create();
+      } else {
+        captureFramebuffer = true;
       }
+    } else if (!Application.isEditor) {
+      nativeDistortionCorrection = false;
+      Debug.LogWarning("Lens distortion-correction disabled. Causes: [" +
+                       config.getDistortionCorrectionDiagnostic() + "]");
     }
 #if ANDROID_DEVICE
-    if (stereoScreen != null) {
-      InitFromUnity(stereoScreen.GetNativeTextureID());
+    if (stereoScreen != null || captureFramebuffer) {
+      InitFromUnity(stereoScreen != null ? stereoScreen.GetNativeTextureID() : 0);
     }
 #endif
   }
@@ -486,7 +498,6 @@ public class Cardboard : MonoBehaviour {
   }
 
   void OnDestroy() {
-      StopCoroutine("EndOfFrame");
       if (sdk == this) {
           sdk = null;
       }
@@ -501,7 +512,7 @@ public class Cardboard : MonoBehaviour {
           yield return new WaitForEndOfFrame();
           if (UpdateState() && vrModeEnabled && !Application.isEditor) {
               GL.InvalidateState();  // necessary for Windows, but not Mac.
-              if (stereoScreen != null && nativeDistortionCorrection) {
+              if (nativeDistortionCorrection) {
                 GL.IssuePluginEvent(kPerformDistortionCorrection);
               }
               if (enableSettingsButton || enableAlignmentMarker) {
@@ -783,7 +794,7 @@ public class Cardboard : MonoBehaviour {
   public bool simulateDistortionCorrection = true;
 
   // Simulated neck model.
-  private static readonly Vector3 neckOffset = new Vector3(0, 0.075f, -0.08f);
+  private static readonly Vector3 neckOffset = new Vector3(0, 0.075f, 0.08f);
 
   // Use mouse to emulate head in the editor.
   private float mouseX = 0;
@@ -849,39 +860,4 @@ public class Cardboard : MonoBehaviour {
     }
   }
 #endif
-
-  private GUIStyle style;
-
-  // The amount of time (in seconds) to show error message on GUI.
-  private const float GUI_ERROR_MSG_DURATION = 10;
-
-  private const string warning =
-@"Distortion correction is disabled.
-Requires Unity Pro v4.5+.
-See log for additional details.";
-
-#if !UNITY_EDITOR
-  void OnGUI() {
-      if (Debug.isDebugBuild && !config.canApplyDistortionCorrection() &&
-              Time.realtimeSinceStartup <= GUI_ERROR_MSG_DURATION) {
-          DisplayDistortionCorrectionDisabledWarning();
-      }
-  }
-#endif
-
-  private void DisplayDistortionCorrectionDisabledWarning() {
-      if (style == null) {
-          style = new GUIStyle();
-          style.normal.textColor = Color.red;
-          style.alignment = TextAnchor.LowerCenter;
-      }
-      if (VRModeEnabled) {
-          style.fontSize = (int)(50 * Screen.width / 1920f / 2);
-          GUI.Label(new Rect(0, 0, Screen.width / 2, Screen.height), warning, style);
-          GUI.Label(new Rect(Screen.width / 2, 0, Screen.width / 2, Screen.height), warning, style);
-      } else {
-          style.fontSize = (int)(50 * Screen.width / 1920f);
-          GUI.Label(new Rect(0, 0, Screen.width, Screen.height), warning, style);
-      }
-  }
 }
