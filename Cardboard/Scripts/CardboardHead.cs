@@ -57,12 +57,10 @@ public class CardboardHead : MonoBehaviour {
       return;
     }
     updated = true;
-    if (!Cardboard.SDK.UpdateState()) {
-      return;
-    }
+    Cardboard.SDK.UpdateState();
 
     if (trackRotation) {
-      var rot = Cardboard.SDK.HeadRotation;
+      var rot = Cardboard.SDK.HeadPose.Orientation;
       if (target == null) {
         transform.localRotation = rot;
       } else {
@@ -71,7 +69,7 @@ public class CardboardHead : MonoBehaviour {
     }
 
     if (trackPosition) {
-      Vector3 pos = Cardboard.SDK.HeadPosition;
+      Vector3 pos = Cardboard.SDK.HeadPose.Position;
       if (target == null) {
         transform.localPosition = pos;
       } else {

@@ -40,6 +40,8 @@ public class CardboardOnGUIMouse : MonoBehaviour {
   // Whether to draw a pointer on the GUI surface, so the user can see
   // where they are about to click.
   private bool pointerVisible;
+  private int pointerX;
+  private int pointerY;
 
   void LateUpdate() {
     if (head == null) {  // Pointer not being controlled by user's head, so we bail.
@@ -72,16 +74,12 @@ public class CardboardOnGUIMouse : MonoBehaviour {
     // Convert from the intersected window's texture coordinates to screen coordinates.
     pos.x = hitWindow.rect.xMin + hitWindow.rect.width * pos.x;
     pos.y = hitWindow.rect.yMin + hitWindow.rect.height * pos.y;
-    int x = (int)(pos.x * Screen.width);
+    pointerX = (int)(pos.x * Screen.width);
+    pointerY = (int)(pos.y * Screen.height);
+    // Move the mouse/touch point to the determined screen point.
     // Unity GUI Y-coordinates ascend top-to-bottom, as do the quad's texture coordinates,
     // while screen Y-coordinates ascend bottom-to-top.
-    int y = (int)((1 - pos.y) * Screen.height);
-    // Send the necessary event to Unity - next frame it will update the mouse.
-    if (Cardboard.SDK.CardboardTriggered) {
-      Cardboard.SDK.InjectMouseClick(x, y);
-    } else {
-      Cardboard.SDK.InjectMouseMove(x, y);
-    }
+    Cardboard.SDK.SetTouchCoordinates(pointerX, Screen.height - pointerY);
     // OK to draw the pointer image.
     pointerVisible = true;
   }
@@ -91,7 +89,8 @@ public class CardboardOnGUIMouse : MonoBehaviour {
     if (pointerImage == null || !pointerVisible || !enabled) {
       return;
     }
-    Vector2 pos = (Vector2)Input.mousePosition;
+    Vector2 pos = Input.mousePresent ? (Vector2)Input.mousePosition
+                                     : new Vector2(pointerX, pointerY);
     Vector2 spot = pointerSpot;
     Vector2 size = pointerSize;
     if (size.sqrMagnitude < 1) {  // If pointerSize was left == 0, just use size of image.

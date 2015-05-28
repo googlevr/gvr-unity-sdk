@@ -124,8 +124,6 @@ public class StereoController : MonoBehaviour {
   // Flags whether we rendered in stereo for this frame.
   private bool renderedStereo = false;
 
-  private Material material;
-
 #if !UNITY_EDITOR
   // Cache for speed, except in editor (don't want to get out of sync with the scene).
   private CardboardEye[] eyes;
@@ -179,7 +177,6 @@ public class StereoController : MonoBehaviour {
 
   void Awake() {
     AddStereoRig();
-    material = new Material(Shader.Find("Cardboard/SolidColor"));
   }
 
   // Helper routine for creation of a stereo rig.  Used by the
@@ -250,8 +247,8 @@ public class StereoController : MonoBehaviour {
 
     // Manage IPD scale based on the distance to the COI.
     if (checkStereoComfort) {
-      float minComfort = Cardboard.SDK.MinimumComfortDistance;
-      float maxComfort = Cardboard.SDK.MaximumComfortDistance;
+      float minComfort = Cardboard.SDK.ComfortableViewingRange.x;
+      float maxComfort = Cardboard.SDK.ComfortableViewingRange.y;
       if (minComfort < maxComfort) {  // Sanity check.
         // If closer than the minimum comfort distance, IPD is scaled down.
         // If farther than the maximum comfort distance, IPD is scaled up.
@@ -271,10 +268,12 @@ public class StereoController : MonoBehaviour {
   }
 
   void OnPreCull() {
-    if (!Cardboard.SDK.VRModeEnabled || !Cardboard.SDK.UpdateState()) {
+    if (!Cardboard.SDK.VRModeEnabled) {
       // Nothing to do.
       return;
     }
+
+    Cardboard.SDK.UpdateState();
 
     // Turn off the mono camera so it doesn't waste time rendering.
     // Note: mono camera is left on from beginning of frame till now
@@ -282,64 +281,13 @@ public class StereoController : MonoBehaviour {
     // to work as expected.
     GetComponent<Camera>().enabled = false;
 
-    bool mainCamera = (tag == "MainCamera");
-    if (mainCamera) {
-      // We just turned off the main camera, and are about to render two stereo eye cameras.
-      // Unfortunately, those two viewports may not fill the whole screen, so we need to clear it
-      // here, or else the pixels outside those rectangles will be colored with whatever garbage
-      // data that is left lying around in memory after all the rendering is done.
-      if (Application.isEditor) {
-        // Would really like to use GL.Clear, since that's the fastest way to do this, but in the
-        // editor that trashes the Game window's tab bar.  So use GL.Clear for the depth map only
-        // and fall back on the same routine we use for drawing the alignment marker in the editor
-        // to clear the color.
-        GL.Clear(true, false, Color.black);
-        FillScreenRect(Screen.width, ScreenHeight, Color.black);
-      } else {
-        GL.Clear(true, true, Color.black);
-      }
-    }
-
     // Render the eyes under our control.
     foreach (var eye in Eyes) {
       eye.Render();
     }
 
-    if (mainCamera && Application.isEditor && Cardboard.SDK.EnableAlignmentMarker) {
-      // Draw an alignment marker here, since the native SDK which normally does this is not
-      // available on this platform.
-      FillScreenRect(4, ScreenHeight - 80, Color.gray);
-    }
-
     // Remember to reenable.
     renderedStereo = true;
-  }
-
-  // Fill a portion of the whole screen with the given color.  The rectangle is centered, and has
-  // the given width and height.
-  private void FillScreenRect(int width, int height, Color color) {
-    int x = Screen.width/2;
-    int y = Screen.height/2;
-    // In the editor, at this point in the render pipeline, the screen height includes the tab
-    // bar at the top of the Game window.  Adjust for that.
-    if (Application.isEditor && StereoScreen == null) {
-      y -= 15;
-    }
-    width /= 2;
-    height /= 2;
-    material.color = color;
-    material.SetPass(0);
-    GL.PushMatrix();
-    GL.LoadPixelMatrix();
-    GL.Color(Color.white);
-    GL.Begin(GL.QUADS);
-    GL.Vertex3(x - width, y - height, 0);
-    GL.Vertex3(x - width, y + height, 0);
-    GL.Vertex3(x + width, y + height, 0);
-    GL.Vertex3(x + width, y - height, 0);
-    GL.End();
-    GL.PopMatrix();
-
   }
 
   IEnumerator EndOfFrame() {

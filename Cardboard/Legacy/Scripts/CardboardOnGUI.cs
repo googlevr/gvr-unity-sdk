@@ -65,9 +65,9 @@ public class CardboardOnGUI : MonoBehaviour {
   // is visible, steal the trigger for mouse clicking.  Call this
   // instead of Cardboard.SDK.CardboardTriggered when this behavior
   // is desired.
-  public static bool CardboardTriggered {
+  public static bool Triggered {
     get {
-      return !IsGUIVisible && Cardboard.SDK.CardboardTriggered;
+      return !IsGUIVisible && Cardboard.SDK.Triggered;
     }
   }
 
@@ -79,7 +79,8 @@ public class CardboardOnGUI : MonoBehaviour {
 
   void Awake() {
     if (!SystemInfo.supportsRenderTextures) {
-      Debug.LogWarning("CardboardOnGUI disabled.  RenderTextures are not supported, either due to license or platform.");
+      Debug.LogWarning("CardboardOnGUI disabled.  RenderTextures are not supported, "
+                       + "either due to license or platform.");
       enabled = false;
     }
   }

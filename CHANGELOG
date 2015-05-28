@@ -53,3 +53,16 @@ v0.4.10 (4/16/2015):
 -  Fixed CardboardGUI's Head property in the Legacy demo scene.
 -  Fixed the neck model Z offset in the Editor.
 -  Fixed a bug in CardboardEditor which failed to save the Editor-only settings.
+
+v0.5 (5/28/2015):
+-  The iOS build platform is now supported.
+-  Added a new C++ native code implementation for head tracking and distortion correction.
+-  The Java-based native code implementation has been moved to the Legacy folder.
+-  Refactored Cardboard.cs into a front-end Unity API and a back-end VRDevice class.
+-  VRDevice implementations provided for Android, iOS, and Unity editor.
+-  Some Cardboard properties have been renamed (but the old names still work).
+-  Added a Tilt event for when the viewer is turned on its side.
+-  Added C# events to Cardboard for responding to Trigger and Tilt events.
+-  Added more phone and viewer profiles to the in-editor simulation menus.
+-  If native code distortion correction is not supported, fall back to using an Image Effect.
+-  If native code UI layer is not supported, fall back to rendering it in Unity.

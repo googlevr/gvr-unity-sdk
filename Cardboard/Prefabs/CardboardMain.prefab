@@ -340,6 +340,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f1578549c7fcc4f6fa1b063992091672, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  trackRotation: 1
+  trackPosition: 1
   target: {fileID: 0}
   updateEarly: 0
 --- !u!114 &11400012
@@ -353,18 +355,18 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a40b544b8c3553c40852ae7ad35a9343, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nativeDistortionCorrection: 1
+  distortionCorrection: 1
   vrModeEnabled: 1
   enableAlignmentMarker: 1
   enableSettingsButton: 1
-  tapIsTrigger: 0
-  neckModelScale: 0
-  backButtonExitsApp: 1
+  TapIsTrigger: 1
+  neckModelScale: 1
   autoDriftCorrection: 1
+  BackButtonExitsApp: 0
   autoUntiltHead: 1
+  simulateDistortionCorrection: 1
   screenSize: 0
   deviceType: 0
-  simulateDistortionCorrection: 1
 --- !u!124 &12400000
 Behaviour:
   m_ObjectHideFlags: 1

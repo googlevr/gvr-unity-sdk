@@ -121,10 +121,7 @@ public class GazeInputModule : BaseInputModule {
   }
 
   private void HandlePendingClick() {
-    if (!pointerData.eligibleForClick) {
-      return;
-    }
-    if (!Cardboard.SDK.CardboardTriggered
+    if (!pointerData.eligibleForClick || !Cardboard.SDK.Triggered
         && Time.unscaledTime - pointerData.clickTime < clickTime) {
       return;
     }
@@ -141,7 +138,7 @@ public class GazeInputModule : BaseInputModule {
   }
 
   private void HandleTrigger() {
-    if (!Cardboard.SDK.CardboardTriggered) {
+    if (!Cardboard.SDK.Triggered) {
       return;
     }
     var go = pointerData.pointerCurrentRaycast.gameObject;

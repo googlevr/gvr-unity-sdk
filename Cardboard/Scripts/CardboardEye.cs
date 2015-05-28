@@ -19,7 +19,7 @@ using System.Reflection;
 // the parent mono Camera, and then sets up side-by-side stereo with an appropriate
 // projection based on the head-tracking data from the Cardboard.SDK object.
 // To enable a stereo camera pair, enable the parent mono camera and set
-// Cardboard.SDK.VRModeEnabled = true.
+// Cardboard.SDK.vrModeEnabled = true.
 // NOTE: If you programmatically change the set of CardboardEyes belonging to a
 // StereoController, be sure to call InvalidateEyes() on it in order to reset its
 // cache.
@@ -74,8 +74,8 @@ public class CardboardEye : MonoBehaviour {
     controller = ctlr;
     // Add an image effect when playing in the editor to preview the distortion correction, since
     // native distortion corrrection is only available on the phone.
-    if (Application.isEditor && Application.isPlaying
-        && Cardboard.SDK.nativeDistortionCorrection && SystemInfo.supportsRenderTextures) {
+    if (Application.isPlaying && !Cardboard.SDK.NativeDistortionCorrectionSupported
+        && SystemInfo.supportsRenderTextures) {
       var effect = GetComponent<RadialUndistortionEffect>();
       if (effect == null) {
         effect = gameObject.AddComponent<RadialUndistortionEffect>();
@@ -127,7 +127,7 @@ public class CardboardEye : MonoBehaviour {
                                        out ipdScale, out eyeOffset);
 
     // Set up the eye's view transform.
-    transform.localPosition = ipdScale * Cardboard.SDK.EyeOffset(eye) +
+    transform.localPosition = ipdScale * Cardboard.SDK.EyePose(eye).Position +
                               eyeOffset * Vector3.forward;
 
     // Set up the eye's projection.
@@ -146,8 +146,8 @@ public class CardboardEye : MonoBehaviour {
     // over an image effect, so if that is active then we don't need to compute these variables.
     // (Exception: we're in the editor, so we use the image effect to preview the distortion
     // correction, because native distortion correction only works on the phone.)
-    if (!Cardboard.SDK.nativeDistortionCorrection || Application.isEditor) {
-      Matrix4x4 realProj = Cardboard.SDK.UndistortedProjection(eye);
+    if (Cardboard.SDK.UseDistortionEffect) {
+      Matrix4x4 realProj = Cardboard.SDK.Projection(eye, Cardboard.Distortion.Undistorted);
       FixProjection(ref realProj, near, far, ipdScale);
       // Parts of the projection matrices that we need to convert texture coordinates between
       // distorted and undistorted frustums.  Include the transform between texture space [0..1]
@@ -168,10 +168,11 @@ public class CardboardEye : MonoBehaviour {
 
     if (controller.StereoScreen == null) {
       Rect rect = camera.rect;
-      if (!Cardboard.SDK.nativeDistortionCorrection || Application.isEditor) {
+      if (!Cardboard.SDK.DistortionCorrection
+          || Cardboard.SDK.UseDistortionEffect) {
         // We are rendering straight to the screen.  Use the reported rect that is visible
         // through the device's lenses.
-        Rect view = Cardboard.SDK.EyeRect(eye);
+        Rect view = Cardboard.SDK.Viewport(eye);
         if (eye == Cardboard.Eye.Right) {
           rect.x -= 0.5f;
         }
@@ -264,6 +265,14 @@ public class CardboardEye : MonoBehaviour {
   // They affect the apparent depth of the camera's window.  See OnPreCull().
   public void CopyCameraAndMakeSideBySide(StereoController controller,
                                           float parx = 0, float pary = 0) {
+#if UNITY_5
+#if UNITY_EDITOR
+    // Member variable 'camera' not always initialized when this method called in Editor.
+    // So, we'll just make a local of the same name.
+    var camera = GetComponent<Camera>();
+#endif
+#endif
+
     // Sync the camera properties.
     camera.CopyFrom(controller.GetComponent<Camera>());
     camera.cullingMask ^= toggleCullingMask.value;

@@ -32,6 +32,10 @@ public class Teleport : MonoBehaviour {
     transform.localPosition = startingPosition;
   }
 
+  public void ToggleVRMode() {
+    Cardboard.SDK.VRModeEnabled = !Cardboard.SDK.VRModeEnabled;
+  }
+
   public void TeleportRandomly() {
     Vector3 direction = Random.onUnitSphere;
     direction.y = Mathf.Clamp(direction.y, 0.5f, 1f);

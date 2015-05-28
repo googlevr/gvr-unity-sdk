@@ -28,7 +28,7 @@ public class TeleportLegacyUI : Teleport {
     RaycastHit hit;
     bool isLookedAt = GetComponent<Collider>().Raycast(head.Gaze, out hit, Mathf.Infinity);
     SetGazedAt(isLookedAt);
-    if (Cardboard.SDK.CardboardTriggered && isLookedAt) {
+    if (Cardboard.SDK.Triggered && isLookedAt) {
       TeleportRandomly();
     }
   }
@@ -44,7 +44,7 @@ public class TeleportLegacyUI : Teleport {
       Cardboard.SDK.Recenter();
     }
     if (GUI.Button(new Rect(50, 170, 200, 50), "VR Mode")) {
-      Cardboard.SDK.ToggleVRMode();
+      ToggleVRMode();
     }
   }
 

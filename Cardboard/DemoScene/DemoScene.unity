@@ -390,6 +390,14 @@ Prefab:
       propertyPath: neckModelScale
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 11400012, guid: b8b03d395f5734e98af91ccf44f9bf47, type: 2}
+      propertyPath: UseUnityRemoteInput
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 11400012, guid: b8b03d395f5734e98af91ccf44f9bf47, type: 2}
+      propertyPath: deviceType
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: b8b03d395f5734e98af91ccf44f9bf47, type: 2}
   m_RootGameObject: {fileID: 1427108206}
@@ -893,7 +901,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1427108208}
+      - m_Target: {fileID: 955127921}
         m_MethodName: ToggleVRMode
         m_Mode: 1
         m_Arguments:
@@ -2281,6 +2289,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f1578549c7fcc4f6fa1b063992091672, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  trackRotation: 1
+  trackPosition: 1
   target: {fileID: 0}
   updateEarly: 0
 --- !u!1 &1427108206
@@ -2324,18 +2334,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a40b544b8c3553c40852ae7ad35a9343, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nativeDistortionCorrection: 1
+  distortionCorrection: 1
   vrModeEnabled: 1
   enableAlignmentMarker: 1
   enableSettingsButton: 1
-  tapIsTrigger: 1
+  TapIsTrigger: 1
   neckModelScale: 1
-  backButtonExitsApp: 1
   autoDriftCorrection: 1
+  syncWithCardboardApp: 0
   autoUntiltHead: 1
+  simulateDistortionCorrection: 1
+  UseUnityRemoteInput: 0
   screenSize: 0
   deviceType: 0
-  simulateDistortionCorrection: 1
 --- !u!1 &1499060387
 GameObject:
   m_ObjectHideFlags: 0
