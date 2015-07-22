@@ -15,11 +15,16 @@
 using UnityEngine;
 using System.Collections;
 
-// Replacement for directional lens flares in stereo, which like skyboxes
-// (see SkyboxMesh.cs) do not consider the separation of the eyes.
-// Attach this script to a positional lens flare to create a stereo-
-// aware directional flare.  It keeps the flare positioned away well from
-// the camera along its own forward vector.
+/// @ingroup LegacyScripts
+/// Unity 4's built-in lens flares do not work correctly for stereo rendering when in
+/// Directional mode, for similar reasons as the skybox mentioned previously.  This
+/// script can be attached to a Lens Flare to make it stereo-aware directional.
+///
+/// To use it, add the script to a Lens Flare and clear the flare's Directional flag
+/// so that the flare is actually positional.  This script keeps the flare at a
+/// distance well away from the mono camera along the flare's own forward vector,
+/// thus recreating the directional behavior, but with proper stereo parallax.  The
+/// flare is repositioned relative to each camera that renders it.
 [RequireComponent(typeof(LensFlare))]
 public class StereoLensFlare : MonoBehaviour {
 #if UNITY_5
@@ -28,6 +33,7 @@ public class StereoLensFlare : MonoBehaviour {
     Component.Destroy(this);
   }
 #else
+  /// Sets the distance to the flare as a fraction of the camera's far clipping distance.
   [Tooltip("Fraction of the camera's far clip distance " +
            "at which to position the flare.")]
   [Range(0,1)]

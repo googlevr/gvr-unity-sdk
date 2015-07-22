@@ -23,27 +23,42 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-// An implementation of the BaseInputModule that uses the player's gaze and the magnet trigger
-// as a raycast generator.  To use, attach to the scene's EventSystem object.  Set the Canvas
-// object's Render Mode to World Space, and set its Event Camera to a (mono) camera that is
-// controlled by a CardboardHead.  If you'd like gaze to work with 3D scene objects, add a
-// PhysicsRaycaster to the gazing camera, and add a component that implements one of the Event
-// interfaces (EventTrigger will work nicely).  The objects must have colliders too.
+/// @ingroup Scripts
+/// This script provides an implemention of Unity's `BaseInputModule` class, so
+/// that Canvas-based UI elements (_uGUI_) can be selected by looking at them and
+/// pulling the trigger or touching the screen.
+/// This uses the player's gaze and the magnet trigger as a raycast generator.
+///
+/// To use, attach to the scene's EventSystem object.  Set the Canvas
+/// object's Render Mode to World Space, and set its Event Camera to a (mono) camera that is
+/// controlled by a CardboardHead.  If you'd like gaze to work with 3D scene objects, add a
+/// PhysicsRaycaster to the gazing camera, and add a component that implements one of the Event
+/// interfaces (EventTrigger will work nicely).  The objects must have colliders too.
+///
+/// GazeInputModule emits the following events: _Enter_, _Exit_, _Down_, _Up_,
+/// _Click_, _Select_, _Deselect_, and _UpdateSelected_.  Scroll, drag and drop,
+/// move, and submit/cancel events are not emitted.
 public class GazeInputModule : BaseInputModule {
+  /// Determines whether gaze input is active in VR Mode only (`true`), or all of the
+  /// time (`false`).  Set to false if you plan to use direct screen taps or other
+  /// input when not in VR Mode.
   [Tooltip("Whether gaze input is active in VR Mode only (true), or all the time (false).")]
   public bool vrModeOnly = false;
 
+  /// An optional object to be placed at a raycast intersection, acting as a 3D
+  /// cursor.  **Important:** Be sure to set any raycasters to ignore the layer that
+  /// this object is in.
   [Tooltip("Optional object to place at raycast intersections as a 3D cursor. " +
            "Be sure it is on a layer that raycasts will ignore.")]
   public GameObject cursor;
 
-  // Time in seconds between the pointer down and up events sent by a magnet click.
-  // Allows time for the UI elements to make their state transitions.
+  /// Time in seconds between the pointer down and up events sent by a magnet click.
+  /// Allows time for the UI elements to make their state transitions.
   [HideInInspector]
   public float clickTime = 0.1f;  // Based on default time for a button to animate to Pressed.
 
-  // The pixel through which to cast rays, in viewport coordinates.  Generally, the center
-  // pixel is best, assuming a monoscopic camera is selected as the Canvas' event camera.
+  /// The pixel through which to cast rays, in viewport coordinates.  Generally, the center
+  /// pixel is best, assuming a monoscopic camera is selected as the `Canvas`' event camera.
   [HideInInspector]
   public Vector2 hotspot = new Vector2(0.5f, 0.5f);
 
@@ -121,8 +136,16 @@ public class GazeInputModule : BaseInputModule {
   }
 
   private void HandlePendingClick() {
-    if (!pointerData.eligibleForClick || !Cardboard.SDK.Triggered
-        && Time.unscaledTime - pointerData.clickTime < clickTime) {
+    if (!pointerData.eligibleForClick) {
+      return;
+    }
+    bool triggerStillDown = !Cardboard.SDK.Triggered
+        && Time.unscaledTime - pointerData.clickTime < clickTime;
+    if (!Cardboard.SDK.TapIsTrigger) {
+      // Screen touch also counts, as long as it didn't start on this frame.
+      triggerStillDown |= !Input.GetMouseButtonDown(0) && Input.GetMouseButton(0);
+    }
+    if (triggerStillDown) {
       return;
     }
 
@@ -138,7 +161,9 @@ public class GazeInputModule : BaseInputModule {
   }
 
   private void HandleTrigger() {
-    if (!Cardboard.SDK.Triggered) {
+    bool triggered = Cardboard.SDK.Triggered
+        || !Cardboard.SDK.TapIsTrigger && Input.GetMouseButtonDown(0);
+    if (!triggered) {
       return;
     }
     var go = pointerData.pointerCurrentRaycast.gameObject;

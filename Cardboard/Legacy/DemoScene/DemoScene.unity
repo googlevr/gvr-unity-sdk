@@ -1815,10 +1815,6 @@ Prefab:
       propertyPath: m_RootOrder
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 11432576, guid: a177aba586fa54700a4ceaac810edae9, type: 2}
-      propertyPath: distortionCorrection
-      value: 1
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: a177aba586fa54700a4ceaac810edae9, type: 2}
   m_RootGameObject: {fileID: 1832774123}
@@ -2025,11 +2021,11 @@ MonoBehaviour:
   vrModeEnabled: 1
   enableAlignmentMarker: 1
   enableSettingsButton: 1
+  tapIsTrigger: 1
   neckModelScale: 1
   autoDriftCorrection: 1
-  escapeExitsApp: 0
   autoUntiltHead: 1
-  simulateDistortionCorrection: 1
+  UseUnityRemoteInput: 0
   screenSize: 0
   deviceType: 0
 --- !u!1 &1944093375

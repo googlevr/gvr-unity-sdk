@@ -13,14 +13,23 @@
 // limitations under the License.
 using UnityEngine;
 
+/// @ingroup Scripts
+/// Encapsulates a rotation and a translation.  This is a convenience class that allows
+/// construction and value access either by Matrix4x4 or Quaternion+Vector3 types.
 public class Pose3D {
-  // Right-handed to left-handed matrix converter (and vice versa).
+  /// Right-handed to left-handed matrix converter (and vice versa).
   protected static readonly Matrix4x4 flipZ = Matrix4x4.Scale(new Vector3(1, 1, -1));
 
+  /// The translation component of the pose.
   public Vector3 Position { get; protected set; }
+
+  /// The rotation component of the pose.
   public Quaternion Orientation { get; protected set; }
+
+  /// The pose as a matrix in Unity gameobject convention (left-handed).
   public Matrix4x4 Matrix { get; protected set; }
 
+  /// The pose as a matrix in right-handed coordinates.
   public Matrix4x4 RightHandedMatrix {
     get {
       return flipZ * Matrix * flipZ;
@@ -54,6 +63,7 @@ public class Pose3D {
   }
 }
 
+/// Mutable version of Pose3D.
 public class MutablePose3D : Pose3D {
   public new void Set(Vector3 position, Quaternion orientation) {
     base.Set(position, orientation);

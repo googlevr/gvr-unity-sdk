@@ -15,10 +15,15 @@
 using UnityEngine;
 using System.Collections;
 
-// Applies the inverse of the lens distortion to the image.  The image is "undistorted" so
-// that when viewed through the lenses (which redistort), the image looks normal.  In the case
-// of Cardboard, the lenses apply a pincushion distortion, so this effect applies a barrel
-// distortion to counteract that.
+/// @ingroup Scripts
+/// Applies the inverse of the lens distortion to the image.  The image is "undistorted" so
+/// that when viewed through the lenses (which redistort), the image looks normal.  In the case
+/// of Cardboard, the lenses apply a pincushion distortion, so this effect applies a barrel
+/// distortion to counteract that.
+///
+/// It is used to show the effect of distortion correction when playing the
+/// scene in the Editor, and as the fall back when the native code distortion
+/// is not available or disabled.
 [RequireComponent(typeof(Camera))]
 public class RadialUndistortionEffect : MonoBehaviour {
 
@@ -55,7 +60,7 @@ public class RadialUndistortionEffect : MonoBehaviour {
     bool disabled = material == null || !Cardboard.SDK.UseDistortionEffect;
 #if UNITY_EDITOR
     bool mainCamera = controller != null && controller.GetComponent<Camera>().tag == "MainCamera";
-    disabled |= !mainCamera || !Cardboard.SDK.simulateDistortionCorrection;
+    disabled |= !mainCamera;
 #endif
     if (disabled) {
       // Pass through, no effect.

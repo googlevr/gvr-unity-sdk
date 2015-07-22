@@ -16,107 +16,147 @@ using UnityEngine;
 using System.Collections;
 using System.Linq;
 
-// Controls a pair of CardboardEye objects that will render the stereo view
-// of the camera this script is attached to.
+/// @ingroup Scripts
+/// Controls a pair of CardboardEye objects that will render the stereo view
+/// of the camera this script is attached to.
+///
+/// This script must be added to any camera that should render stereo when the app
+/// is in VR Mode.  This includes picture-in-picture windows, whether their contents
+/// are in stereo or not: the window itself must be twinned for stereo, regardless.
+///
+/// For each frame, StereoController decides whether to render via the camera it
+/// is attached to (the _mono_ camera) or the stereo eyes that it controls (see
+/// CardboardEye). You control this  decision for all cameras at once by setting
+/// the value of Cardboard#VRModeEnabled.
+///
+/// For technical reasons, the mono camera remains enabled for the initial portion of
+/// the frame.  It is disabled only when rendering begins in `OnPreCull()`, and is
+/// reenabled again at the end of the frame.  This allows 3rd party scripts that use
+/// `Camera.main`, for example, to refer the the mono camera even when VR Mode is
+/// enabled.
+///
+/// At startup the script ensures it has a full stereo rig, which consists of two
+/// child cameras with CardboardEye scripts attached, and a CardboardHead script
+/// somewhere in the hierarchy of parents and children for head tracking.  The rig
+/// is created if necessary, the CardboardHead being attached to the controller
+/// itself.  The child camera settings are then cloned or updated from the mono
+/// camera.
+///
+/// It is permissible for a StereoController to contain another StereoController
+/// as a child.  In this case, a CardboardEye is controlled by its closest
+/// StereoController parent.
+///
+/// The Inspector panel for this script includes a button _Update Stereo Cameras_.
+/// This performs the same action as described above for startup, but in the Editor.
+/// Use this to generate the rig if you intend to customize it.  This action is also
+/// available via _Component -> Cardboard -> Update Stereo Cameras_ in the Editor’s
+/// main menu, and in the context menu for the `Camera` component.
 [RequireComponent(typeof(Camera))]
 public class StereoController : MonoBehaviour {
+  /// Whether to draw directly to the output window (true), or to an offscreen buffer
+  /// first and then blit (false). If you wish to use Deferred Rendering or any
+  /// Image Effects in stereo, turn this option off.
   [Tooltip("Whether to draw directly to the output window (true), or " +
            "to an offscreen buffer first and then blit (false).  Image " +
            " Effects and Deferred Lighting may only work if set to false.")]
   public bool directRender = true;
 
-  // Adjusts the level of stereopsis for this stereo rig.  Note that this
-  // parameter is not the virtual size of the head -- use a scale on the head
-  // game object for that.  Instead, it is a control on eye vergence, or
-  // rather, how cross-eyed or not the stereo rig is.  Set to 0 to turn
-  // off stereo in this rig independently of any others.
+  /// Adjusts the level of stereopsis for this stereo rig.
+  /// @note This parameter is not the virtual size of the head -- use a scale
+  /// on the head game object for that.  Instead, it is a control on eye vergence,
+  /// or rather, how cross-eyed or not the stereo rig is.  Set to 0 to turn
+  /// off stereo in this rig independently of any others.
   [Tooltip("Set the stereo level for this camera.")]
   [Range(0,1)]
   public float stereoMultiplier = 1.0f;
 
-  // The stereo cameras by default use the actual optical FOV of the Cardboard device,
-  // because otherwise the match between head motion and scene motion is broken, which
-  // impacts the virtual reality effect.  However, in some cases it is desirable to
-  // adjust the FOV anyway, for special effects or artistic reasons.  But in no case
-  // should the FOV be allowed to remain very different from the true optical FOV for
-  // very long, or users will experience discomfort.
-  //
-  // This value determines how much to match the mono camera's field of view.  This is
-  // a fraction: 0 means no matching, 1 means full matching, and values in between are
-  // compromises.  Reasons for not matching 100% would include preserving some VR-ness,
-  // and that due to the lens distortion the edges of the view are not as easily seen as
-  // when the phone is not in VR-mode.
-  //
-  // Another use for this variable is to preserve scene composition against differences
-  // in the optical FOV of various Cardboard models.  In all cases, this value simply
-  // lets the mono camera have some control over the scene in VR mode, like it does in
-  // non-VR mode.
+  /// The stereo cameras by default use the actual optical FOV of the Cardboard device,
+  /// because otherwise the match between head motion and scene motion is broken, which
+  /// impacts the virtual reality effect.  However, in some cases it is desirable to
+  /// adjust the FOV anyway, for special effects or artistic reasons.  But in no case
+  /// should the FOV be allowed to remain very different from the true optical FOV for
+  /// very long, or users will experience discomfort.
+  ///
+  /// This value determines how much to match the mono camera's field of view.  This is
+  /// a fraction: 0 means no matching, 1 means full matching, and values in between are
+  /// compromises.  Reasons for not matching 100% would include preserving some VR-ness,
+  /// and that due to the lens distortion the edges of the view are not as easily seen as
+  /// when the phone is not in VR-mode.
+  ///
+  /// Another use for this variable is to preserve scene composition against differences
+  /// in the optical FOV of various Cardboard models.  In all cases, this value simply
+  /// lets the mono camera have some control over the scene in VR mode, like it does in
+  /// non-VR mode.
   [Tooltip("How much to adjust the stereo field of view to match this camera.")]
   [Range(0,1)]
   public float matchMonoFOV = 0;
 
-  // Determines the method by which the stereo cameras' FOVs are matched to the mono
-  // camera's FOV (assuming matchMonoFOV is not 0).  The default is to move the stereo
-  // cameras (matchByZoom = 0), with the option to instead do a simple camera zoom
-  // (matchByZoom = 1).  In-between values yield a mix of the two behaviors.
-  //
-  // It is not recommended to use simple zooming for typical scene composition, as it
-  // conflicts with the VR need to match the user's head motion with the corresponding
-  // scene motion.  This should be reserved for special effects such as when the player
-  // views the scene through a telescope or other magnifier (and thus the player knows
-  // that VR is going to be affected), or similar situations.
-  //
-  // Note that matching by moving the eyes requires that the centerOfInterest object
-  // be non-null, or there will be no effect.
+  /// Determines the method by which the stereo cameras' FOVs are matched to the mono
+  /// camera's FOV (assuming #matchMonoFOV is not 0).  The default is to move the stereo
+  /// cameras (#matchByZoom = 0), with the option to instead do a simple camera zoom
+  /// (#matchByZoom = 1).  In-between values yield a mix of the two behaviors.
+  ///
+  /// It is not recommended to use simple zooming for typical scene composition, as it
+  /// conflicts with the VR need to match the user's head motion with the corresponding
+  /// scene motion.  This should be reserved for special effects such as when the player
+  /// views the scene through a telescope or other magnifier (and thus the player knows
+  /// that VR is going to be affected), or similar situations.
+  ///
+  /// @note Matching by moving the eyes requires that the #centerOfInterest object
+  /// be non-null, or there will be no effect.
   [Tooltip("Whether to adjust FOV by moving the eyes (0) or simply zooming (1).")]
   [Range(0,1)]
   public float matchByZoom = 0;
 
-  // Matching the mono camera's field of view in stereo by moving the eyes requires
-  // a designated "center of interest".  This is either a point in space (an empty
-  // gameobject) you place in the scene as a sort of "3D cursor", or an actual scene
-  // entity which the player is likely to be focussed on.
-  //
-  // The FOV adjustment is done by moving the eyes toward or away from the COI
-  // so that it appears to have the same size on screen as it would in the mono
-  // camera.  This is disabled if the COI is null.
+  /// Matching the mono camera's field of view in stereo by moving the eyes requires
+  /// a designated "center of interest".  This is either a point in space (an empty
+  /// gameobject) you place in the scene as a sort of "3D cursor", or an actual scene
+  /// entity which the player is likely to be focussed on.
+  ///
+  /// The FOV adjustment is done by moving the eyes toward or away from the COI
+  /// so that it appears to have the same size on screen as it would in the mono
+  /// camera.  This is disabled if the COI is null.
   [Tooltip("Object or point where field of view matching is done.")]
   public Transform centerOfInterest;
 
-  // The COI is generally meant to be just a point in space, like a 3D cursor.
-  // Occasionally, you will want it to be an actual object with size.  Set this
-  // to the approximate radius of the object to help the FOV-matching code
-  // compensate for the object's horizon when it is close to the camera.
+  /// The #centerOfInterest is generally meant to be just a point in space, like a 3D cursor.
+  /// Occasionally, you will want it to be an actual object with size.  Set this
+  /// to the approximate radius of the object to help the FOV-matching code
+  /// compensate for the object's horizon when it is close to the camera.
   [Tooltip("If COI is an object, its approximate size.")]
   public float radiusOfInterest = 0;
 
-  // If true, check that the centerOfInterest is between the min and max comfortable
-  // viewing distances (see Cardboard.cs), or else adjust the stereo multiplier to
-  // compensate.  If the COI has a radius, then the near side is checked.  COI must
-  // be non-null for this setting to have any effect.
+  /// If true, check that the #centerOfInterest is between the min and max comfortable
+  /// viewing distances (see Cardboard.cs), or else adjust the stereo multiplier to
+  /// compensate.  If the COI has a radius, then the near side is checked.  COI must
+  /// be non-null for this setting to have any effect.
   [Tooltip("Adjust stereo level when COI gets too close or too far.")]
   public bool checkStereoComfort = true;
 
-  // For picture-in-picture cameras that don't fill the entire screen,
-  // set the virtual depth of the window itself.  A value of 0 means
-  // zero parallax, which is fairly close.  A value of 1 means "full"
-  // parallax, which is equal to the interpupillary distance and equates
-  // to an infinitely distant window.  This does not affect the actual
-  // screen size of the the window (in pixels), only the stereo separation
-  // of the left and right images.
+  /// For picture-in-picture cameras that don't fill the entire screen,
+  /// set the virtual depth of the window itself.  A value of 0 means
+  /// zero parallax, which is fairly close.  A value of 1 means "full"
+  /// parallax, which is equal to the interpupillary distance and equates
+  /// to an infinitely distant window.  This does not affect the actual
+  /// screen size of the the window (in pixels), only the stereo separation
+  /// of the left and right images.
   [Tooltip("Adjust the virtual depth of this camera's window (picture-in-picture only).")]
   [Range(0,1)]
   public float screenParallax = 0;
 
-  // For picture-in-picture cameras, move the window away from the edges
-  // in VR Mode to make it easier to see.  The optics of HMDs make the screen
-  // edges hard to see sometimes, so you can use this to keep the PIP visible
-  // whether in VR Mode or not.  The x value is the fraction of the screen along
-  // either side to pad, and the y value is for the top and bottom of the screen.
+  /// For picture-in-picture cameras, move the window away from the edges
+  /// in VR Mode to make it easier to see.  The optics of HMDs make the screen
+  /// edges hard to see sometimes, so you can use this to keep the PIP visible
+  /// whether in VR Mode or not.  The x value is the fraction of the screen along
+  /// either side to pad.
   [Tooltip("Move the camera window horizontally towards the center of the screen (PIP only).")]
   [Range(0,1)]
   public float stereoPaddingX = 0;
 
+  /// For picture-in-picture cameras, move the window away from the edges
+  /// in VR Mode to make it easier to see.  The optics of HMDs make the screen
+  /// edges hard to see sometimes, so you can use this to keep the PIP visible
+  /// whether in VR Mode or not.  The y value is for the top and bottom of the screen to pad.
   [Tooltip("Move the camera window vertically towards the center of the screen (PIP only).")]
   [Range(0,1)]
   public float stereoPaddingY = 0;
@@ -129,7 +169,10 @@ public class StereoController : MonoBehaviour {
   private CardboardEye[] eyes;
 #endif
 
-  // Returns the CardboardEye components that we control.
+  /// Returns an array of stereo cameras that are controlled by this instance of
+  /// the script.
+  /// @note This array is cached for speedier access.  Call
+  /// InvalidateEyes if it is ever necessary to reset the cache.
   public CardboardEye[] Eyes {
     get {
 #if UNITY_EDITOR
@@ -144,23 +187,24 @@ public class StereoController : MonoBehaviour {
     }
   }
 
-  // Clear the cached array of CardboardEye children.
-  // NOTE: Be sure to call this if you programmatically change the set of CardboardEye children
-  // managed by this StereoController.
+  /// Clear the cached array of CardboardEye children.
+  /// @note Be sure to call this if you programmatically change the set of CardboardEye children
+  /// managed by this StereoController.
   public void InvalidateEyes() {
 #if !UNITY_EDITOR
     eyes = null;
 #endif
   }
 
-  // Returns the nearest CardboardHead that affects our eyes.
+  /// Returns the nearest CardboardHead that affects our eyes.
   public CardboardHead Head {
     get {
       return Eyes.Select(eye => eye.Head).FirstOrDefault();
     }
   }
 
-  // Where the stereo eyes will render the scene.
+  /// Returns the target texture that the eyes will render into.  This is the mono
+  /// camera’s target texture, if it has one, or else Cardboard#StereoScreen.
   public RenderTexture StereoScreen {
     get {
       return GetComponent<Camera>().targetTexture ?? Cardboard.SDK.StereoScreen;
@@ -179,8 +223,8 @@ public class StereoController : MonoBehaviour {
     AddStereoRig();
   }
 
-  // Helper routine for creation of a stereo rig.  Used by the
-  // custom editor for this class, or to build the rig at runtime.
+  /// Helper routine for creation of a stereo rig.  Used by the
+  /// custom editor for this class, or to build the rig at runtime.
   public void AddStereoRig() {
     if (Eyes.Length > 0) {  // Simplistic test if rig already exists.
       return;
@@ -216,13 +260,13 @@ public class StereoController : MonoBehaviour {
     cardboardEye.CopyCameraAndMakeSideBySide(this);
   }
 
-  // Given information about a specific camera (usually one of the stereo eyes),
-  // computes an adjustment to the stereo settings for both FOV matching and
-  // stereo comfort.  The input is the [1,1] entry of the camera's projection
-  // matrix, representing the vertical field of view, and the overall scale
-  // being applied to the Z axis.  The output is a multiplier of the IPD to
-  // use for offseting the eyes laterally, and an offset in the eye's Z direction
-  // to account for the FOV difference.  The eye offset is in local coordinates.
+  /// Given information about a specific camera (usually one of the stereo eyes),
+  /// computes an adjustment to the stereo settings for both FOV matching and
+  /// stereo comfort.  The input is the [1,1] entry of the camera's projection
+  /// matrix, representing the vertical field of view, and the overall scale
+  /// being applied to the Z axis.  The output is a multiplier of the IPD to
+  /// use for offseting the eyes laterally, and an offset in the eye's Z direction
+  /// to account for the FOV difference.  The eye offset is in local coordinates.
   public void ComputeStereoAdjustment(float proj11, float zScale,
                                       out float ipdScale, out float eyeOffset) {
     ipdScale = stereoMultiplier;
@@ -276,7 +320,7 @@ public class StereoController : MonoBehaviour {
     Cardboard.SDK.UpdateState();
 
     // Turn off the mono camera so it doesn't waste time rendering.
-    // Note: mono camera is left on from beginning of frame till now
+    // @note mono camera is left on from beginning of frame till now
     // in order that other game logic (e.g. Camera.main) continues
     // to work as expected.
     GetComponent<Camera>().enabled = false;

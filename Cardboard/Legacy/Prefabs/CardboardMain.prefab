@@ -329,12 +329,11 @@ MonoBehaviour:
   vrModeEnabled: 1
   enableAlignmentMarker: 1
   enableSettingsButton: 1
-  TapIsTrigger: 1
+  tapIsTrigger: 1
   neckModelScale: 1
   autoDriftCorrection: 1
-  BackButtonExitsApp: 0
   autoUntiltHead: 1
-  simulateDistortionCorrection: 1
+  UseUnityRemoteInput: 0
   screenSize: 0
   deviceType: 0
 --- !u!114 &11432578

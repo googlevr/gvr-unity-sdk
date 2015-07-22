@@ -20,14 +20,21 @@
 //
 // Modified by Google:
 //   Combined the 6 separate meshes into a single mesh with submeshes.
-//
-// Usage:
-//   Attach to a camera object, and it meshifies the camera's skybox at runtime.
-//   The skybox is automatically scaled to fit just inside the far clipping
-//   plane and is kept centered on the camera.
 
 using UnityEngine;
 
+/// @ingroup LegacyScripts
+/// Unity 4's built-in skybox backgrounds do not work correctly for stereo rendering.
+/// Since the same exact image is rendered to each eye, the background has zero
+/// parallax.  Given the optics of Cardboard, this yields an effective stereo depth
+/// that is likely right in the middle, or worse, front of the scene.  The results
+/// in a visually painful parallax clash with other objects in the scene.
+///
+/// This script should be attached to the Camera which represents the primary
+/// viewpoint of the player (such as _Main Camera_).  At runtime it builds a mesh that
+/// will be textured with the camera's skybox material.  The mesh is scaled up to
+/// just fit inside the far clipping plane, and kept centered on the camera's
+/// position.
 [RequireComponent(typeof(Camera))]
 public class SkyboxMesh : MonoBehaviour {
 #if UNITY_5
@@ -36,13 +43,24 @@ public class SkyboxMesh : MonoBehaviour {
     Component.Destroy(this);
   }
 #else
+  /// The overall shape of the generated sky mesh.
   public enum Shape {
     Sphere,
     Cube,
   }
 
+  /// The overall shape of the generated sky mesh.  The mesh has 6 sides regardless
+  /// of shape, one for each texture in the skybox material.  The `shape` simply
+  /// determines whether those sides are convex or flat.
   public Shape shape = Shape.Sphere;
+
+  /// Controls the mesh resolution:  Each side of the mesh is an NxN grid of
+  /// triangles, where N = `segments`.
   public int segments = 32;
+
+  /// The skybox mesh will be set to this layer.  If you wish for only certain
+  /// cameras to see the skybox mesh, choose a layer for it and make sure that
+  /// only those cameras render that layer.
   public int layer = 0;
 
   private GameObject skybox;

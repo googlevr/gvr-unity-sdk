@@ -15,25 +15,37 @@
 using UnityEngine;
 using System.Collections;
 
+/// @ingroup LegacyScripts
+/// Attach this script to the same object as CardboardOnGUI itself.  It can draw a
+/// cursor image into the GUI texture to show the location of the mouse pointer.  It
+/// supports moving the mouse with the user's gaze, and clicking on the UI with the
+/// trigger, but other mouse-controlling devices, such as gamepads, will work as well.
 public class CardboardOnGUIMouse : MonoBehaviour {
 
-  // If the app supports the use of some other pointing device, e.g. a gamepad
-  // or bluetooth mouse, then this field can be left null.  When set to a
-  // CardboardHead instance, then the user's head in effect becomes the mouse
-  // pointer and the Cardboard trigger becomes the mouse button.  The user
-  // looks at a GUI button and pulls the trigger to click it.
+  /// If the app supports the use of some other pointing device, e.g. a gamepad
+  /// or bluetooth mouse, then this field can be left null.  When set to a
+  /// CardboardHead instance, then the user's head in effect becomes the mouse
+  /// pointer and the Cardboard trigger becomes the mouse button.  The user
+  /// looks at a GUI button and pulls the trigger to click it.
   [Tooltip("The CardboardHead which drives the simulated mouse.")]
   public CardboardHead head;
 
-  // The image to draw into the captured GUI texture representing the current
-  // mouse position.
+  /// The image to draw into the captured GUI texture representing the current
+  /// pointer position.
   [Tooltip("What to draw on the GUI surface for the simulated mouse pointer.")]
   public Texture pointerImage;
 
+  /// The size of the pointer image in _screen coordinates_, that is, the same
+  /// coordinates used in your OnGUI functions to place UI elements on the screen
+  /// when the app is not in VR Mode.  It is independent of the actual resolution of
+  /// the image.  Leave at 0,0 to use actual image size.
   [Tooltip("The size to draw the pointer in screen coordinates. " +
            "Leave at 0,0 to use actual image size.")]
   public Vector2 pointerSize;
 
+  /// The location of the pointer's _hot spot_ relative to the top left corner of
+  /// the pointer image.  This is in _screen coordinates_, and does not
+  /// depend on the actual resolution of the pointer image.
   [Tooltip("The screen pixel of the image to position over the mouse point.")]
   public Vector2 pointerSpot;
 
@@ -89,8 +101,7 @@ public class CardboardOnGUIMouse : MonoBehaviour {
     if (pointerImage == null || !pointerVisible || !enabled) {
       return;
     }
-    Vector2 pos = Input.mousePresent ? (Vector2)Input.mousePosition
-                                     : new Vector2(pointerX, pointerY);
+    Vector2 pos = new Vector2(pointerX, pointerY);
     Vector2 spot = pointerSpot;
     Vector2 size = pointerSize;
     if (size.sqrMagnitude < 1) {  // If pointerSize was left == 0, just use size of image.

@@ -14,6 +14,7 @@
 
 using UnityEngine;
 
+/// @ingroup Scripts
 public class CardboardUILayer {
   // The gear has 6 identical sections, each spanning 60 degrees.
   const float kAnglePerGearSection = 60;
@@ -95,6 +96,7 @@ public class CardboardUILayer {
       GL.End();
       GL.PopMatrix();
     }
+#if UNITY_EDITOR
     if (Cardboard.SDK.EnableSettingsButton) {
       GL.PushMatrix();
       GL.LoadOrtho();
@@ -114,5 +116,6 @@ public class CardboardUILayer {
       GL.End();
       GL.PopMatrix();
     }
+#endif
   }
 }

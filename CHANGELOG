@@ -66,3 +66,15 @@ v0.5 (5/28/2015):
 -  Added more phone and viewer profiles to the in-editor simulation menus.
 -  If native code distortion correction is not supported, fall back to using an Image Effect.
 -  If native code UI layer is not supported, fall back to rendering it in Unity.
+
+v0.5.1 (7/22/2015):
+-  Screen timeout disabled in iOS apps.
+-  Reset VR Mode state on level load in case new scene does not have Cardboard.
+-  Return correct Input.touchCount.
+-  Crashing bug on certain models due to native code called PlatformInfo fixed.
+-  GazeInputModule can be used with the mouse as well as with the Cardboard trigger.
+-  Removed Simulate Distortion Correction flag in the Editor.
+-  No longer force screen brightness to max on Android.
+-  Removed the INTERNET permission from AndroidManifest.xml.
+-  Split the demos into a separate unitypackage.
+-  Ignore gyro drift setting on iOS (it doesn't need it).

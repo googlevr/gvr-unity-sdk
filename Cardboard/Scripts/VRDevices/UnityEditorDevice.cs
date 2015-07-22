@@ -14,7 +14,6 @@
 #if UNITY_EDITOR
 
 using UnityEngine;
-using UnityEditor;
 using System.Collections.Generic;
 
 // Sends simulated values for use when testing within the Unity Editor.
@@ -49,7 +48,7 @@ public class UnityEditorDevice : BaseVRDevice {
   public override void SetSettingsButtonEnabled(bool enabled) {}
   public override void SetNeckModelScale(float scale) {}
   public override void SetAutoDriftCorrectionEnabled(bool enabled) {}
-
+  public override void SetTapIsTrigger(bool enabled) {}
   public override void SetStereoScreen(RenderTexture stereoScreen) {}
 
   private Quaternion initialRotation = Quaternion.identity;

@@ -38,6 +38,15 @@ public abstract class BaseVRDevice {
 
   public abstract void Init();
 
+  public abstract void SetDistortionCorrectionEnabled(bool enabled);
+  public abstract void SetVRModeEnabled(bool enabled);
+  public abstract void SetAlignmentMarkerEnabled(bool enabled);
+  public abstract void SetSettingsButtonEnabled(bool enabled);
+  public abstract void SetTapIsTrigger(bool enabled);
+  public abstract void SetNeckModelScale(float scale);
+  public abstract void SetAutoDriftCorrectionEnabled(bool enabled);
+  public abstract void SetStereoScreen(RenderTexture stereoScreen);
+
   public virtual bool SupportsNativeDistortionCorrection(List<string> diagnostics) {
     bool support = true;
     if (!SystemInfo.supportsRenderTextures) {
@@ -80,14 +89,13 @@ public abstract class BaseVRDevice {
     return new RenderTexture(Screen.width, Screen.height, 16, RenderTextureFormat.RGB565);
   }
 
-  public abstract void SetDistortionCorrectionEnabled(bool enabled);
-  public abstract void SetVRModeEnabled(bool enabled);
-  public abstract void SetAlignmentMarkerEnabled(bool enabled);
-  public abstract void SetSettingsButtonEnabled(bool enabled);
-  public abstract void SetNeckModelScale(float scale);
-  public abstract void SetAutoDriftCorrectionEnabled(bool enabled);
+  public virtual bool SetDefaultDeviceProfile(Uri uri) {
+    return false;
+  }
 
-  public abstract void SetStereoScreen(RenderTexture stereoScreen);
+  public virtual void ShowSettingsDialog() {
+    // Do nothing.
+  }
 
   public Pose3D GetHeadPose() {
     return this.headPose;
@@ -230,12 +238,11 @@ public abstract class BaseVRDevice {
 #if UNITY_EDITOR
       device = new UnityEditorDevice();
 #elif ANDROID_DEVICE
-      //device = new CardboardAndroidDevice();
-      device = new AndroidVRDevice();
+      device = new CardboardAndroidDevice();
 #elif IPHONE_DEVICE
-      device = new iOSVRDevice();
+      device = new CardboardiOSDevice();
 #else
-      throw new InvalidOperationException();
+      throw new InvalidOperationException("Unsupported device.");
 #endif
     }
     return device;

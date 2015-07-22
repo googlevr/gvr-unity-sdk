@@ -378,24 +378,16 @@ Prefab:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 11400012, guid: b8b03d395f5734e98af91ccf44f9bf47, type: 2}
-      propertyPath: tapIsTrigger
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 400006, guid: b8b03d395f5734e98af91ccf44f9bf47, type: 2}
       propertyPath: m_RootOrder
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 11400012, guid: b8b03d395f5734e98af91ccf44f9bf47, type: 2}
-      propertyPath: neckModelScale
+      propertyPath: tapIsTrigger
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 11400012, guid: b8b03d395f5734e98af91ccf44f9bf47, type: 2}
-      propertyPath: UseUnityRemoteInput
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 11400012, guid: b8b03d395f5734e98af91ccf44f9bf47, type: 2}
-      propertyPath: deviceType
+      propertyPath: syncWithCardboardApp
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
@@ -2338,12 +2330,11 @@ MonoBehaviour:
   vrModeEnabled: 1
   enableAlignmentMarker: 1
   enableSettingsButton: 1
-  TapIsTrigger: 1
+  tapIsTrigger: 1
   neckModelScale: 1
   autoDriftCorrection: 1
   syncWithCardboardApp: 0
   autoUntiltHead: 1
-  simulateDistortionCorrection: 1
   UseUnityRemoteInput: 0
   screenSize: 0
   deviceType: 0

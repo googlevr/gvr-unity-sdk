@@ -14,44 +14,48 @@
 
 using UnityEngine;
 
-// A utility class for redirecting OnGUI()-based UI elements onto a texture,
-// which can be drawn on a surface in the scene and thus appear in stereo.
-// The auxiliary CardboardOnGUIWindow class handles displaying the texture
-// in the scene.  CardboardOnGUI captures the OnGUI() calls, which need to be
-// modified slightly for this to work, and handles feeding back fake mouse
-// events into the Unity player based on the user's head and trigger actions.
-//
-// If the option is available, it is probably better to use a real 3D
-// GUI such as the new Unity4.6+ system.  But if you just want to get
-// existing projects based on OnGUI() to work in Cardboard, this class
-// can help.
+/// @ingroup LegacyScripts
+/// A utility class for redirecting OnGUI()-based UI elements onto a texture,
+/// which can be drawn on a surface in the scene and thus appear in stereo.
+/// The auxiliary CardboardOnGUIWindow class handles displaying the texture
+/// in the scene.  CardboardOnGUI captures the OnGUI() calls, which need to be
+/// modified slightly for this to work, and handles feeding back fake mouse
+/// events into the Unity player based on the user's head and trigger actions.
+///
+/// If the option is available, it is probably better to use a real 3D
+/// GUI such as the new Unity4.6+ system.  But if you just want to get
+/// existing projects based on OnGUI() to work in Cardboard, this class
+/// can help.
+///
+/// Position the GUI mesh in 3D space using the gameobject's transform.  Note: do
+/// not place the object as a child of the CardboardHead, or the user will not be
+/// able to look at different parts of the UI because it will move with them.  It is
+/// better to place it as a sibling of the Head object.
 public class CardboardOnGUI : MonoBehaviour {
 
-  // The type of an OnGUI() method.
+  /// The .NET type of an `OnGUI()` method.
   public delegate void OnGUICallback();
 
-  // Add a gameobject's OnGUI() to this event, which is called during the
-  // redirection phase to capture the UI in a texture.
+  /// The list of `OnGUI()` calls that will be captured in the texture.  Add your
+  /// script's OnGUI method to enable the script's GUI in the CardboardOnGUI window.
   public static event OnGUICallback onGUICallback;
 
-  // Unity is going to call OnGUI() methods as usual, in addition to them
-  // being called by the onGUICallback event.  To prevent this double
-  // call from affecting game logic, modify the OnGUI() method.  At the
-  // very top, add "if (!CardboardOnGUI.OKToDraw(this)) return; ".
-  // This will ensure only one OnGUI() call sequence occurs per frame,
-  // whether in VR Mode or not.
-  private static bool okToDraw;
+  /// Unity is going to call OnGUI() methods as usual, in addition to them
+  /// being called by the onGUICallback event.  To prevent this double
+  /// call from affecting game logic, modify the OnGUI() method.  At the
+  /// very top, add "if (!CardboardOnGUI.OKToDraw(this)) return;".
+  /// This will ensure only one OnGUI() call sequence occurs per frame,
+  /// whether in VR Mode or not.
   public static bool OKToDraw(MonoBehaviour mb) {
     return okToDraw && (mb == null || mb.enabled && mb.gameObject.activeInHierarchy);
   }
+  private static bool okToDraw;
 
-  // Unlike on a plain 2D screen, in Cardboard the edges of the screen are
-  // very hard to see.  UI elements will likely have to be moved towards
-  // the center for the user to be able to interact with them.  As this would
-  // obscure the view of the rest of the scene, the class provides this flag to
-  // hide or show the entire in-scene rendering of the GUI, so it can be shown
-  // only when the user needs it.
-  private static bool isGUIVisible;
+  /// This is your global visibility control for whether CardboardOnGUI shows anything
+  /// in the scene.  Set it to _true_ to allow the GUI to draw, and _false_ to hide
+  /// it.  The purpose is so you can move GUI elements away from the edges of the
+  /// screen (which are hard to see in VR Mode), and instead pop up the GUI when it
+  /// is needed, and dismiss it when not.
   public static bool IsGUIVisible {
     get {
       return isGUIVisible && Cardboard.SDK.VRModeEnabled && SystemInfo.supportsRenderTextures;
@@ -60,17 +64,22 @@ public class CardboardOnGUI : MonoBehaviour {
       isGUIVisible = value;
     }
   }
+  private static bool isGUIVisible;
 
-  // A wrapper around the trigger event that lets the GUI, when it
-  // is visible, steal the trigger for mouse clicking.  Call this
-  // instead of Cardboard.SDK.CardboardTriggered when this behavior
-  // is desired.
+  /// A wrapper around Cardboard#Triggered that hides the trigger event
+  /// when the GUI is visible (i.e. when you set #IsGUIVisible to true).
+  /// By using this flag in your scripts rather than Cardboard#Triggered,
+  /// you allow the GUI to take the trigger events when it is visible.
+  /// This is when the trigger is needed for clicking buttons.
+  /// When the GUI is hidden, the trigger events pass through.
   public static bool Triggered {
     get {
       return !IsGUIVisible && Cardboard.SDK.Triggered;
     }
   }
 
+  /// The GUI texture is cleared to this color before any OnGUI methods are called
+  /// during the capture phase.
   [Tooltip("The color and transparency of the overall GUI screen.")]
   public Color background = Color.clear;
 
@@ -89,7 +98,7 @@ public class CardboardOnGUI : MonoBehaviour {
     Create();
   }
 
-  // Sets up the render texture and all the windows that will show parts of it.
+  /// Sets up the render texture and all the windows that will show parts of it.
   public void Create() {
     if (guiScreen != null) {
       guiScreen.Release();

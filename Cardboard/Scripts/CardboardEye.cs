@@ -15,24 +15,35 @@
 using UnityEngine;
 using System.Reflection;
 
-// Controls one camera of a stereo pair.  Each frame, it mirrors the settings of
-// the parent mono Camera, and then sets up side-by-side stereo with an appropriate
-// projection based on the head-tracking data from the Cardboard.SDK object.
-// To enable a stereo camera pair, enable the parent mono camera and set
-// Cardboard.SDK.vrModeEnabled = true.
-// NOTE: If you programmatically change the set of CardboardEyes belonging to a
-// StereoController, be sure to call InvalidateEyes() on it in order to reset its
-// cache.
+/// @ingroup Scripts
+/// Controls one camera of a stereo pair.  Each frame, it mirrors the settings of
+/// the parent mono Camera, and then sets up side-by-side stereo with
+/// the view and projection matrices from the Cardboard.EyeView and Cardboard.Projection.
+/// The render output is directed to the Cardboard.StereoScreen render texture, either
+/// to the left half or right half depending on the chosen eye.
+///
+/// To enable a stereo camera pair, enable the parent mono camera and set
+/// Cardboard.SDK.vrModeEnabled = true.
+///
+/// @note If you programmatically change the set of CardboardEyes belonging to a
+/// StereoController, be sure to call StereoController::InvalidateEyes on it
+/// in order to reset its cache.
 [RequireComponent(typeof(Camera))]
 public class CardboardEye : MonoBehaviour {
-  // Whether this is the left eye or the right eye.
+  /// Whether this is the left eye or the right eye.
+  /// Determines which stereo eye to render, that is, which `EyeOffset` and
+  /// `Projection` matrix to use and which half of the screen to render to.
   public Cardboard.Eye eye;
 
+  /// Allows you to flip on or off specific culling mask layers for just this
+  /// eye.  The mask is a toggle:  The eye's culling mask is first copied from
+  /// the parent mono camera, and then the layers specified here are flipped.
+  /// Each eye has its own toggle mask.
   [Tooltip("Culling mask layers that this eye should toggle relative to the parent camera.")]
   public LayerMask toggleCullingMask = 0;
 
-  // The stereo controller in charge of this eye (and whose mono camera
-  // we will copy settings from).
+  /// The StereoController in charge of this eye (and whose mono camera
+  /// we will copy settings from).
   private StereoController controller;
   public StereoController Controller {
     // This property is set up to work both in editor and in player.
@@ -48,6 +59,7 @@ public class CardboardEye : MonoBehaviour {
     }
   }
 
+  /// Returns the closest ancestor CardboardHead.
   public CardboardHead Head {
     get {
       return GetComponentInParent<CardboardHead>();
@@ -198,9 +210,8 @@ public class CardboardEye : MonoBehaviour {
     }
   }
 
-  // Called by StereoController to run the whole render pipeline for this camera.
-  public void Render()
-  {
+  /// Called by StereoController to run the whole render pipeline for this camera.
+  public void Render() {
     Setup();
 
     // Use the "fast" or "slow" method.  Fast means the camera draws right into one half of
@@ -245,12 +256,12 @@ public class CardboardEye : MonoBehaviour {
     camera.targetTexture = null;
   }
 
-  // Alternate means of rendering stereo, when you don't plan to switch in and out of VR mode:
-  // In the editor, disable the MainCamera's camera component.  Enable the two stereo eye
-  // camera components.  Note: due to a quirk of Unity, there must be at least one camera
-  // not rendering to a texture, preferably last in order.  If necessary, add a dummy camera
-  // to the scene with a high depth value, it's clear flags set to "Don't Clear", and culling mask
-  // set to Nothing.
+  /// Alternate means of rendering stereo, when you don't plan to switch in and out of VR mode:
+  /// In the editor, disable the MainCamera's camera component.  Enable the two stereo eye
+  /// camera components.
+  /// @note due to a quirk of Unity, there must be at least one camera not rendering to a texture,
+  /// preferably last in order.  If necessary, add a dummy camera to the scene with a high depth
+  /// value, it's clear flags set to "Don't Clear", and culling mask set to Nothing.
   void OnPreCull() {
     if (camera.enabled) {
       Setup();
@@ -258,11 +269,11 @@ public class CardboardEye : MonoBehaviour {
     }
   }
 
-  // Helper to copy camera settings from the controller's mono camera.
-  // Used in OnPreCull and the custom editor for StereoController.
-  // The parameters parx and pary, if not left at default, should come from a
-  // projection matrix returned by the SDK.
-  // They affect the apparent depth of the camera's window.  See OnPreCull().
+  /// Helper to copy camera settings from the controller's mono camera.
+  /// Used in OnPreCull and the custom editor for StereoController.
+  /// The parameters parx and pary, if not left at default, should come from a
+  /// projection matrix returned by the SDK.
+  /// They affect the apparent depth of the camera's window.  See OnPreCull().
   public void CopyCameraAndMakeSideBySide(StereoController controller,
                                           float parx = 0, float pary = 0) {
 #if UNITY_5
