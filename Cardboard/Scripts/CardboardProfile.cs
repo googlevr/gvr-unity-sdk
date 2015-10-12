@@ -1,7 +1,21 @@
-﻿using System;
+﻿// Copyright 2014 Google Inc. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using System;
 using UnityEngine;
 
-// Measurements of a particular phone in a particular Cardboard device.
+/// Measurements of a particular phone in a particular Cardboard device.
 [System.Serializable]
 public class CardboardProfile {
   public CardboardProfile Clone() {
@@ -11,8 +25,8 @@ public class CardboardProfile {
     };
   }
 
-  // Information about the screen.  All distances in meters, measured as the phone is expected
-  // to be placed in the Cardboard, i.e. landscape orientation.
+  /// Information about the screen.  All distances are in meters, measured as the phone is expected
+  /// to be placed in the Cardboard, i.e. landscape orientation.
   [System.Serializable]
   public struct Screen {
     public float width;   // The long edge of the phone.
@@ -20,7 +34,7 @@ public class CardboardProfile {
     public float border;  // Distance from bottom of the cardboard to the bottom edge of screen.
   }
 
-  // Information about the lens placement in the Cardboard.  All distances in meters.
+  /// Information about the lens placement in the Cardboard.  All distances are in meters.
   [System.Serializable]
   public struct Lenses {
     public float separation;     // Center to center.
@@ -36,10 +50,10 @@ public class CardboardProfile {
     public const int AlignBottom = 1;  // Offset is measured up from bottom of device.
   }
 
-  // Information about the viewing angles through the lenses.  All angles in degrees, measured
-  // away from the optical axis, i.e. angles are all positive.  It is assumed that left and right
-  // eye FOVs are mirror images, so that both have the same inner and outer angles.  Angles do not
-  // need to account for the limits due to screen size.
+  /// Information about the viewing angles through the lenses.  All angles in degrees, measured
+  /// away from the optical axis, i.e. angles are all positive.  It is assumed that left and right
+  /// eye FOVs are mirror images, so that both have the same inner and outer angles.  Angles do not
+  /// need to account for the limits due to screen size.
   [System.Serializable]
   public struct MaxFOV {
     public float outer;  // Towards the side of the screen.
@@ -48,8 +62,8 @@ public class CardboardProfile {
     public float lower;  // Towards the bottom of the screen.
   }
 
-  // Information on how the lens distorts light rays.  Also used for the (approximate) inverse
-  // distortion.  Assumes a radially symmetric pincushion/barrel distortion model.
+  /// Information on how the lens distorts light rays.  Also used for the (approximate) inverse
+  /// distortion.  Assumes a radially symmetric pincushion/barrel distortion model.
   [System.Serializable]
   public struct Distortion {
     public float k1;
@@ -59,8 +73,25 @@ public class CardboardProfile {
       float r2 = r * r;
       return ((k2 * r2 + k1) * r2 + 1) * r;
     }
+
+    public float distortInv(float radius) {
+      // Secant method.
+      float r0 = 0;
+      float r1 = 1;
+      float dr0 = radius - distort(r0);
+      while (Mathf.Abs(r1 - r0) > 0.0001f) {
+        float dr1 = radius - distort(r1);
+        float r2 = r1 - dr1 * ((r1 - r0) / (dr1 - dr0));
+        r0 = r1;
+        r1 = r2;
+        dr0 = dr1;
+      }
+      return r1;
+    }
   }
 
+  /// Information about a particular device, including specfications on its lenses, FOV,
+  /// and distortion and inverse distortion coefficients.
   [System.Serializable]
   public struct Device {
     public Lenses lenses;
@@ -69,19 +100,20 @@ public class CardboardProfile {
     public Distortion inverse;
   }
 
-  // The combined set of information about a Cardboard profile.
+  /// Screen parameters of a Cardboard device.
   public Screen screen;
+
+  /// Device parameters of a Cardboard device.
   public Device device;
 
-  // The vertical offset of the lens centers from the screen center.
+  /// The vertical offset of the lens centers from the screen center.
   public float VerticalLensOffset {
     get {
       return (device.lenses.offset - screen.border - screen.height/2) * device.lenses.alignment;
     }
   }
 
-  // Some known profiles.
-
+  /// Some known screen profiles.
   public enum ScreenSizes {
     Nexus5,
     Nexus6,
@@ -94,66 +126,77 @@ public class CardboardProfile {
     iPhone6p,
   };
 
+  /// Parameters for a Nexus 5 device.
   public static readonly Screen Nexus5 = new Screen {
     width = 0.110f,
     height = 0.062f,
     border = 0.004f
   };
 
+  /// Parameters for a Nexus 6 device.
   public static readonly Screen Nexus6 = new Screen {
     width = 0.133f,
     height = 0.074f,
     border = 0.004f
   };
 
+  /// Parameters for a Galaxy S6 device.
   public static readonly Screen GalaxyS6 = new Screen {
     width = 0.114f,
     height = 0.0635f,
     border = 0.0035f
   };
 
+  /// Parameters for a Galaxy Note4 device.
   public static readonly Screen GalaxyNote4 = new Screen {
     width = 0.125f,
     height = 0.0705f,
     border = 0.0045f
   };
 
+  /// Parameters for a LG G3 device.
   public static readonly Screen LGG3 = new Screen {
     width = 0.121f,
     height = 0.068f,
     border = 0.003f
   };
 
+  /// Parameters for an iPhone 4 device.
   public static readonly Screen iPhone4 = new Screen {
     width = 0.075f,
     height = 0.050f,
     border = 0.0045f
   };
 
+  /// Parameters for an iPhone 5 device.
   public static readonly Screen iPhone5 = new Screen {
     width = 0.089f,
     height = 0.050f,
     border = 0.0045f
   };
 
+  /// Parameters for an iPhone 6 device.
   public static readonly Screen iPhone6 = new Screen {
     width = 0.104f,
     height = 0.058f,
     border = 0.005f
   };
 
+  /// Parameters for an iPhone 6p device.
   public static readonly Screen iPhone6p = new Screen {
     width = 0.112f,
     height = 0.068f,
     border = 0.005f
   };
 
+  /// Some known Cardboard device profiles.
   public enum DeviceTypes {
     CardboardJun2014,
     CardboardMay2015,
     GoggleTechC1Glass,
   };
 
+  /// Parameters for a Cardboard v1.
   public static readonly Device CardboardJun2014 = new Device {
     lenses = {
       separation = 0.060f,
@@ -174,26 +217,28 @@ public class CardboardProfile {
     inverse = ApproximateInverse(0.441f, 0.156f)
   };
 
+  /// Parameters for a Cardboard v2.
   public static readonly Device CardboardMay2015 = new Device {
     lenses = {
-      separation = 0.062f,
+      separation = 0.064f,
       offset = 0.035f,
-      screenDistance = 0.037f,
+      screenDistance = 0.039f,
       alignment = Lenses.AlignBottom,
     },
     maxFOV = {
-      outer = 50.0f,
-      inner = 50.0f,
-      upper = 50.0f,
-      lower = 50.0f
+      outer = 60.0f,
+      inner = 60.0f,
+      upper = 60.0f,
+      lower = 60.0f
     },
     distortion = {
-      k1 = 0.26f,
-      k2 = 0.27f
+      k1 = 0.34f,
+      k2 = 0.55f
     },
-    inverse = ApproximateInverse(0.26f, 0.27f)
+    inverse = ApproximateInverse(0.34f, 0.55f)
   };
 
+  /// Parameters for a Go4D C1-Glass.
   public static readonly Device GoggleTechC1Glass = new Device {
     lenses = {
       separation = 0.065f,
@@ -214,12 +259,13 @@ public class CardboardProfile {
     inverse = ApproximateInverse(0.3f, 0)
   };
 
-  // Nexus 5 in a v1 Cardboard.
+  /// Nexus 5 in a Cardboard v1.
   public static readonly CardboardProfile Default = new CardboardProfile {
     screen = Nexus5,
     device = CardboardJun2014
   };
 
+  /// Returns a CardboardProfile with the given parameters.
   public static CardboardProfile GetKnownProfile(ScreenSizes screenSize, DeviceTypes deviceType) {
     Screen screen;
     switch (screenSize) {
@@ -256,6 +302,9 @@ public class CardboardProfile {
       case DeviceTypes.CardboardMay2015:
         device = CardboardMay2015;
         break;
+      case DeviceTypes.GoggleTechC1Glass:
+        device = GoggleTechC1Glass;
+        break;
       default:
         device = CardboardJun2014;
         break;
@@ -263,12 +312,14 @@ public class CardboardProfile {
     return new CardboardProfile { screen = screen, device = device };
   }
 
-  public void GetLeftEyeVisibleTanAngles(ref float[] result) {
+  /// Calculates the tan-angles from the maximum FOV for the left eye for the
+  /// current device and screen parameters.
+  public void GetLeftEyeVisibleTanAngles(float[] result) {
     // Tan-angles from the max FOV.
-    float fovLeft = (float) Math.Tan(-device.maxFOV.outer * Math.PI / 180);
-    float fovTop = (float) Math.Tan(device.maxFOV.upper * Math.PI / 180);
-    float fovRight = (float) Math.Tan(device.maxFOV.inner * Math.PI / 180);
-    float fovBottom = (float) Math.Tan(-device.maxFOV.lower * Math.PI / 180);
+    float fovLeft = Mathf.Tan(-device.maxFOV.outer * Mathf.Deg2Rad);
+    float fovTop = Mathf.Tan(device.maxFOV.upper * Mathf.Deg2Rad);
+    float fovRight = Mathf.Tan(device.maxFOV.inner * Mathf.Deg2Rad);
+    float fovBottom = Mathf.Tan(-device.maxFOV.lower * Mathf.Deg2Rad);
     // Viewport size.
     float halfWidth = screen.width / 4;
     float halfHeight = screen.height / 2;
@@ -280,7 +331,7 @@ public class CardboardProfile {
     float screenLeft = device.distortion.distort((centerX - halfWidth) / centerZ);
     float screenTop = device.distortion.distort((centerY + halfHeight) / centerZ);
     float screenRight = device.distortion.distort((centerX + halfWidth) / centerZ);
-    float screenBottom = device.distortion.distort((centerY - halfWidth) / centerZ);
+    float screenBottom = device.distortion.distort((centerY - halfHeight) / centerZ);
     // Compare the two sets of tan-angles and take the value closer to zero on each side.
     result[0] = Math.Max(fovLeft, screenLeft);
     result[1] = Math.Min(fovTop, screenTop);
@@ -288,12 +339,14 @@ public class CardboardProfile {
     result[3] = Math.Max(fovBottom, screenBottom);
   }
 
-  public void GetLeftEyeNoLensTanAngles(ref float[] result) {
+  /// Calculates the tan-angles from the maximum FOV for the left eye for the
+  /// current device and screen parameters, assuming no lenses.
+  public void GetLeftEyeNoLensTanAngles(float[] result) {
     // Tan-angles from the max FOV.
-    float fovLeft = device.inverse.distort((float)Math.Tan(-device.maxFOV.outer * Math.PI / 180));
-    float fovTop = device.inverse.distort((float)Math.Tan(device.maxFOV.upper * Math.PI / 180));
-    float fovRight = device.inverse.distort((float)Math.Tan(device.maxFOV.inner * Math.PI / 180));
-    float fovBottom = device.inverse.distort((float)Math.Tan(-device.maxFOV.lower * Math.PI / 180));
+    float fovLeft = device.distortion.distortInv(Mathf.Tan(-device.maxFOV.outer * Mathf.Deg2Rad));
+    float fovTop = device.distortion.distortInv(Mathf.Tan(device.maxFOV.upper * Mathf.Deg2Rad));
+    float fovRight = device.distortion.distortInv(Mathf.Tan(device.maxFOV.inner * Mathf.Deg2Rad));
+    float fovBottom = device.distortion.distortInv(Mathf.Tan(-device.maxFOV.lower * Mathf.Deg2Rad));
     // Viewport size.
     float halfWidth = screen.width / 4;
     float halfHeight = screen.height / 2;
@@ -305,7 +358,7 @@ public class CardboardProfile {
     float screenLeft = (centerX - halfWidth) / centerZ;
     float screenTop = (centerY + halfHeight) / centerZ;
     float screenRight = (centerX + halfWidth) / centerZ;
-    float screenBottom = (centerY - halfWidth) / centerZ;
+    float screenBottom = (centerY - halfHeight) / centerZ;
     // Compare the two sets of tan-angles and take the value closer to zero on each side.
     result[0] = Math.Max(fovLeft, screenLeft);
     result[1] = Math.Min(fovTop, screenTop);
@@ -313,6 +366,8 @@ public class CardboardProfile {
     result[3] = Math.Max(fovBottom, screenBottom);
   }
 
+  /// Calculates the screen rectangle visible from the left eye for the
+  /// current device and screen parameters.
   public Rect GetLeftEyeVisibleScreenRect(float[] undistortedFrustum) {
     float dist = device.lenses.screenDistance;
     float eyeX = (screen.width - device.lenses.separation) / 2;
@@ -322,6 +377,12 @@ public class CardboardProfile {
     float right = (undistortedFrustum[2] * dist + eyeX) / screen.width;
     float bottom = (undistortedFrustum[3] * dist + eyeY) / screen.height;
     return new Rect(left, bottom, right - left, top - bottom);
+  }
+
+  public static float GetMaxRadius(float[] tanAngleRect) {
+    float x = Mathf.Max(Mathf.Abs(tanAngleRect[0]), Mathf.Abs(tanAngleRect[2]));
+    float y = Mathf.Max(Mathf.Abs(tanAngleRect[1]), Mathf.Abs(tanAngleRect[3]));
+    return Mathf.Sqrt(x * x + y * y);
   }
 
   // Solves a least-squares matrix equation.  Given the equation A * x = y, calculate the
@@ -390,11 +451,13 @@ public class CardboardProfile {
     return vecX;
   }
 
+  /// Calculates an approximate inverse to the given radial distortion parameters.
   public static Distortion ApproximateInverse(float k1, float k2, float maxRadius = 1,
                                               int numSamples = 10) {
     return ApproximateInverse(new Distortion { k1=k1, k2=k2 }, maxRadius, numSamples);
   }
 
+  /// Calculates an approximate inverse to the given radial distortion parameters.
   public static Distortion ApproximateInverse(Distortion distort, float maxRadius = 1,
                                               int numSamples = 10) {
     const int numCoefficients = 2;

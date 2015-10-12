@@ -16,19 +16,12 @@ using UnityEngine;
 using System.Collections;
 
 /// @ingroup LegacyScripts
-/// Attach this script to the same object as CardboardOnGUI itself.  It can draw a
-/// cursor image into the GUI texture to show the location of the mouse pointer.  It
+/// This script shows the location of the mouse pointer on the GUI texture.
+///
+/// Attach this script to the same object as CardboardOnGUI itself.  It
 /// supports moving the mouse with the user's gaze, and clicking on the UI with the
 /// trigger, but other mouse-controlling devices, such as gamepads, will work as well.
 public class CardboardOnGUIMouse : MonoBehaviour {
-
-  /// If the app supports the use of some other pointing device, e.g. a gamepad
-  /// or bluetooth mouse, then this field can be left null.  When set to a
-  /// CardboardHead instance, then the user's head in effect becomes the mouse
-  /// pointer and the Cardboard trigger becomes the mouse button.  The user
-  /// looks at a GUI button and pulls the trigger to click it.
-  [Tooltip("The CardboardHead which drives the simulated mouse.")]
-  public CardboardHead head;
 
   /// The image to draw into the captured GUI texture representing the current
   /// pointer position.
@@ -56,6 +49,8 @@ public class CardboardOnGUIMouse : MonoBehaviour {
   private int pointerY;
 
   void LateUpdate() {
+    StereoController controller = Cardboard.Controller;
+    CardboardHead head = controller ? controller.Head : null;
     if (head == null) {  // Pointer not being controlled by user's head, so we bail.
       pointerVisible = true;  // Draw pointer wherever Unity thinks the mouse is.
       return;
@@ -96,7 +91,7 @@ public class CardboardOnGUIMouse : MonoBehaviour {
     pointerVisible = true;
   }
 
-  // Draw the fake mouse pointer.  Called by CardboardOnGUI after the rest of the UI is done.
+  /// Draw the fake mouse pointer.  Called by CardboardOnGUI after the rest of the UI is done.
   public void DrawPointerImage() {
     if (pointerImage == null || !pointerVisible || !enabled) {
       return;

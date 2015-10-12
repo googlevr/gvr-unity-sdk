@@ -78,3 +78,32 @@ v0.5.1 (7/22/2015):
 -  Removed the INTERNET permission from AndroidManifest.xml.
 -  Split the demos into a separate unitypackage.
 -  Ignore gyro drift setting on iOS (it doesn't need it).
+
+v0.5.2 (10/12/2015):
+-  General performance improvements and CPU load reduction to reduce thermal throttling.
+-  New gyro drift correction method for better stability across more phones.
+-  Onboarding and Setup dialogs now support localized language strings.  For Android this
+   is automatic.  For iOS, enable Localizations in the Xcode project.
+-  Default distortion correction method is now done entirely in Unity to avoid
+   GL.IssuePluginEvent() overhead.  The old native C++ version still available if issues arise.
+-  The GL.IssuePluginEvent() call uses a unique ID in order to be compatible with other native
+   plugins.  (This only matters if you use the old Native distortion method.)
+-  A new CardboardCamera prefab manages both full screen clear and distortion
+   correction.  It is included in CardboardMain, or created automatically if needed.
+-  Distortion correction is now done during the Camera rendering phase, which means
+   that uGUI Screen Space Overlays (and OnGUI) will appear onscreen now.
+-  The new distortion correction method is compatible with Metal (iOS) and multi-
+   threaded rendering (Android).
+-  The offscreen rendertexture used for distortion correction takes properties from
+   project settings (e.g. antialiasing, pixel format).  Depth now defaults to 24 bits.
+-  The offscreen rendertexture resolution is padded to account for the barrel distortion,
+   in order to reduce relative fuzziness in pixels near the center.
+-  The Cardboard object has a simple slider to adjust the scale of the rendertexture
+   resolution globally.  Dial down to increase performance.
+-  There is now an onscreen Back Button that functions like the normal Android back
+   button (which is hidden in immersive mode).  You can turn it on or off, and choose
+   how to respond.
+-  Recent versions of Unity (5.1.x and 5.2.x) have changed the way they report DPI, which
+   is affecting the SDKs calculation of screen size.  This has been worked around.
+-  A bug in the StereoController.AddStereoRig() function which cached the eyes array before
+   filling it in has been fixed.

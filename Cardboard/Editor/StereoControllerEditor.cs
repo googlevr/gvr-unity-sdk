@@ -30,6 +30,7 @@ public class StereoControllerEditor : Editor {
   private GUIContent updateButton =
     new GUIContent(ACTION_NAME, "Copy all Camera settings to the stereo cameras.");
 
+  /// @cond HIDDEN
   public override void OnInspectorGUI() {
     DrawDefaultInspector();
     GUILayout.BeginHorizontal(GUILayout.ExpandHeight(false));
@@ -67,6 +68,7 @@ public class StereoControllerEditor : Editor {
     var camera = (Camera)command.context;
     DoUpdateStereoCameras(camera.gameObject);
   }
+  /// @endcond
 
   private static bool CanUpdateStereoCameras(GameObject go) {
     return go != null &&
@@ -109,7 +111,7 @@ public class StereoControllerEditor : Editor {
     // Head.
     var head = go.GetComponent<CardboardHead>();
     if (head != null && !hadHead) {
-        Undo.RegisterCreatedObjectUndo(head, ACTION_NAME);
+      Undo.RegisterCreatedObjectUndo(head, ACTION_NAME);
     }
 
     // Eyes. Synchronizes them with controller's camera too.

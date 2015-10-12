@@ -2,6 +2,31 @@
 
 This section describes the prefabs that are provided by the package.
 
+## CardboardCamera
+
+This prefab simply contains an instance of the _%CardboardPreRender_ script and
+an instance of the _%CardboardPostRender_ script, and a _Camera_ component for
+each.
+
+The CardboardPreRender script is drawn before any stereo rendering occurs.  It's
+primary job is to clear the full screen, since in VR mode, the stereo cameras don't
+always fill the entire frame.
+
+The CardboardPostRender script is more substantial.  It is the last Camera to draw
+during Unity's rendering pipeline.  It's primary purpose is to now manage distortion
+correction.  When the new in-Unity distortion method is active, it renders a
+predistorted mesh with the stereo screen as its texture.  If the old native C++
+distortion method is active, it simply defers this activity to the native plugin.
+
+Since CardboardPostRender now occurs during the normal Camera rendering phase, any
+Screen Space Overlay canvases will be drawn on top of it rather than being covered
+up as in prior versions of the SDK.
+
+This prefab is bundled in the _CardboardMain_ prefab.  It is also generated at runtime
+automatically if one doesn't exist.  You only need to manually include this in the
+scene if you are _not_ using _CardboardMain_, and you wish to edit the Camera
+component's settings in the Unity editor.
+
 ## CardboardMain
 
 This prefab is intended to be a drop-in replacement for a normal Unity camera,

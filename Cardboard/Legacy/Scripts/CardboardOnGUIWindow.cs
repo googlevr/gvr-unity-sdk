@@ -16,12 +16,12 @@ using UnityEngine;
 
 /// @ingroup LegacyScripts
 /// Works with CardboardOnGUI to show all or part of the OnGUI-rendered
-/// UI on a mesh in the scene.  There should be one or more of these
-/// as children of the CardboardOnGUI gameobject.  Each one specifies
-/// the region of the captured OnGUI screen to show on its own mesh.
-/// This allows you to place pieces of the GUI in the scene at different
-/// distances and angles to the user without having to change any of the
-/// OnGUI methods themselves.
+/// UI on a mesh in the scene.
+///
+/// There should be one or more of these as children of the CardboardOnGUI gameobject.
+/// Each one specifies the region of the captured OnGUI screen to show on its own mesh.
+/// This allows you to place pieces of the GUI in the scene at different distances and angles
+/// to the user without having to change any of the OnGUI methods themselves.
 ///
 /// Each instance can pick out a different region of the GUI texture to show (see
 /// #rect).  Use the object's transform to position and orient this region in
@@ -48,10 +48,6 @@ using UnityEngine;
 public class CardboardOnGUIWindow : MonoBehaviour {
   private MeshRenderer meshRenderer;
 
-  void Reset() {
-    rect = new Rect(0,0,1,1);  // Make window show the full GUI screen.
-  }
-
   /// Determines the portion of the CardboardOnGUI texture to draw on the attached
   /// mesh.  The units are exactly the same as a Camera component's `Viewport Rect`:
   /// `(0,0)` is the bottom left corner and `(1,1)` the top right.  Use it to pick out
@@ -65,6 +61,10 @@ public class CardboardOnGUIWindow : MonoBehaviour {
     if (!SystemInfo.supportsRenderTextures) {
       enabled = false;
     }
+  }
+
+  void Reset() {
+    rect = new Rect(0,0,1,1);  // Make window show the full GUI screen.
   }
 
   /// Make a material that points to the target texture.  Texture scale

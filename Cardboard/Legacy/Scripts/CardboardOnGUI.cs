@@ -17,6 +17,7 @@ using UnityEngine;
 /// @ingroup LegacyScripts
 /// A utility class for redirecting OnGUI()-based UI elements onto a texture,
 /// which can be drawn on a surface in the scene and thus appear in stereo.
+///
 /// The auxiliary CardboardOnGUIWindow class handles displaying the texture
 /// in the scene.  CardboardOnGUI captures the OnGUI() calls, which need to be
 /// modified slightly for this to work, and handles feeding back fake mouse

@@ -5,10 +5,12 @@ The Unity plugin package contains the following:
 * _Cardboard.cs_ - Singleton connection to the native code VR device.
 * _CardboardEye.cs_ - Applies an eye view/projection to a stereo camera.
 * _CardboardHead.cs_ - Applies the Cardboard head view to its transform.
+* _CardboardPreRender.cs_ - Clears entire frame in VR mode.
+* _CardboardPostRender.cs_ - Applies distortion correction in VR mode.
 * _GazeInputModule.cs_ - Control uGUI elements with gaze and trigger.
 * _Pose3D.cs_ - Contains a rotation and translation.
-* _RadialUndistortionEffect.cs_ - Image Effect simulating distortion correction.
 * _StereoController.cs_ - Controls mono vs stereo rendering.
+* _StereoRenderEffect.cs_ - Handles the non-Direct-Render pass for stereo Image Effects.
 
 **Editor Scripts**
 
@@ -17,13 +19,14 @@ The Unity plugin package contains the following:
 
 **Prefabs**
 
+* _CardboardCamera.prefab - Handles whole frame clearing and distortion correction in Unity.
 * _CardboardMain.prefab_ - A drop-in replacement for a Main Camera object.
 * _CardboardHead.prefab_ - A drop-in replacement for other cameras.
 * _CardboardAdapter.prefab_ - Adds stereo rendering to an existing camera.
 
 **Shaders**
 
-* _RadialUndistortionEffect.cs_ - Shader for simulating distortion correction.
+* _UnlitTexture.shader_ - Draw the distortion mesh with the rendered scene.
 
 **Demo**
 

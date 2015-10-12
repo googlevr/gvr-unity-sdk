@@ -17,6 +17,10 @@ Shader "Cardboard/SolidColor" {
         _Color ("Main Color", COLOR) = (1,1,1,1)
     }
     SubShader {
-        Pass { Color [_Color] }
+        Pass {
+            ZWrite Off
+            ZTest Always
+            Color [_Color]
+        }
     }
 }

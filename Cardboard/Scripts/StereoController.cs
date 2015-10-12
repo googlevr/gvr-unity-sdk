@@ -61,6 +61,16 @@ public class StereoController : MonoBehaviour {
            " Effects and Deferred Lighting may only work if set to false.")]
   public bool directRender = true;
 
+  /// When enabled, UpdateStereoValues() is called every frame to keep the stereo cameras
+  /// completely synchronized with both the mono camera and the device profile.  When
+  /// disabled, you must call UpdateStereoValues() whenever you make a change to the mono
+  /// camera that should be mirrored to the stereo cameras.  Changes to the device profile
+  /// are handled automatically.  It is better for performance to leave this option disabled
+  /// whenever possible.  Good use cases for enabling it are when animating values on the
+  /// mono camera (like background color), or during development to debug camera synchronization
+  /// issues.
+  public bool keepStereoUpdated = false;
+
   /// Adjusts the level of stereopsis for this stereo rig.
   /// @note This parameter is not the virtual size of the head -- use a scale
   /// on the head game object for that.  Instead, it is a control on eye vergence,
@@ -133,6 +143,12 @@ public class StereoController : MonoBehaviour {
   [Tooltip("Adjust stereo level when COI gets too close or too far.")]
   public bool checkStereoComfort = true;
 
+  /// Smoothes the changes to the stereo camera FOV and position based on #centerOfInterest
+  /// and #checkStereoComfort.
+  [Tooltip("Smoothing factor to use when adjusting stereo for COI and comfort.")]
+  [Range(0,1)]
+  public float stereoAdjustSmoothing = 0.1f;
+
   /// For picture-in-picture cameras that don't fill the entire screen,
   /// set the virtual depth of the window itself.  A value of 0 means
   /// zero parallax, which is fairly close.  A value of 1 means "full"
@@ -167,6 +183,7 @@ public class StereoController : MonoBehaviour {
 #if !UNITY_EDITOR
   // Cache for speed, except in editor (don't want to get out of sync with the scene).
   private CardboardEye[] eyes;
+  private CardboardHead head;
 #endif
 
   /// Returns an array of stereo cameras that are controlled by this instance of
@@ -187,55 +204,71 @@ public class StereoController : MonoBehaviour {
     }
   }
 
-  /// Clear the cached array of CardboardEye children.
+  /// Returns the nearest CardboardHead that affects our eyes.
+  public CardboardHead Head {
+    get {
+#if UNITY_EDITOR
+      CardboardHead head = null;  // Local variable rather than member, so as not to cache.
+#endif
+      if (head == null) {
+        head = Eyes.Select(eye => eye.Head).FirstOrDefault();
+      }
+      return head;
+    }
+  }
+
+  /// Clear the cached array of CardboardEye children, as well as the CardboardHead that controls
+  /// their gaze.
   /// @note Be sure to call this if you programmatically change the set of CardboardEye children
   /// managed by this StereoController.
   public void InvalidateEyes() {
 #if !UNITY_EDITOR
     eyes = null;
+    head = null;
 #endif
   }
 
-  /// Returns the nearest CardboardHead that affects our eyes.
-  public CardboardHead Head {
-    get {
-      return Eyes.Select(eye => eye.Head).FirstOrDefault();
+  /// Updates the stereo cameras from the mono camera every frame.  This includes all Camera
+  /// component values such as background color, culling mask, viewport rect, and so on.  Also,
+  /// it includes updating the viewport rect and projection matrix for side-by-side stereo, plus
+  /// applying any adjustments for center of interest and stereo comfort.
+  public void UpdateStereoValues() {
+    CardboardEye[] eyes = Eyes;
+    for (int i = 0, n = eyes.Length; i < n; i++) {
+      eyes[i].UpdateStereoValues();
     }
   }
 
-  /// Returns the target texture that the eyes will render into.  This is the mono
-  /// camera’s target texture, if it has one, or else Cardboard#StereoScreen.
-  public RenderTexture StereoScreen {
-    get {
-      return GetComponent<Camera>().targetTexture ?? Cardboard.SDK.StereoScreen;
-    }
-  }
-
-  // In the Unity editor, at the point we need it, the Screen.height oddly includes the tab bar
-  // at the top of the Game window.  So subtract that out.
-  private int ScreenHeight {
-    get {
-      return Screen.height - (Application.isEditor && StereoScreen == null ? 36 : 0);
-    }
-  }
+#if UNITY_5
+  new public Camera camera { get; private set; }
+#endif
 
   void Awake() {
     AddStereoRig();
+#if UNITY_5
+    camera = GetComponent<Camera>();
+#endif
   }
 
   /// Helper routine for creation of a stereo rig.  Used by the
   /// custom editor for this class, or to build the rig at runtime.
   public void AddStereoRig() {
-    if (Eyes.Length > 0) {  // Simplistic test if rig already exists.
+    // Simplistic test if rig already exists.
+    // Note: Do not use Eyes property, because it caches the result before we have created the rig.
+    var eyes = GetComponentsInChildren<CardboardEye>(true).Where(eye => eye.Controller == this);
+    if (eyes.Any()) {
       return;
     }
     CreateEye(Cardboard.Eye.Left);
     CreateEye(Cardboard.Eye.Right);
     if (Head == null) {
-      gameObject.AddComponent<CardboardHead>();
+      var head = gameObject.AddComponent<CardboardHead>();
+      // Don't track position for dynamically added Head components, or else
+      // you may unexpectedly find your camera pinned to the origin.
+      head.trackPosition = false;
     }
 #if !UNITY_5
-    if (GetComponent<Camera>().tag == "MainCamera" && GetComponent<SkyboxMesh>() == null) {
+    if (camera.tag == "MainCamera" && GetComponent<SkyboxMesh>() == null) {
       gameObject.AddComponent<SkyboxMesh>();
     }
 #endif
@@ -248,9 +281,6 @@ public class StereoController : MonoBehaviour {
     go.transform.parent = transform;
     go.AddComponent<Camera>().enabled = false;
 #if !UNITY_5
-    if (GetComponent<GUILayer>() != null) {
-      go.AddComponent<GUILayer>();
-    }
     if (GetComponent("FlareLayer") != null) {
       go.AddComponent("FlareLayer");
     }
@@ -260,23 +290,19 @@ public class StereoController : MonoBehaviour {
     cardboardEye.CopyCameraAndMakeSideBySide(this);
   }
 
-  /// Given information about a specific camera (usually one of the stereo eyes),
-  /// computes an adjustment to the stereo settings for both FOV matching and
-  /// stereo comfort.  The input is the [1,1] entry of the camera's projection
-  /// matrix, representing the vertical field of view, and the overall scale
-  /// being applied to the Z axis.  The output is a multiplier of the IPD to
-  /// use for offseting the eyes laterally, and an offset in the eye's Z direction
-  /// to account for the FOV difference.  The eye offset is in local coordinates.
-  public void ComputeStereoAdjustment(float proj11, float zScale,
-                                      out float ipdScale, out float eyeOffset) {
-    ipdScale = stereoMultiplier;
-    eyeOffset = 0;
+  /// Compute the position of one of the stereo eye cameras.  Accounts for both
+  /// FOV matching and stereo comfort, if those features are enabled.  The input is
+  /// the [1,1] entry of the eye camera's projection matrix, representing the vertical
+  /// field of view, and the overall scale being applied to the Z axis.  Returns the
+  /// position of the stereo eye camera in local coordinates.
+  public Vector3 ComputeStereoEyePosition(Cardboard.Eye eye, float proj11, float zScale) {
     if (centerOfInterest == null || !centerOfInterest.gameObject.activeInHierarchy) {
-      return;
+      return Cardboard.SDK.EyePose(eye).Position * stereoMultiplier;
     }
 
     // Distance of COI relative to head.
-    float distance = (centerOfInterest.position - transform.position).magnitude;
+    float distance = centerOfInterest != null ?
+        (centerOfInterest.position - transform.position).magnitude : 0;
 
     // Size of the COI, clamped to [0..distance] for mathematical sanity in following equations.
     float radius = Mathf.Clamp(radiusOfInterest, 0, distance);
@@ -284,13 +310,14 @@ public class StereoController : MonoBehaviour {
     // Move the eye so that COI has about the same size onscreen as in the mono camera FOV.
     // The radius affects the horizon location, which is where the screen-size matching has to
     // occur.
-    float scale = proj11 / GetComponent<Camera>().projectionMatrix[1, 1];  // vertical FOV
+    float scale = proj11 / camera.projectionMatrix[1, 1];  // vertical FOV
     float offset =
         Mathf.Sqrt(radius * radius + (distance * distance - radius * radius) * scale * scale);
-    eyeOffset = (distance - offset) * Mathf.Clamp01(matchMonoFOV) / zScale;
+    float eyeOffset = (distance - offset) * Mathf.Clamp01(matchMonoFOV) / zScale;
 
-    // Manage IPD scale based on the distance to the COI.
+    float ipdScale = stereoMultiplier;
     if (checkStereoComfort) {
+      // Manage IPD scale based on the distance to the COI.
       float minComfort = Cardboard.SDK.ComfortableViewingRange.x;
       float maxComfort = Cardboard.SDK.ComfortableViewingRange.y;
       if (minComfort < maxComfort) {  // Sanity check.
@@ -301,6 +328,8 @@ public class StereoController : MonoBehaviour {
         ipdScale *= minDistance / Mathf.Clamp(minDistance, minComfort, maxComfort);
       }
     }
+
+    return ipdScale * Cardboard.SDK.EyePose(eye).Position + eyeOffset * Vector3.forward;
   }
 
   void OnEnable() {
@@ -312,33 +341,31 @@ public class StereoController : MonoBehaviour {
   }
 
   void OnPreCull() {
-    if (!Cardboard.SDK.VRModeEnabled) {
-      // Nothing to do.
-      return;
+    if (Cardboard.SDK.VRModeEnabled) {
+      // Activate the eyes under our control.
+      CardboardEye[] eyes = Eyes;
+      for (int i = 0, n = eyes.Length; i < n; i++) {
+        eyes[i].camera.enabled = true;
+      }
+      // Turn off the mono camera so it doesn't waste time rendering.  Remember to reenable.
+      // @note The mono camera is left on from beginning of frame till now in order that other game
+      // logic (e.g. referring to Camera.main) continues to work as expected.
+      camera.enabled = false;
+      renderedStereo = true;
+    } else {
+      Cardboard.SDK.UpdateState();
+      // Make sure any vertex-distorting shaders don't break completely.
+      Shader.SetGlobalMatrix("_RealProjection", camera.projectionMatrix);
+      Shader.SetGlobalMatrix("_FixProjection", camera.cameraToWorldMatrix);
+      Shader.SetGlobalFloat("_NearClip", camera.nearClipPlane);
     }
-
-    Cardboard.SDK.UpdateState();
-
-    // Turn off the mono camera so it doesn't waste time rendering.
-    // @note mono camera is left on from beginning of frame till now
-    // in order that other game logic (e.g. Camera.main) continues
-    // to work as expected.
-    GetComponent<Camera>().enabled = false;
-
-    // Render the eyes under our control.
-    foreach (var eye in Eyes) {
-      eye.Render();
-    }
-
-    // Remember to reenable.
-    renderedStereo = true;
   }
 
   IEnumerator EndOfFrame() {
     while (true) {
       // If *we* turned off the mono cam, turn it back on for next frame.
       if (renderedStereo) {
-        GetComponent<Camera>().enabled = true;
+        camera.enabled = true;
         renderedStereo = false;
       }
       yield return new WaitForEndOfFrame();

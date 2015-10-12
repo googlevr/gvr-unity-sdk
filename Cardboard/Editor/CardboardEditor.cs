@@ -13,22 +13,23 @@
 // limitations under the License.
 
 using UnityEngine;
-using UnityEngine.Rendering;
 using UnityEditor;
-using UnityEditor.Callbacks;
 
 /// @ingroup EditorScripts
 /// A custom editor for properties on the Cardboard script.  This appears in the
 /// Inspector window of a Cardboard object.  Its purpose is to allow changing the
 /// `Cardboard.SDK` object's properties from their default values.
 [CustomEditor(typeof(Cardboard))]
-[InitializeOnLoad]
 public class CardboardEditor : Editor {
   GUIContent vrModeLabel = new GUIContent("VR Mode Enabled",
       "Sets whether VR mode is enabled.");
 
   GUIContent distortionCorrectionLabel = new GUIContent("Distortion Correction",
-      "Whether distortion correction is performed the SDK.");
+      "The distortion correction method performed by the SDK.");
+
+  GUIContent stereoScreenScale = new GUIContent("Stereo Screen Scale",
+      "The screen resolution is multiplied by this value when creating the " +
+      "RenderTexture for the stereo screen.");
 
   GUIContent autoDriftCorrectionLabel = new GUIContent("Auto Drift Correction",
       "When enabled, drift in the gyro readings is estimated and removed.");
@@ -50,6 +51,9 @@ public class CardboardEditor : Editor {
       "Google Cardboard app to allow the user to  configure their individual " +
       "settings and Cardboard headset parameters.");
 
+  GUIContent backButtonLabel = new GUIContent("Back Button",
+      "Whether to draw the onscreen Back Button.");
+
   GUIContent tapIsTriggerLabel = new GUIContent("Tap Is Trigger",
       "Whether screen taps are treated as trigger events.");
 
@@ -65,6 +69,7 @@ public class CardboardEditor : Editor {
   GUIContent deviceTypeLabel = new GUIContent("Device Type",
       "The Cardboard device type to emulate.");
 
+  /// @cond HIDDEN
   public override void OnInspectorGUI() {
     GUI.changed = false;
 
@@ -77,12 +82,28 @@ public class CardboardEditor : Editor {
     EditorGUILayout.LabelField("General Settings", headingStyle);
     cardboard.VRModeEnabled =
         EditorGUILayout.Toggle(vrModeLabel, cardboard.VRModeEnabled);
-    cardboard.DistortionCorrection =
-        EditorGUILayout.Toggle(distortionCorrectionLabel, cardboard.DistortionCorrection);
-    cardboard.AutoDriftCorrection =
-        EditorGUILayout.Toggle(autoDriftCorrectionLabel, cardboard.AutoDriftCorrection);
+    cardboard.DistortionCorrection = (Cardboard.DistortionCorrectionMethod)
+        EditorGUILayout.EnumPopup(distortionCorrectionLabel, cardboard.DistortionCorrection);
+    float oldScale = Cardboard.SDK.StereoScreenScale;
+    float newScale = EditorGUILayout.Slider(stereoScreenScale, oldScale, 0.25f, 2.0f);
+    if (!Mathf.Approximately(newScale, oldScale)) {
+      Cardboard.SDK.StereoScreenScale = newScale;
+    }
     cardboard.NeckModelScale =
         EditorGUILayout.Slider(neckModelScaleLabel, cardboard.NeckModelScale, 0, 1);
+    cardboard.AutoDriftCorrection =
+      EditorGUILayout.Toggle(autoDriftCorrectionLabel, cardboard.AutoDriftCorrection);
+
+    EditorGUILayout.Separator();
+
+    EditorGUILayout.LabelField("UI Layer Settings", headingStyle);
+    cardboard.EnableAlignmentMarker =
+        EditorGUILayout.Toggle(alignmentMarkerLabel, cardboard.EnableAlignmentMarker);
+    cardboard.EnableSettingsButton =
+        EditorGUILayout.Toggle(settingsButtonLabel, cardboard.EnableSettingsButton);
+    cardboard.BackButtonMode = (Cardboard.BackButtonModes)
+        EditorGUILayout.EnumPopup(backButtonLabel, cardboard.BackButtonMode);
+
     EditorGUILayout.Separator();
 
     EditorGUILayout.LabelField("Cardboard Settings", headingStyle);
@@ -90,12 +111,9 @@ public class CardboardEditor : Editor {
     cardboard.SyncWithCardboardApp =
         EditorGUILayout.Toggle(syncWithCardboardLabel, cardboard.SyncWithCardboardApp);
 #endif
-    cardboard.EnableAlignmentMarker =
-        EditorGUILayout.Toggle(alignmentMarkerLabel, cardboard.EnableAlignmentMarker);
-    cardboard.EnableSettingsButton =
-        EditorGUILayout.Toggle(settingsButtonLabel, cardboard.EnableSettingsButton);
     cardboard.TapIsTrigger =
         EditorGUILayout.Toggle(tapIsTriggerLabel, cardboard.TapIsTrigger);
+
     EditorGUILayout.Separator();
 
     EditorGUILayout.LabelField(editorSettingsLabel, headingStyle);
@@ -109,40 +127,5 @@ public class CardboardEditor : Editor {
     if (GUI.changed) {
       EditorUtility.SetDirty(cardboard);
     }
-  }
-
-  static CardboardEditor() {
-    EditorUserBuildSettings.activeBuildTargetChanged += CheckGraphicsAPI;
-  }
-
-  [PostProcessBuild]
-  public static void CheckGraphicsAPI(BuildTarget target, string path) {
-    CheckGraphicsAPI();
-  }
-
-  private static void CheckGraphicsAPI() {
-#if UNITY_IOS
-#if UNITY_5 || UNITY_4_6 && !UNITY_4_6_1 && !UNITY_4_6_2
-#if UNITY_5
-    var iOSBuildTarget = BuildTarget.iOS;
-    var iOSGraphicsAPIs = PlayerSettings.GetGraphicsAPIs(BuildTarget.iOS);
-    bool isOpenGL = true;
-    foreach (var device in iOSGraphicsAPIs) {
-      isOpenGL &= (device == GraphicsDeviceType.OpenGLES2 || device == GraphicsDeviceType.OpenGLES3);
-    }
-#else
-    var iOSBuildTarget = BuildTarget.iPhone;
-    bool isOpenGL = PlayerSettings.targetIOSGraphics == TargetIOSGraphics.OpenGLES_2_0
-        || PlayerSettings.targetIOSGraphics == TargetIOSGraphics.OpenGLES_3_0;
-#endif  // UNITY_5
-    if (EditorUserBuildSettings.activeBuildTarget == iOSBuildTarget
-        && !Application.isPlaying
-        && Object.FindObjectOfType<Cardboard>() != null
-        && !isOpenGL) {
-      Debug.LogWarning("iOS Graphics API should be set to OpenGL for best " +
-            "distortion-correction performance in Cardboard.");
-    }
-#endif  // UNITY_5 || UNITY_4_6 && !UNITY_4_6_1 && !UNITY_4_6_2
-#endif  // UNITY_IOS
   }
 }

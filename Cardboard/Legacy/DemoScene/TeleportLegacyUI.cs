@@ -16,15 +16,13 @@ using UnityEngine;
 using System.Collections;
 
 public class TeleportLegacyUI : Teleport {
-  private CardboardHead head;
-
   void Awake() {
-    head = Camera.main.GetComponent<StereoController>().Head;
     CardboardOnGUI.IsGUIVisible = true;
     CardboardOnGUI.onGUICallback += this.OnGUI;
   }
 
   void Update() {
+    CardboardHead head = Cardboard.Controller.Head;
     RaycastHit hit;
     bool isLookedAt = GetComponent<Collider>().Raycast(head.Gaze, out hit, Mathf.Infinity);
     SetGazedAt(isLookedAt);

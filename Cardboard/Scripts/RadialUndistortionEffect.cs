@@ -27,16 +27,9 @@ using System.Collections;
 [RequireComponent(typeof(Camera))]
 public class RadialUndistortionEffect : MonoBehaviour {
 
-#if UNITY_EDITOR
-  private StereoController controller;
-#endif
   private Material material;
 
   void Awake() {
-    if (!SystemInfo.supportsRenderTextures) {
-      Debug.Log("Radial Undistortion disabled: render textures not supported.");
-      return;
-    }
     Shader shader = Shader.Find("Cardboard/Radial Undistortion");
     if (shader == null) {
       Debug.Log("Radial Undistortion disabled: shader not found.");
@@ -45,29 +38,7 @@ public class RadialUndistortionEffect : MonoBehaviour {
     material = new Material(shader);
   }
 
-#if UNITY_EDITOR
-  void Start() {
-    var eye = GetComponent<CardboardEye>();
-    if (eye != null) {
-      controller = eye.Controller;
-    }
-  }
-#endif
-
   void OnRenderImage(RenderTexture source, RenderTexture dest) {
-    // Check if we found our shader, and that native distortion correction is OFF (except maybe in
-    // the editor, since native is not available here).
-    bool disabled = material == null || !Cardboard.SDK.UseDistortionEffect;
-#if UNITY_EDITOR
-    bool mainCamera = controller != null && controller.GetComponent<Camera>().tag == "MainCamera";
-    disabled |= !mainCamera;
-#endif
-    if (disabled) {
-      // Pass through, no effect.
-      Graphics.Blit(source, dest);
-    } else {
-      // Undistort the image.
-      Graphics.Blit(source, dest, material);
-    }
+    Graphics.Blit(source, dest, material);
   }
 }

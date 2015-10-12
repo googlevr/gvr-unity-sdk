@@ -24,6 +24,8 @@
 using UnityEngine;
 
 /// @ingroup LegacyScripts
+/// This script builds a stereo correct version of the skybox.
+///
 /// Unity 4's built-in skybox backgrounds do not work correctly for stereo rendering.
 /// Since the same exact image is rendered to each eye, the background has zero
 /// parallax.  Given the optics of Cardboard, this yields an effective stereo depth

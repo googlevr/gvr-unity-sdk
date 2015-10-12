@@ -9,7 +9,6 @@ GameObject:
   m_Component:
   - 4: {fileID: 400000}
   - 20: {fileID: 2000000}
-  - 92: {fileID: 9200000}
   - 124: {fileID: 12400000}
   - 114: {fileID: 11400000}
   m_Layer: 0
@@ -28,7 +27,6 @@ GameObject:
   m_Component:
   - 4: {fileID: 400002}
   - 20: {fileID: 2000002}
-  - 92: {fileID: 9200002}
   - 124: {fileID: 12400002}
   - 114: {fileID: 11400002}
   m_Layer: 0
@@ -156,20 +154,6 @@ Camera:
   m_OcclusionCulling: 1
   m_StereoConvergence: 10
   m_StereoSeparation: .0219999999
---- !u!92 &9200000
-Behaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 100000}
-  m_Enabled: 1
---- !u!92 &9200002
-Behaviour:
-  m_ObjectHideFlags: 1
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 100100000}
-  m_GameObject: {fileID: 100002}
-  m_Enabled: 1
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -182,6 +166,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   eye: 1
+  toggleCullingMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!114 &11400002
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -194,6 +181,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   eye: 0
+  toggleCullingMask:
+    serializedVersion: 2
+    m_Bits: 0
 --- !u!114 &11400004
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -205,6 +195,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f1578549c7fcc4f6fa1b063992091672, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  trackRotation: 1
+  trackPosition: 1
   target: {fileID: 0}
   updateEarly: 0
 --- !u!124 &12400000

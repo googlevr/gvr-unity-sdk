@@ -16,9 +16,11 @@ using UnityEngine;
 using System.Collections;
 
 /// @ingroup LegacyScripts
+///
+/// This script can be attached to a Lens Flare to make it stereo-aware in Directional mode.
+///
 /// Unity 4's built-in lens flares do not work correctly for stereo rendering when in
-/// Directional mode, for similar reasons as the skybox mentioned previously.  This
-/// script can be attached to a Lens Flare to make it stereo-aware directional.
+/// Directional mode, for similar reasons as the skybox.
 ///
 /// To use it, add the script to a Lens Flare and clear the flare's Directional flag
 /// so that the flare is actually positional.  This script keeps the flare at a

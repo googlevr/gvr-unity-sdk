@@ -15,7 +15,7 @@ using UnityEngine;
 
 /// @ingroup Scripts
 /// Encapsulates a rotation and a translation.  This is a convenience class that allows
-/// construction and value access either by Matrix4x4 or Quaternion+Vector3 types.
+/// construction and value access either by Matrix4x4 or Quaternion + Vector3 types.
 public class Pose3D {
   /// Right-handed to left-handed matrix converter (and vice versa).
   protected static readonly Matrix4x4 flipZ = Matrix4x4.Scale(new Vector3(1, 1, -1));
@@ -36,16 +36,20 @@ public class Pose3D {
     }
   }
 
+  /// Default constructor.
+  /// Initializes position to the origin and orientation to the identity rotation.
   public Pose3D() {
     Position = Vector3.zero;
     Orientation = Quaternion.identity;
     Matrix = Matrix4x4.identity;
   }
 
+  /// Constructor that takes a Vector3 and a Quaternion.
   public Pose3D(Vector3 position, Quaternion orientation) {
     Set(position, orientation);
   }
 
+  /// Constructor that takes a Matrix4x4.
   public Pose3D(Matrix4x4 matrix) {
     Set(matrix);
   }
@@ -65,14 +69,17 @@ public class Pose3D {
 
 /// Mutable version of Pose3D.
 public class MutablePose3D : Pose3D {
+  /// Sets the position and orientation from a Vector3 + Quaternion.
   public new void Set(Vector3 position, Quaternion orientation) {
     base.Set(position, orientation);
   }
 
+  /// Sets the position and orientation from a Matrix4x4.
   public new void Set(Matrix4x4 matrix) {
     base.Set(matrix);
   }
 
+  /// Sets the position and orientation from a right-handed Matrix4x4.
   public void SetRightHanded(Matrix4x4 matrix) {
     Set(flipZ * matrix * flipZ);
   }

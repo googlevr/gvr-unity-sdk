@@ -15,11 +15,13 @@
 using UnityEngine;
 
 /// @ingroup Scripts
+/// This script provides head tracking support for a camera.
+///
 /// Attach this script to any game object that should match the user's head motion.
 /// By default, it continuously updates the local transform to Cardboard.HeadView.
 /// A target object may be specified to provide an alternate reference frame for the motion.
 ///
-/// This script will typically be attached to directly to a Camera object, or to its
+/// This script will typically be attached directly to a Camera object, or to its
 /// parent if you need to offset the camera from the origin.
 /// Alternatively it can be inserted as a child of the Camera and parent of the
 /// CardboardEye camera.  Do this if you already have steering logic driving the
@@ -32,11 +34,13 @@ using UnityEngine;
 /// #trackRotation and #trackPosition properties in this case.
 public class CardboardHead : MonoBehaviour {
   /// Determines whether to apply the user's head rotation to this gameobject's
-  /// orientation.
+  /// orientation.  True means to update the gameobject's orientation with the
+  /// user's head rotation, and false means don't modify the gameobject's orientation.
   public bool trackRotation = true;
 
   /// Determines whether to apply ther user's head offset to this gameobject's
-  /// position.
+  /// position.  True means to update the gameobject's position with the user's head offset,
+  /// and false means don't modify the gameobject's position.
   public bool trackPosition = true;
 
   /// The user's head motion will be applied in this object's reference frame
@@ -50,14 +54,15 @@ public class CardboardHead : MonoBehaviour {
 
 
   /// Determines whether the head tracking is applied during `LateUpdate()` or
-  /// `Update()`.  The default is `LateUpdate()` to reduce latency.  However, some
-  /// scripts need to use the camera's direction to affect the game play, e.g by
-  /// casting rays or steering a vehicle, during the `LateUpdate()` phase.
+  /// `Update()`.  The default is false, which means it is applied during `LateUpdate()`
+  /// to reduce latency.
   ///
+  /// However, some scripts may need to use the camera's direction to affect the gameplay,
+  /// e.g by casting rays or steering a vehicle, during the `LateUpdate()` phase.
   /// This can cause an annoying jitter because Unity, during this `LateUpdate()`
   /// phase, will update the head object first on some frames but second on others.
-  /// If this is the case for your game, try switching the head to use `Update()`
-  /// by setting this to true.
+  /// If this is the case for your game, try switching the head to apply head tracking
+  /// during `Update()` by setting this to true.
   public bool updateEarly = false;
 
   /// Returns a ray based on the heads position and forward direction, after making
@@ -97,7 +102,7 @@ public class CardboardHead : MonoBehaviour {
       if (target == null) {
         transform.localRotation = rot;
       } else {
-        transform.rotation = rot * target.rotation;
+        transform.rotation = target.rotation * rot;
       }
     }
 

@@ -14,12 +14,13 @@
 #if UNITY_EDITOR
 
 using UnityEngine;
+using UnityEditor;
 using System.Collections.Generic;
 
 // Sends simulated values for use when testing within the Unity Editor.
 public class UnityEditorDevice : BaseVRDevice {
-  // Simulated neck model.
-  private static readonly Vector3 neckOffset = new Vector3(0, 0.075f, -0.08f);
+  // Simulated neck model.  Vector from the neck pivot point to the point between the eyes.
+  private static readonly Vector3 neckOffset = new Vector3(0, 0.075f, 0.08f);
 
   // Use mouse to emulate head in the editor.
   private float mouseX = 0;
@@ -38,18 +39,19 @@ public class UnityEditorDevice : BaseVRDevice {
     return false;  // No need for diagnostic message.
   }
 
-  public override RenderTexture CreateStereoScreen() {
-    return null;  // No need for it in the editor.
-  }
-
-  public override void SetDistortionCorrectionEnabled(bool enabled) {}
+  // Since we can check all these settings by asking Cardboard.SDK, no need
+  // to keep a separate copy here.
   public override void SetVRModeEnabled(bool enabled) {}
-  public override void SetAlignmentMarkerEnabled(bool enabled) {}
+  public override void SetDistortionCorrectionEnabled(bool enabled) {}
+  public override void SetStereoScreen(RenderTexture stereoScreen) {}
   public override void SetSettingsButtonEnabled(bool enabled) {}
+  public override void SetAlignmentMarkerEnabled(bool enabled) {}
+  public override void SetVRBackButtonEnabled(bool enabled) {}
+  public override void SetShowVrBackButtonOnlyInVR(bool only) {}
   public override void SetNeckModelScale(float scale) {}
   public override void SetAutoDriftCorrectionEnabled(bool enabled) {}
+  public override void SetElectronicDisplayStabilizationEnabled(bool enabled) {}
   public override void SetTapIsTrigger(bool enabled) {}
-  public override void SetStereoScreen(RenderTexture stereoScreen) {}
 
   private Quaternion initialRotation = Quaternion.identity;
 
@@ -57,7 +59,7 @@ public class UnityEditorDevice : BaseVRDevice {
   private bool RemoteCommunicating {
     get {
       if (!remoteCommunicating) {
-#if UNITY5
+#if UNITY_5
         remoteCommunicating = EditorApplication.isRemoteConnected;
 #else
         remoteCommunicating = Vector3.Dot(Input.gyro.rotationRate, Input.gyro.rotationRate) > 0.05;
@@ -98,17 +100,18 @@ public class UnityEditorDevice : BaseVRDevice {
     var neck = (rot * neckOffset - neckOffset.y * Vector3.up) * Cardboard.SDK.NeckModelScale;
     headPose.Set(neck, rot);
 
-    triggered = Input.GetMouseButtonUp(0);
+    triggered = Input.GetMouseButtonDown(0);
     tilted = Input.GetKeyUp(KeyCode.Escape);
   }
 
-  public override void PostRender(bool vrMode) {
+  public override void PostRender() {
     // Do nothing.
   }
 
   public override void UpdateScreenData() {
     Profile = CardboardProfile.GetKnownProfile(Cardboard.SDK.ScreenSize, Cardboard.SDK.DeviceType);
     ComputeEyesFromProfile();
+    profileChanged = true;
   }
 
   public override void Recenter() {

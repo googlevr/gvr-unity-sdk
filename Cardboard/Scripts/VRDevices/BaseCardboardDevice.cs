@@ -25,14 +25,17 @@ BaseAndroidDevice
 BaseVRDevice
 #endif
 {
+  // A relatively unique id to use when calling our C++ native render plugin.
+  private const int kCardboardRenderEvent = 0x47554342;
+
   // Event IDs sent up from native layer.
   private const int kTriggered = 1;
   private const int kTilted = 2;
   private const int kProfileChanged = 3;
-  private const int kLaunchSettingsDialog = 4;
+  private const int kVRBackButton = 4;
 
   private float[] headData = new float[16];
-  private float[] viewData = new float[16 * 6 + 8];
+  private float[] viewData = new float[16 * 6 + 10];
   private float[] profileData = new float[13];
 
   private Matrix4x4 headView = new Matrix4x4();
@@ -54,21 +57,8 @@ BaseVRDevice
     return supported;
   }
 
-  public override bool SupportsNativeUILayer(List<string> diagnostics) {
-    bool supported = base.SupportsNativeUILayer(diagnostics);
-    if (debugDisableNativeUILayer) {
-      supported = false;
-      diagnostics.Add("Debug override");
-    }
-    return supported;
-  }
-
   public override void SetDistortionCorrectionEnabled(bool enabled) {
     EnableDistortionCorrection(enabled);
-  }
-
-  public override void SetAlignmentMarkerEnabled(bool enabled) {
-    EnableAlignmentMarker(enabled);
   }
 
   public override void SetNeckModelScale(float scale) {
@@ -79,25 +69,37 @@ BaseVRDevice
     EnableAutoDriftCorrection(enabled);
   }
 
-  public void SetElectronicDisplayStabilizationEnabled(bool enabled) {
+  public override void SetElectronicDisplayStabilizationEnabled(bool enabled) {
     EnableElectronicDisplayStabilization(enabled);
   }
 
-  public override void Init() {
-    // Get landscape dimensions, even if app starts in portrait.
-    int width = Mathf.Max(Screen.width, Screen.height);
-    int height = Mathf.Min(Screen.height, Screen.width);
+  public override bool SetDefaultDeviceProfile(System.Uri uri) {
+    byte[] profile = System.Text.Encoding.UTF8.GetBytes(uri.ToString());
+    return SetDefaultProfile(profile, profile.Length);
+  }
 
-    Start(width, height, Screen.dpi, Screen.dpi);
+  public override void Init() {
+    DisplayMetrics dm = GetDisplayMetrics();
+    Start(dm.width, dm.height, dm.xdpi, dm.ydpi);
+
+    byte[] version = System.Text.Encoding.UTF8.GetBytes(Application.unityVersion);
+    SetUnityVersion(version, version.Length);
+
     SetEventCallback(OnVREvent);
   }
 
   public override void SetStereoScreen(RenderTexture stereoScreen) {
+#if UNITY_5 || !UNITY_IOS
+    SetTextureId(stereoScreen != null ? (int)stereoScreen.GetNativeTexturePtr() : 0);
+#else
+    // Using old API for Unity 4.x and iOS because Metal crashes on GetNativeTexturePtr()
     SetTextureId(stereoScreen != null ? stereoScreen.GetNativeTextureID() : 0);
+#endif
   }
 
   public override void UpdateState() {
-    GetHeadPose(headData, Time.smoothDeltaTime);
+    ProcessEvents();
+    GetHeadPose(headData);
     ExtractMatrix(ref headView, headData);
     headPose.SetRightHanded(headView.inverse);
   }
@@ -109,18 +111,23 @@ BaseVRDevice
     } else {
       UpdateView();
     }
+    profileChanged = true;
   }
 
   public override void Recenter() {
     ResetHeadTracker();
   }
 
-  public override void PostRender(bool vrMode) {
-    if (vrMode) {
-      GL.IssuePluginEvent(0);
-      GL.InvalidateState();
+  public override void PostRender() {
+    GL.IssuePluginEvent(kCardboardRenderEvent);
+  }
+
+  public override void OnPause(bool pause) {
+    if (pause) {
+      Pause();
+    } else {
+      Resume();
     }
-    ProcessEvents();
   }
 
   public override void OnApplicationQuit() {
@@ -149,6 +156,9 @@ BaseVRDevice
     rightEyeUndistortedViewport.Set(viewData[j], viewData[j+1], viewData[j+2], viewData[j+3]);
     rightEyeDistortedViewport = rightEyeUndistortedViewport;
     j += 4;
+
+    recommendedTextureSize = new Vector2(viewData[j], viewData[j+1]);
+    j += 2;
   }
 
   private void UpdateProfile() {
@@ -183,21 +193,23 @@ BaseVRDevice
     return i;
   }
 
+  private int[] events = new int[4];
+
   protected virtual void ProcessEvents() {
-    int[] events = null;
+    int num = 0;
     lock (eventQueue) {
-      int num = eventQueue.Count;
-      if (num > 0) {
-        events = new int[num];
-        eventQueue.CopyTo(events, 0);
-        eventQueue.Clear();
+      num = eventQueue.Count;
+      if (num == 0) {
+        return;
       }
+      if (num > events.Length) {
+        events = new int[num];
+      }
+      eventQueue.CopyTo(events, 0);
+      eventQueue.Clear();
     }
-    if (events == null) {
-      return;
-    }
-    foreach (int eventID in events) {
-      switch (eventID) {
+    for (int i = 0; i < num; i++) {
+      switch (events[i]) {
         case kTriggered:
           triggered = true;
           break;
@@ -207,6 +219,9 @@ BaseVRDevice
         case kProfileChanged:
           UpdateScreenData();
           break;
+        case kVRBackButton:
+          backButtonPressed = true;
+          break;
       }
     }
   }
@@ -215,7 +230,7 @@ BaseVRDevice
   private static void OnVREvent(int eventID) {
     BaseCardboardDevice device = GetDevice() as BaseCardboardDevice;
     // This function is called back from random native code threads.
-    lock(device.eventQueue) {
+    lock (device.eventQueue) {
       device.eventQueue.Enqueue(eventID);
     }
   }
@@ -238,10 +253,13 @@ BaseVRDevice
   private static extern void SetTextureId(int id);
 
   [DllImport(dllName)]
-  private static extern void EnableDistortionCorrection(bool enable);
+  private static extern bool SetDefaultProfile(byte[] uri, int size);
 
   [DllImport(dllName)]
-  private static extern void EnableAlignmentMarker(bool enable);
+  private static extern void SetUnityVersion(byte[] version_str, int version_length);
+
+  [DllImport(dllName)]
+  private static extern void EnableDistortionCorrection(bool enable);
 
   [DllImport(dllName)]
   private static extern void EnableAutoDriftCorrection(bool enable);
@@ -259,10 +277,16 @@ BaseVRDevice
   private static extern void GetProfile(float[] profile);
 
   [DllImport(dllName)]
-  private static extern void GetHeadPose(float[] pose, float fps);
+  private static extern void GetHeadPose(float[] pose);
 
   [DllImport(dllName)]
   private static extern void GetViewParameters(float[] viewParams);
+
+  [DllImport(dllName)]
+  private static extern void Pause();
+
+  [DllImport(dllName)]
+  private static extern void Resume();
 
   [DllImport(dllName)]
   private static extern void Stop();
