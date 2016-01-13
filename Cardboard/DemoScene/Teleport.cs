@@ -24,6 +24,13 @@ public class Teleport : MonoBehaviour {
     SetGazedAt(false);
   }
 
+  void LateUpdate() {
+    Cardboard.SDK.UpdateState();
+    if (Cardboard.SDK.BackButtonPressed) {
+      Application.Quit();
+    }
+  }
+
   public void SetGazedAt(bool gazedAt) {
     GetComponent<Renderer>().material.color = gazedAt ? Color.green : Color.red;
   }

@@ -107,3 +107,32 @@ v0.5.2 (10/12/2015):
    is affecting the SDKs calculation of screen size.  This has been worked around.
 -  A bug in the StereoController.AddStereoRig() function which cached the eyes array before
    filling it in has been fixed.
+
+v0.6 (1/12/2016):
+-  Added support for spatialized audio playback, including scripts, prefabs, and editors.
+-  Added a Cardboard entry to the editor's main menu, making it easier to reach documentation.
+-  Added new CardoardManager prefab which packages everything except a Main Camera.  Useful when
+   adapting your own cameras for stereo.
+-  Added a simple reticle interface for gaze-based UI interaction.
+-  Updated GazeInputModule to use the reticle interface.
+-  Removed the "auto-instantiation" behavior of Cardboard.SDK, which sometimes created an extra Cardboard.
+   You must ensure that a Cardboard object exists in the scene before Cardboard.SDK is used.
+   The various prefabs like CardboardMain and CardboardManager are intended to help with this.
+   Or call Cardboard.Create() from code.
+-  Fixed the "UI layer flash" that happens on startup when the UI layer should not appear.
+-  Removed the obsolete RadialUndistortionEffect shader and script.
+-  Ensure that if the Main Camera uses a Skybox component, then the stereo cameras do too.
+-  Added an event to CardboardHead for scripts that want to act after the head tracking is updated.
+-  Revert a change from last release that padded the offscreen rendertexture to account for
+   barrel distortion.  On higher resolution phones, the performance hit was too great.
+-  Revert a change from last release that used the raw gyro on iOS together with the Cardboard
+   gyro filtering.  The result was noticeably worse than just using the clean iOS gyro.
+-  Removed the automatically triggered onboarding dialog.  It can still be triggered from code.
+-  Fixed a bug causing apps that start with VR mode turned off to not render correctly when VR
+   mode is later turned on.
+-  Disabled the Tilt event callback, which due to threading-related issues was causing apps to crash
+   if the phone had been tilted 90 degrees to the right before exiting or loading a new scene.
+   Apps needing tilt detection should use Input.accel rather than Cardboard.Tilted.
+-  Fixed a link-time issue on iOS caused when using the -ObjC linker flag.
+-  Set the target SDK to 22 in AndroidManifest.xml to get around permission issues on Marshmallow.
+-  DEPRECATION NOTICE: The next SDK release will drop Unity 4 compatibility and remove the Legacy folder.
