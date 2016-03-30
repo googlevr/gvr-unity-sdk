@@ -28,11 +28,6 @@ using System;
 // Represents a vr device that this plugin interacts with.
 // Please do not interact with this class directly, instead use the interface in Cardboard.cs.
 public abstract class BaseVRDevice {
-  public struct DisplayMetrics {
-    public int width, height;
-    public float xdpi, ydpi;
-  }
-
   private static BaseVRDevice device = null;
 
   protected BaseVRDevice() {
@@ -46,62 +41,42 @@ public abstract class BaseVRDevice {
   public abstract void SetUILayerEnabled(bool enabled);
   public abstract void SetVRModeEnabled(bool enabled);
   public abstract void SetDistortionCorrectionEnabled(bool enabled);
-  public abstract void SetStereoScreen(RenderTexture stereoScreen);
 
   public abstract void SetSettingsButtonEnabled(bool enabled);
   public abstract void SetAlignmentMarkerEnabled(bool enabled);
   public abstract void SetVRBackButtonEnabled(bool enabled);
   public abstract void SetShowVrBackButtonOnlyInVR(bool only);
 
-  public abstract void SetTapIsTrigger(bool enabled);
   public abstract void SetNeckModelScale(float scale);
   public abstract void SetAutoDriftCorrectionEnabled(bool enabled);
   public abstract void SetElectronicDisplayStabilizationEnabled(bool enabled);
 
-  // Returns landscape orientation display metrics.
-  public virtual DisplayMetrics GetDisplayMetrics() {
-    // Always return landscape orientation.
-    int width = Mathf.Max(Screen.width, Screen.height);
-    int height = Mathf.Min(Screen.width, Screen.height);
-    return new DisplayMetrics { width = width, height = height, xdpi = Screen.dpi, ydpi = Screen.dpi };
+  public virtual bool SupportsNativeDistortionCorrection(List<string> diagnostics) {
+    return true;
   }
 
-  public virtual bool SupportsNativeDistortionCorrection(List<string> diagnostics) {
-    bool support = true;
-    if (!SystemInfo.supportsRenderTextures) {
-      diagnostics.Add("RenderTexture (Unity Pro feature) is unavailable");
-      support = false;
-    }
-    if (!SupportsUnityRenderEvent()) {
-      diagnostics.Add("Unity 4.5+ is needed for UnityRenderEvent");
-      support = false;
-    }
-    return support;
+  public virtual bool RequiresNativeDistortionCorrection() {
+    return leftEyeOrientation != 0 || rightEyeOrientation != 0;
   }
 
   public virtual bool SupportsNativeUILayer(List<string> diagnostics) {
     return true;
   }
 
-  public bool SupportsUnityRenderEvent() {
-    bool support = true;
-    if (Application.isMobilePlatform) {
-      try {
-        string version = new Regex(@"(\d+\.\d+)\..*").Replace(Application.unityVersion, "$1");
-        if (new Version(version) < new Version("4.5")) {
-          support = false;
-        }
-      } catch {
-        Debug.LogWarning("Unable to determine Unity version from: " + Application.unityVersion);
-      }
-    }
-    return support;
+  public virtual bool ShouldRecreateStereoScreen(int curWidth, int curHeight) {
+    return this.RequiresNativeDistortionCorrection()
+           && (curWidth != (int)recommendedTextureSize[0]
+               || curHeight != (int)recommendedTextureSize[1]);
   }
 
   public virtual RenderTexture CreateStereoScreen() {
     float scale = Cardboard.SDK.StereoScreenScale;
     int width = Mathf.RoundToInt(Screen.width * scale);
     int height = Mathf.RoundToInt(Screen.height * scale);
+    if (this.RequiresNativeDistortionCorrection()) {
+      width = (int)recommendedTextureSize[0];
+      height = (int)recommendedTextureSize[1];
+    }
     //Debug.Log("Creating new default cardboard screen texture "
     //    + width+ "x" + height + ".");
     var rt = new RenderTexture(width, height, 24, RenderTextureFormat.Default);
@@ -175,6 +150,8 @@ public abstract class BaseVRDevice {
   protected Rect rightEyeUndistortedViewport;
 
   protected Vector2 recommendedTextureSize;
+  protected int leftEyeOrientation;
+  protected int rightEyeOrientation;
 
   public bool triggered;
   public bool tilted;
@@ -187,11 +164,7 @@ public abstract class BaseVRDevice {
 
   public abstract void Recenter();
 
-  public abstract void PostRender();
-
-  public virtual void SetTouchCoordinates(int x, int y) {
-    // Do nothing
-  }
+  public abstract void PostRender(RenderTexture stereoScreen);
 
   public virtual void OnPause(bool pause) {
     if (!pause) {

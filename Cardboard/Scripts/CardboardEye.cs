@@ -204,11 +204,7 @@ public class CardboardEye : MonoBehaviour {
                     realProj;
       Shader.SetGlobalMatrix("_RealProjection", realProj);
       Shader.SetGlobalMatrix("_FixProjection", fixProj);
-    } else {
-      // Not doing vertex-based distortion.  Set up the parameters to make any vertex-warping
-      // shaders in the project leave vertexes alone.
-      Shader.SetGlobalMatrix("_RealProjection", cam.projectionMatrix);
-      Shader.SetGlobalMatrix("_FixProjection", cam.cameraToWorldMatrix);
+      Shader.EnableKeyword("CARDBOARD_DISTORTION");
     }
     Shader.SetGlobalFloat("_NearClip", cam.nearClipPlane);
   }
@@ -232,6 +228,10 @@ public class CardboardEye : MonoBehaviour {
       // Don't need the side-by-side image effect.
       stereoEffect.enabled = false;
     }
+  }
+
+  void OnPostRender() {
+    Shader.DisableKeyword("CARDBOARD_DISTORTION");
   }
 
   /// Helper to copy camera settings from the controller's mono camera.  Used in SetupStereo() and

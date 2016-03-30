@@ -19,14 +19,6 @@ using System.Collections.Generic;
 public abstract class BaseAndroidDevice : BaseVRDevice {
   protected AndroidJavaObject androidActivity;
 
-  public override bool SupportsNativeDistortionCorrection(List<string> diagnostics) {
-    bool support = base.SupportsNativeDistortionCorrection(diagnostics);
-    if (androidActivity == null) {
-      diagnostics.Add("Cannot access Activity");
-    }
-    return support;
-  }
-
   public override void Destroy() {
     if (androidActivity != null) {
       androidActivity.Dispose();
@@ -46,7 +38,7 @@ public abstract class BaseAndroidDevice : BaseVRDevice {
     }
   }
 
-  protected AndroidJavaClass GetClass(string className) {
+  public static AndroidJavaClass GetClass(string className) {
     try {
       return new AndroidJavaClass(className);
     } catch (AndroidJavaException e) {
@@ -55,7 +47,7 @@ public abstract class BaseAndroidDevice : BaseVRDevice {
     }
   }
 
-  protected AndroidJavaObject Create(string className, params object[] args) {
+  public static AndroidJavaObject Create(string className, params object[] args) {
     try {
       return new AndroidJavaObject(className, args);
     } catch (AndroidJavaException e) {
@@ -64,7 +56,7 @@ public abstract class BaseAndroidDevice : BaseVRDevice {
     }
   }
 
-  protected static bool CallStaticMethod(AndroidJavaObject jo, string name, params object[] args) {
+  public static bool CallStaticMethod(AndroidJavaObject jo, string name, params object[] args) {
     if (jo == null) {
       Debug.LogError("Object is null when calling static method " + name);
       return false;
@@ -78,7 +70,7 @@ public abstract class BaseAndroidDevice : BaseVRDevice {
     }
   }
 
-  protected static bool CallObjectMethod(AndroidJavaObject jo, string name, params object[] args) {
+  public static bool CallObjectMethod(AndroidJavaObject jo, string name, params object[] args) {
     if (jo == null) {
       Debug.LogError("Object is null when calling method " + name);
       return false;
@@ -92,7 +84,7 @@ public abstract class BaseAndroidDevice : BaseVRDevice {
     }
   }
 
-  protected static bool CallStaticMethod<T>(ref T result, AndroidJavaObject jo, string name,
+  public static bool CallStaticMethod<T>(ref T result, AndroidJavaObject jo, string name,
                                             params object[] args) {
     if (jo == null) {
       Debug.LogError("Object is null when calling static method " + name);
@@ -107,7 +99,7 @@ public abstract class BaseAndroidDevice : BaseVRDevice {
     }
   }
 
-  protected static bool CallObjectMethod<T>(ref T result, AndroidJavaObject jo, string name,
+  public static bool CallObjectMethod<T>(ref T result, AndroidJavaObject jo, string name,
                                             params object[] args) {
     if (jo == null) {
       Debug.LogError("Object is null when calling method " + name);

@@ -136,3 +136,21 @@ v0.6 (1/12/2016):
 -  Fixed a link-time issue on iOS caused when using the -ObjC linker flag.
 -  Set the target SDK to 22 in AndroidManifest.xml to get around permission issues on Marshmallow.
 -  DEPRECATION NOTICE: The next SDK release will drop Unity 4 compatibility and remove the Legacy folder.
+
+v0.7 (3/30/2016):
+- Removed legacy support for Unity 4.x
+- Minimum supported Android SDK is now KitKat (19)
+- Removed the TapIsTrigger setting.  A screen tap is always treated as a trigger now.
+- Removed obsolete Cardboard.cs properties from pre-v0.5
+- Removed the onboarding dialog and "sync with Cardboard" option.
+- Fixed a crash bug from using the magnetic trigger or tilt event before loading a level.
+- Fixed a bug caused by calling RenderTexture.Create() on some phones too early.
+- Allow the CardboardReticle to change distance with non-interactive objects too.
+- Worked around a crashing bug in Unity when using a native audio plugin.
+- For Android, package the Java support code and resources in a .aar file.
+- For iOS, the -ObjC Xcode flag is now required by native Cardboard code, and will be added at project build time.
+- For iOS, bitcode is supplied in the native libraries.
+- For iOS, manual Xcode project changes to support Cardboard are no longer required.
+- Known issue: iOS Simulator is not supported.
+- Known issue: Can't reliably start a CardboardAudioSource from Awake().  Use Start() instead.
+- Known issue: Only one CardboardAudioListener can exist in the scene.  Workaround is to put it on a "Microphone" game object, and reparent it to the current camera.

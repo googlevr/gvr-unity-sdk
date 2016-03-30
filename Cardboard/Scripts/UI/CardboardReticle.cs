@@ -18,7 +18,7 @@ using UnityEngine.EventSystems;
 
 [AddComponentMenu("Cardboard/UI/CardboardReticle")]
 [RequireComponent(typeof(Renderer))]
-public class CardboardReticle : MonoBehaviour, ICardboardPointer {
+public class CardboardReticle : MonoBehaviour, ICardboardGazePointer {
   /// Number of segments making the reticle circle.
   public int reticleSegments = 20;
 
@@ -45,7 +45,7 @@ public class CardboardReticle : MonoBehaviour, ICardboardPointer {
   private const float kReticleGrowthAngle = 1.5f;
 
   // Minimum distance of the reticle (in meters).
-  private const float kReticleDistanceMin = 0.75f;
+  private const float kReticleDistanceMin = 0.45f;
   // Maximum distance of the reticle (in meters).
   private const float kReticleDistanceMax = 10.0f;
 
@@ -90,8 +90,9 @@ public class CardboardReticle : MonoBehaviour, ICardboardPointer {
   /// The camera is the event camera, the target is the object
   /// the user is looking at, and the intersectionPosition is the intersection
   /// point of the ray sent from the camera on the object.
-  public void OnGazeStart(Camera camera, GameObject targetObject, Vector3 intersectionPosition) {
-    SetGazeTarget(intersectionPosition);
+  public void OnGazeStart(Camera camera, GameObject targetObject, Vector3 intersectionPosition,
+                          bool isInteractive) {
+    SetGazeTarget(intersectionPosition, isInteractive);
   }
 
   /// Called every frame the user is still looking at a valid GameObject. This
@@ -100,8 +101,9 @@ public class CardboardReticle : MonoBehaviour, ICardboardPointer {
   /// The camera is the event camera, the target is the object the user is
   /// looking at, and the intersectionPosition is the intersection point of the
   /// ray sent from the camera on the object.
-  public void OnGazeStay(Camera camera, GameObject targetObject, Vector3 intersectionPosition) {
-    SetGazeTarget(intersectionPosition);
+  public void OnGazeStay(Camera camera, GameObject targetObject, Vector3 intersectionPosition,
+                         bool isInteractive) {
+    SetGazeTarget(intersectionPosition, isInteractive);
   }
 
   /// Called when the user's look no longer intersects an object previously
@@ -127,6 +129,14 @@ public class CardboardReticle : MonoBehaviour, ICardboardPointer {
   /// the user releases the trigger.
   public void OnGazeTriggerEnd(Camera camera) {
     // Put your reticle trigger end logic here :)
+  }
+
+  public void GetPointerRadius(out float innerRadius, out float outerRadius) {
+    float min_inner_angle_radians = Mathf.Deg2Rad * kReticleMinInnerAngle;
+    float max_inner_angle_radians = Mathf.Deg2Rad * (kReticleMinInnerAngle + kReticleGrowthAngle);
+
+    innerRadius = 2.0f * Mathf.Tan(min_inner_angle_radians);
+    outerRadius = 2.0f * Mathf.Tan(max_inner_angle_radians);
   }
 
   private void CreateReticleVertices() {
@@ -209,12 +219,17 @@ public class CardboardReticle : MonoBehaviour, ICardboardPointer {
     materialComp.SetFloat("_DistanceInMeters", reticleDistanceInMeters);
   }
 
-  private void SetGazeTarget(Vector3 target) {
-    Vector3 targetLocalPosition = transform.parent.InverseTransformPoint(target);
+  private void SetGazeTarget(Vector3 target, bool interactive) {
+    Vector3 targetLocalPosition = transform.InverseTransformPoint(target);
 
     reticleDistanceInMeters =
         Mathf.Clamp(targetLocalPosition.z, kReticleDistanceMin, kReticleDistanceMax);
-    reticleInnerAngle = kReticleMinInnerAngle + kReticleGrowthAngle;
-    reticleOuterAngle = kReticleMinOuterAngle + kReticleGrowthAngle;
+    if (interactive) {
+      reticleInnerAngle = kReticleMinInnerAngle + kReticleGrowthAngle;
+      reticleOuterAngle = kReticleMinOuterAngle + kReticleGrowthAngle;
+    } else {
+      reticleInnerAngle = kReticleMinInnerAngle;
+      reticleOuterAngle = kReticleMinOuterAngle;
+    }
   }
 }

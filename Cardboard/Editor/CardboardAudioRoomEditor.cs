@@ -103,11 +103,7 @@ public class CardboardAudioRoomEditor : Editor {
   /// @endcond
 
   private void DrawSurfaceMaterial (SerializedProperty surfaceMaterial) {
-#if UNITY_4_5
-    surfaceMaterialLabel.text = ObjectNames.NicifyVariableName(surfaceMaterial.name);
-#else
     surfaceMaterialLabel.text = surfaceMaterial.displayName;
-#endif
     EditorGUILayout.PropertyField(surfaceMaterial, surfaceMaterialLabel);
   }
 }

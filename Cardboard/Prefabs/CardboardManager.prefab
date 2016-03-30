@@ -176,7 +176,6 @@ MonoBehaviour:
   enableAlignmentMarker: 1
   enableSettingsButton: 1
   backButtonMode: 1
-  tapIsTrigger: 1
   neckModelScale: 1
   autoDriftCorrection: 1
   electronicDisplayStabilization: 0

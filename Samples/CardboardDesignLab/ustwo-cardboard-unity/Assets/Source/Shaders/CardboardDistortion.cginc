@@ -37,21 +37,11 @@ float     _MaxRadSq;
 float4x4  _RealProjection;
 
 float4 undistort(float4 pos) {
-
-    
-    #if SHADER_API_GLES || SHADER_API_GLES3
     pos = mul(UNITY_MATRIX_MV, pos);
     float near = -(UNITY_MATRIX_P[2][2] + 1) / UNITY_MATRIX_P[3][2];
     if (pos.z < near) {
         float r2 = clamp(dot(pos.xy, pos.xy) / (pos.z*pos.z), 0, _MaxRadSq);
         pos.xy *= 1 + (_Undistortion.x + _Undistortion.y*r2)*r2;
     }
-    #else
- 
-        return mul(UNITY_MATRIX_MVP, pos);
-    #endif
-    //return mul(UNITY_MATRIX_P, pos);
     return mul(_RealProjection, pos);
-    
-    //return mul(transpose(UNITY_MATRIX_IT_MV), pos);
 }

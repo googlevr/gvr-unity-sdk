@@ -20,16 +20,16 @@ using UnityEngine;
 public class StereoRenderEffect : MonoBehaviour {
   private Material material;
 
-#if UNITY_5
-  private new Camera camera;
+  private Camera cam;
+
+  private static readonly Rect fullRect = new Rect(0, 0, 1, 1);
 
   void Awake() {
-    camera = GetComponent<Camera>();
+    cam = GetComponent<Camera>();
   }
-#endif
 
   void Start() {
-    material = new Material(Shader.Find("Cardboard/SkyboxMesh"));
+    material = new Material(Shader.Find("Cardboard/UnlitTexture"));
   }
 
   void OnRenderImage(RenderTexture source, RenderTexture dest) {
@@ -39,11 +39,11 @@ public class StereoRenderEffect : MonoBehaviour {
     GL.LoadPixelMatrix(0, width, height, 0);
     // Camera rects are in screen coordinates (bottom left is origin), but DrawTexture takes a
     // rect in GUI coordinates (top left is origin).
-    Rect blitRect = camera.pixelRect;
+    Rect blitRect = cam.pixelRect;
     blitRect.y = height - blitRect.height - blitRect.y;
     RenderTexture oldActive = RenderTexture.active;
     RenderTexture.active = dest;
-    Graphics.DrawTexture(blitRect, source, material);
+    Graphics.DrawTexture(blitRect, source, fullRect, 0, 0, 0, 0, Color.white, material);
     RenderTexture.active = oldActive;
     GL.PopMatrix();
   }

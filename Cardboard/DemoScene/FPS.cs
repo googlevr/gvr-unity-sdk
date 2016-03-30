@@ -17,17 +17,42 @@ using UnityEngine.UI;
 
 [RequireComponent(typeof(Text))]
 public class FPS : MonoBehaviour {
-  private Text text;
+  private Text textField;
   private float fps = 60;
 
   void Awake() {
-    text = GetComponent<Text>();
+    textField = GetComponent<Text>();
   }
 
   void LateUpdate() {
+    string text = "Direct ";
+    text += Cardboard.Controller.directRender ? "ON" : "off";
+
+    text += " / Distortion correction ";
+    switch(Cardboard.SDK.DistortionCorrection) {
+    case Cardboard.DistortionCorrectionMethod.Unity:
+      text += "Unity";
+      break;
+
+    case Cardboard.DistortionCorrectionMethod.Native:
+      text += "Native";
+      break;
+
+    case Cardboard.DistortionCorrectionMethod.None:
+      text += "none";
+      break;
+
+    default:
+      text += "UNKNOWN";
+      break;
+    }
+
+    text += " / ";
+
     float interp = Time.deltaTime / (0.5f + Time.deltaTime);
     float currentFPS = 1.0f / Time.deltaTime;
     fps = Mathf.Lerp(fps, currentFPS, interp);
-    text.text = Mathf.RoundToInt(fps) + "fps";
+    text += Mathf.RoundToInt(fps) + "fps";
+    textField.text = text;
   }
 }

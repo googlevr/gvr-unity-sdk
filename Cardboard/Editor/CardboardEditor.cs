@@ -14,6 +14,10 @@
 
 using UnityEngine;
 using UnityEditor;
+using UnityEditor.Callbacks;
+#if UNITY_IOS
+using UnityEditor.iOS.Xcode;
+#endif
 
 /// @ingroup EditorScripts
 /// A custom editor for properties on the Cardboard script.  This appears in the
@@ -37,11 +41,6 @@ public class CardboardEditor : Editor {
   GUIContent neckModelScaleLabel = new GUIContent("Neck Model Scale",
       "The scale factor of the builtin neck model [0..1].  To disable, set to 0.");
 
-#if UNITY_IOS
-  GUIContent syncWithCardboardLabel = new GUIContent("Sync with Cardboard App",
-      "Enables the 'Sync with Google Cardboard' slider in the viewer settings dialog.");
-#endif
-
   GUIContent alignmentMarkerLabel = new GUIContent("Alignment Marker",
       "Whether to draw the alignment marker. The marker is a vertical line that splits " +
       "the viewport in half, designed to help users align the screen with the Cardboard.");
@@ -53,9 +52,6 @@ public class CardboardEditor : Editor {
 
   GUIContent backButtonLabel = new GUIContent("Back Button",
       "Whether to draw the onscreen Back Button.");
-
-  GUIContent tapIsTriggerLabel = new GUIContent("Tap Is Trigger",
-      "Whether screen taps are treated as trigger events.");
 
   GUIContent editorSettingsLabel = new GUIContent("Unity Editor Emulation Settings",
       "Controls for the in-editor emulation of Cardboard.");
@@ -106,16 +102,6 @@ public class CardboardEditor : Editor {
 
     EditorGUILayout.Separator();
 
-    EditorGUILayout.LabelField("Cardboard Settings", headingStyle);
-#if UNITY_IOS
-    cardboard.SyncWithCardboardApp =
-        EditorGUILayout.Toggle(syncWithCardboardLabel, cardboard.SyncWithCardboardApp);
-#endif
-    cardboard.TapIsTrigger =
-        EditorGUILayout.Toggle(tapIsTriggerLabel, cardboard.TapIsTrigger);
-
-    EditorGUILayout.Separator();
-
     EditorGUILayout.LabelField(editorSettingsLabel, headingStyle);
     cardboard.autoUntiltHead =
         EditorGUILayout.Toggle(autoUntiltHeadLabel, cardboard.autoUntiltHead);
@@ -128,4 +114,23 @@ public class CardboardEditor : Editor {
       EditorUtility.SetDirty(cardboard);
     }
   }
+
+#if UNITY_IOS
+  // Add -ObjC to the Xcode project's linker flags, since our native iOS code
+  // requires it.  Also add required frameworks.
+  [PostProcessBuild(100)]
+  public static void OnPostProcessBuild(BuildTarget platform, string projectPath) {
+    if (platform != BuildTarget.iOS) {
+      return;
+    }
+    string pbxFile = PBXProject.GetPBXProjectPath(projectPath);
+    PBXProject pbxProject = new PBXProject();
+    pbxProject.ReadFromFile(pbxFile);
+    string target = pbxProject.TargetGuidByName(PBXProject.GetUnityTargetName());
+    pbxProject.AddFrameworkToProject(target, "Security.framework", false);
+    pbxProject.AddFrameworkToProject(target, "GLKit.framework", false);
+    pbxProject.AddBuildProperty(target, "OTHER_LDFLAGS", "-ObjC");
+    pbxProject.WriteToFile(pbxFile);
+  }
+#endif
 }

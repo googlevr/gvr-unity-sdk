@@ -21,11 +21,14 @@ using System.Collections;
 [CustomEditor(typeof(CardboardAudioListener))]
 public class CardboardAudioListenerEditor : Editor {
   private SerializedProperty globalGainDb = null;
+  private SerializedProperty occlusionMask = null;
   private SerializedProperty quality = null;
   private SerializedProperty worldScale = null;
 
   private GUIContent globalGainLabel = new GUIContent("Global Gain (dB)",
      "Sets the global gain of the system. Can be used to adjust the overall output volume.");
+  private GUIContent occlusionMaskLabel = new GUIContent("Occlusion Mask",
+     "Sets the global layer mask for occlusion detection.");
   private GUIContent qualityLabel = new GUIContent("Quality",
      "Sets the quality mode in which the spatial audio will be rendered. " +
      "Higher quality modes allow for increased fidelity at the cost of greater CPU usage.");
@@ -34,6 +37,7 @@ public class CardboardAudioListenerEditor : Editor {
 
   void OnEnable () {
     globalGainDb = serializedObject.FindProperty("globalGainDb");
+    occlusionMask = serializedObject.FindProperty("occlusionMask");
     quality = serializedObject.FindProperty("quality");
     worldScale = serializedObject.FindProperty("worldScale");
   }
@@ -53,6 +57,10 @@ public class CardboardAudioListenerEditor : Editor {
                            globalGainLabel);
     EditorGUILayout.Slider(worldScale, CardboardAudio.minWorldScale, CardboardAudio.maxWorldScale,
                            worldScaleLabel);
+
+    EditorGUILayout.Separator();
+
+    EditorGUILayout.PropertyField(occlusionMask, occlusionMaskLabel);
 
     serializedObject.ApplyModifiedProperties();
   }

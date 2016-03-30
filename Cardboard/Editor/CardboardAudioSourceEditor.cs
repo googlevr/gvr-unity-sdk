@@ -30,12 +30,14 @@ public class CardboardAudioSourceEditor : Editor {
   private SerializedProperty rolloffMode = null;
   private SerializedProperty maxDistance = null;
   private SerializedProperty minDistance = null;
+  private SerializedProperty bypassRoomEffects = null;
   private SerializedProperty directivityAlpha = null;
   private SerializedProperty directivitySharpness = null;
   private Texture2D directivityTexture = null;
   private SerializedProperty gainDb = null;
   private SerializedProperty hrtfEnabled = null;
   private SerializedProperty occlusionEnabled = null;
+  private SerializedProperty spread = null;
 
   private GUIContent clipLabel = new GUIContent("AudioClip",
       "The AudioClip asset played by the CardboardAudioSource.");
@@ -56,6 +58,8 @@ public class CardboardAudioSourceEditor : Editor {
       "Outside this min distance it will begin to attenuate.");
   private GUIContent playOnAwakeLabel = new GUIContent("Play On Awake",
       "Play the sound when the scene loads.");
+  private GUIContent bypassRoomEffectsLabel = new GUIContent("Bypass Room Effects",
+      "Sets whether the room effects for the source should be bypassed.");
   private GUIContent directivityLabel = new GUIContent("Directivity",
       "Controls the pattern of sound emission of the source. This can change the perceived " +
       "loudness of the source depending on which way it is facing relative to the listener. " +
@@ -70,10 +74,12 @@ public class CardboardAudioSourceEditor : Editor {
       "Applies a gain to the source for adjustment of relative loudness.");
   private GUIContent hrtfEnabledLabel = new GUIContent("Enable HRTF",
       "Sets HRTF binaural rendering for the source. Note that this setting has no effect when " +
-      "global low quality mode is selected.");
+      "stereo quality mode is selected globally.");
   private GUIContent occlusionLabel = new GUIContent("Enable Occlusion",
       "Sets whether the sound of the source should be occluded when passing through objects " +
       "between the source and the listener.");
+  private GUIContent spreadLabel = new GUIContent("Spread",
+      "Source spread in degrees.");
 
   void OnEnable () {
     clip = serializedObject.FindProperty("sourceClip");
@@ -85,17 +91,14 @@ public class CardboardAudioSourceEditor : Editor {
     rolloffMode = serializedObject.FindProperty("rolloffMode");
     maxDistance = serializedObject.FindProperty("sourceMaxDistance");
     minDistance = serializedObject.FindProperty("sourceMinDistance");
+    bypassRoomEffects = serializedObject.FindProperty("bypassRoomEffects");
     directivityAlpha = serializedObject.FindProperty("directivityAlpha");
     directivitySharpness = serializedObject.FindProperty("directivitySharpness");
-#if UNITY_4_5
-    directivityTexture = Texture2D.CreateExternalTexture(0, 0, TextureFormat.ARGB32, false, false,
-                                                         System.IntPtr.Zero);
-#else
     directivityTexture = Texture2D.blackTexture;
-#endif
     gainDb = serializedObject.FindProperty("gainDb");
     hrtfEnabled = serializedObject.FindProperty("hrtfEnabled");
     occlusionEnabled = serializedObject.FindProperty("occlusionEnabled");
+    spread = serializedObject.FindProperty("spread");
   }
 
   /// @cond
@@ -107,6 +110,7 @@ public class CardboardAudioSourceEditor : Editor {
     EditorGUILayout.Separator();
 
     EditorGUILayout.PropertyField(mute, muteLabel);
+    EditorGUILayout.PropertyField(bypassRoomEffects, bypassRoomEffectsLabel);
     EditorGUILayout.PropertyField(playOnAwake, playOnAwakeLabel);
     EditorGUILayout.PropertyField(loop, loopLabel);
 
@@ -124,6 +128,7 @@ public class CardboardAudioSourceEditor : Editor {
 
     EditorGUILayout.Separator();
 
+    EditorGUILayout.PropertyField(spread, spreadLabel);
     EditorGUILayout.PropertyField(rolloffMode, rolloffModeLabel);
     ++EditorGUI.indentLevel;
     EditorGUILayout.PropertyField(minDistance, minDistanceLabel);

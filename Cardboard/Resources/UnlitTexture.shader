@@ -1,4 +1,4 @@
-﻿// Copyright 2014 Google Inc. All rights reserved.
+﻿// Copyright 2016 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -12,32 +12,55 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// Original code by Nora
-// http://stereoarts.jp
-//
-// Retrieved from:
-// https://developer.oculusvr.com/forums/viewtopic.php?f=37&t=844#p28982
-
 Shader "Cardboard/UnlitTexture" {
-  Properties {
-    _MainTex ("Texture", 2D) = "white" {}
-  }
-  Category {
-    Tags { "RenderType" = "Opaque" }
-    Cull Off
-    Lighting Off
-    Fog {Mode Off}
-    BindChannels {
-      Bind "Color", color
-      Bind "Vertex", vertex
-      Bind "TexCoord", texcoord
-    }
-    SubShader {
-      Pass {
-        SetTexture [_MainTex] {
-          Combine primary * texture
-        }
-      }
-    }
-  }
+ Properties {
+   _Color ("Color", Color) = (1,1,1,1)
+   _MainTex ("Texture", 2D) = "white" {}
+ }
+ SubShader {
+   Tags { "RenderType"="Opaque" }
+   Cull Off
+   Blend Off
+   ZTest Always
+   ZWrite Off
+   Lighting Off
+   Fog {Mode Off}
+
+   Pass {
+     CGPROGRAM
+     #pragma vertex vert
+     #pragma fragment frag
+
+     #include "UnityCG.cginc"
+
+     struct appdata {
+       float4 vertex : POSITION;
+       float4 color : COLOR;
+       float2 uv : TEXCOORD0;
+     };
+
+     struct v2f {
+       float2 uv : TEXCOORD0;
+       float4 color : COLOR;
+       float4 vertex : SV_POSITION;
+     };
+
+     sampler2D _MainTex;
+     float4 _MainTex_ST;
+     float4 _Color;
+
+     v2f vert (appdata v) {
+       v2f o;
+       o.vertex = mul(UNITY_MATRIX_MVP, v.vertex);
+       o.color = v.color;
+       o.uv = TRANSFORM_TEX(v.uv, _MainTex);
+       return o;
+     }
+
+     fixed4 frag (v2f i) : COLOR {
+       return tex2D(_MainTex, i.uv) * i.color * _Color;
+     }
+     ENDCG
+   }
+ }
 }

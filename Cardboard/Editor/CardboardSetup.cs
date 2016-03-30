@@ -25,7 +25,8 @@ public class CardboardSetup : EditorWindow {
 
   // Is there a Cardboard camera already?
   private bool foundCardboardCamera = false;
-  private bool addReticle = false;
+  private bool addReticle = true;
+  private bool uGUISupport = false;
 
   // Currently selected camera in the dialog.
   private int selectedCamera = -1;
@@ -100,7 +101,9 @@ public class CardboardSetup : EditorWindow {
     GUILayout.BeginVertical("Box");
 
     // Reticle.
-    addReticle = GUILayout.Toggle(addReticle, "Reticle support");
+    addReticle = EditorGUILayout.BeginToggleGroup("Reticle support", addReticle);
+    uGUISupport = GUILayout.Toggle(uGUISupport, "uGUI support");
+    EditorGUILayout.EndToggleGroup();
 
     GUILayout.EndVertical();
     GUILayout.Space(20);
@@ -241,16 +244,31 @@ public class CardboardSetup : EditorWindow {
         // Found head! Refer its GameObject.
         GameObject headObject = head.gameObject;
 
-        // Instantiate reticle.
-        GameObject instance = Object.Instantiate(asset) as GameObject;
-        instance.name = asset.name; // removes the (clone) from the name.
-        // Set as child of CardboardHead object.
-        instance.transform.SetParent(headObject.transform, false);
-      }
+        // Reticle object.
+        GameObject reticleObject;
 
-      // Add modules to support uGUI.
-      AddGazeInputModule();
-      AddPhysicsRaycasterToCamera(gameObject);
+        // Find existing reticle.
+        CardboardReticle cardboardReticle = headObject.GetComponentInChildren<CardboardReticle>();
+        if (cardboardReticle != null) {
+          reticleObject = cardboardReticle.gameObject;
+        } else {
+          // Instantiate reticle.
+          GameObject instance = Object.Instantiate(asset) as GameObject;
+          instance.name = asset.name; // removes the (clone) from the name.
+          // Set as child of CardboardHead object.
+          instance.transform.SetParent(headObject.transform, false);
+
+          reticleObject = instance;
+        }
+
+        if (uGUISupport) {
+          // Add modules to support uGUI.
+          AddGazeInputModule();
+          AddPhysicsRaycasterToCamera(gameObject);
+        } else {
+          AddCardboardGaze(gameObject, reticleObject);
+        }
+      }
     }
   }
 
@@ -357,6 +375,24 @@ public class CardboardSetup : EditorWindow {
     for (int i = 0; i < components.Length; ++i) {
       UnityEditorInternal.ComponentUtility.MoveComponentUp(gazeInputModule);
     }
+  }
+
+  private void AddCardboardGaze(GameObject cameraObject, GameObject reticleObject) {
+    // Find existing CardboardGaze.
+    CardboardGaze cardboardGaze =
+        cameraObject.GetComponent<CardboardGaze>();
+
+    // Otherwise,
+     if (cardboardGaze == null) {
+       // Add the CardboardGaze.
+       cardboardGaze = cameraObject.AddComponent<CardboardGaze>();
+     }
+
+    // Remove Ignore Raycast layer from the collision mask.
+    cardboardGaze.mask &= ~(1 <<LayerMask.NameToLayer("Ignore Raycast"));
+
+    // Set the Reticle as the cursor.
+    cardboardGaze.PointerObject = reticleObject;
   }
 
   private void AdjustWindowSize() {

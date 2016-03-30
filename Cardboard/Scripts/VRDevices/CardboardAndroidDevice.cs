@@ -34,27 +34,6 @@ public class CardboardAndroidDevice : BaseCardboardDevice {
     }
   }
 
-  // Returns landscape orientation display metrics.
-  public override DisplayMetrics GetDisplayMetrics() {
-    using (var listenerClass = GetClass(ActivityListenerClass)) {
-      // Sadly some Android devices still don't report accurate values.  If this
-      // doesn't work correctly on your device, comment out this function to try
-      // the Unity implementation.
-      float[] metrics = listenerClass.CallStatic<float[]>("getDisplayMetrics");
-      // Always return landscape orientation.
-      int width, height;
-      if (metrics[0] > metrics[1]) {
-        width = (int)metrics[0];
-        height = (int)metrics[1];
-      } else {
-        width = (int)metrics[1];
-        height = (int)metrics[0];
-      }
-      // DPI-x (metrics[2]) on Android appears to refer to the narrow dimension of the screen.
-      return new DisplayMetrics { width = width, height = height, xdpi = metrics[3], ydpi = metrics[2] };
-    }
-  }
-
   public override void SetUILayerEnabled(bool enabled) {
     CallObjectMethod(activityListener, "setUILayerEnabled", enabled);
   }
@@ -79,28 +58,8 @@ public class CardboardAndroidDevice : BaseCardboardDevice {
     CallObjectMethod(activityListener, "setShowVrBackButtonOnlyInVR", only);
   }
 
-  public override void SetTapIsTrigger(bool enabled) {
-    CallObjectMethod(activityListener, "setTapIsTrigger", enabled);
-  }
-
-  public override void SetTouchCoordinates(int x, int y) {
-    CallObjectMethod(activityListener, "setTouchCoordinates", x, y);
-  }
-
   public override void ShowSettingsDialog() {
     CallObjectMethod(activityListener, "launchConfigureActivity");
-  }
-
-  protected override void ProcessEvents() {
-    base.ProcessEvents();
-    if (!Cardboard.SDK.TapIsTrigger) {
-      if (triggered) {
-        CallObjectMethod(activityListener, "injectSingleTap");
-      }
-      if (backButtonPressed) {
-        CallObjectMethod(activityListener, "injectKeyPress", 111);  // Escape key.
-      }
-    }
   }
 
   public override void OnPause(bool pause) {

@@ -99,7 +99,7 @@ public class CardboardPostRender : MonoBehaviour {
     }
     if (correction == Cardboard.DistortionCorrectionMethod.Native
         && Cardboard.SDK.NativeDistortionCorrectionSupported) {
-      Cardboard.SDK.PostRender();
+      Cardboard.SDK.PostRender(stereoScreen);
     } else {
       if (distortionMesh == null || Cardboard.SDK.ProfileChanged) {
         RebuildDistortionMesh();

@@ -31,25 +31,25 @@ using System.Collections.Generic;
 [AddComponentMenu("Cardboard/Cardboard")]
 public class Cardboard : MonoBehaviour {
   // Cardboard SDK Version
-  public const string CARDBOARD_SDK_VERSION = "0.6";
+  public const string CARDBOARD_SDK_VERSION = "0.7";
 
   /// The singleton instance of the Cardboard class.
   public static Cardboard SDK {
     get {
+#if UNITY_EDITOR
+      if (sdk == null && !Application.isPlaying) {
+        sdk = UnityEngine.Object.FindObjectOfType<Cardboard>();
+      }
+#endif
       if (sdk == null) {
-        if (Application.isEditor && !Application.isPlaying) {
-          // Let the editor scripts access the object through this property.
-          sdk = UnityEngine.Object.FindObjectOfType<Cardboard>();
-        } else {
-          Debug.LogError("No Cardboard instance found.  Ensure one exists in the scene, or call"
-              + "Cardboard.Create() at startup to generate one.\n"
-              + "If one does exist but hasn't called Awake() yet, "
-              + "then this error is due to order-of-initialization.\n"
-              + "In that case, consider moving "
-              + "your first reference to Cardboard.SDK to a later point in time.\n"
-              + "If exiting the scene, this indicates that the Cardboard object has already "
-              + "been destroyed.");
-        }
+        Debug.LogError("No Cardboard instance found.  Ensure one exists in the scene, or call "
+            + "Cardboard.Create() at startup to generate one.\n"
+            + "If one does exist but hasn't called Awake() yet, "
+            + "then this error is due to order-of-initialization.\n"
+            + "In that case, consider moving "
+            + "your first reference to Cardboard.SDK to a later point in time.\n"
+            + "If exiting the scene, this indicates that the Cardboard object has already "
+            + "been destroyed.");
       }
       return sdk;
     }
@@ -129,6 +129,9 @@ public class Cardboard : MonoBehaviour {
       return distortionCorrection;
     }
     set {
+      if (device != null && device.RequiresNativeDistortionCorrection()) {
+        value = DistortionCorrectionMethod.Native;
+      }
       if (value != distortionCorrection && device != null) {
         device.SetDistortionCorrectionEnabled(value == DistortionCorrectionMethod.Native
             && NativeDistortionCorrectionSupported);
@@ -197,21 +200,6 @@ public class Cardboard : MonoBehaviour {
   [SerializeField]
   private BackButtonModes backButtonMode = BackButtonModes.OnlyInVR;
 
-  /// When enabled, Cardboard treats a screen tap the same as a trigger pull.
-  public bool TapIsTrigger {
-    get {
-      return tapIsTrigger;
-    }
-    set {
-      if (value != tapIsTrigger && device != null) {
-        device.SetTapIsTrigger(value);
-      }
-      tapIsTrigger = value;
-    }
-  }
-  [SerializeField]
-  private bool tapIsTrigger = true;
-
   /// The native SDK will apply a neck offset to the head tracking, resulting in
   /// a more realistic model of a person's head position.  This control determines
   /// the scale factor of the offset.  To turn off the neck model, set it to 0, and
@@ -262,26 +250,6 @@ public class Cardboard : MonoBehaviour {
   [SerializeField]
   private bool electronicDisplayStabilization = false;
   /// @endcond
-
-#if UNITY_IOS
-  /// @deprecated Whether to show an option to sync settings with the Cardboard App in the
-  /// settings dialogue for iOS devices.
-  public bool SyncWithCardboardApp {
-    get {
-      return syncWithCardboardApp;
-    }
-    set {
-      if (value && value != syncWithCardboardApp) {
-        Debug.LogWarning("Remember to enable iCloud capability in Xcode, "
-            + "and set the 'iCloud Documents' checkbox. "
-            + "Not doing this may cause the app to crash if the user tries to sync.");
-      }
-      syncWithCardboardApp = value;
-    }
-  }
-  [SerializeField]
-  private bool syncWithCardboardApp = false;
-#endif
 
 #if UNITY_EDITOR
   /// Restores level head tilt in when playing in the Unity Editor after you
@@ -376,20 +344,10 @@ public class Cardboard : MonoBehaviour {
       if (value == stereoScreen) {
         return;
       }
-      if (!SystemInfo.supportsRenderTextures && value != null) {
-        Debug.LogError("Can't set StereoScreen: RenderTextures are not supported.");
-        return;
-      }
       if (stereoScreen != null) {
         stereoScreen.Release();
       }
       stereoScreen = value;
-      if (device != null) {
-        if (stereoScreen != null) {
-          stereoScreen.Create();
-        }
-        device.SetStereoScreen(stereoScreen);
-      }
       if (OnStereoScreenChanged != null) {
         OnStereoScreenChanged(stereoScreen);
       }
@@ -503,7 +461,6 @@ public class Cardboard : MonoBehaviour {
     device.SetShowVrBackButtonOnlyInVR(backButtonMode == BackButtonModes.OnlyInVR);
     device.SetDistortionCorrectionEnabled(distortionCorrection == DistortionCorrectionMethod.Native
         && NativeDistortionCorrectionSupported);
-    device.SetTapIsTrigger(tapIsTrigger);
     device.SetNeckModelScale(neckModelScale);
     device.SetAutoDriftCorrectionEnabled(autoDriftCorrection);
     device.SetElectronicDisplayStabilizationEnabled(electronicDisplayStabilization);
@@ -555,8 +512,7 @@ public class Cardboard : MonoBehaviour {
     }
   }
 
-  /// Emitted whenever a trigger pull occurs.  If #TapIsTrigger is set, then it is also
-  /// emitted when a screen tap occurs.
+  /// Emitted whenever a trigger occurs.
   public event Action OnTrigger;
 
   /// Emitted whenever the viewer is tilted on its side.
@@ -566,10 +522,7 @@ public class Cardboard : MonoBehaviour {
   /// profile, that is, the QR code scanned by the user.
   public event Action OnProfileChange;
 
-  /// Emitted whenever the user presses the "VR Back Button".  If #TapIsTrigger is set, the
-  /// Escape key issues this as well.
-  /// @note On Android, if #TapIsTrigger is off, a back button press is received as an Escape
-  /// key.  (Unity also sees the System Back button as an Escape key.)
+  /// Emitted whenever the user presses the "VR Back Button".
   public event Action OnBackButton;
 
   /// Whether the Cardboard trigger was pulled. True for exactly one complete frame
@@ -604,6 +557,18 @@ public class Cardboard : MonoBehaviour {
     if (updatedToFrame != Time.frameCount) {
       updatedToFrame = Time.frameCount;
       device.UpdateState();
+
+      if (device.profileChanged) {
+        if (distortionCorrection != DistortionCorrectionMethod.Native
+            && device.RequiresNativeDistortionCorrection()) {
+          DistortionCorrection = DistortionCorrectionMethod.Native;
+        }
+        if (stereoScreen != null
+            && device.ShouldRecreateStereoScreen(stereoScreen.width, stereoScreen.height)) {
+          StereoScreen = null;
+        }
+      }
+
       DispatchEvents();
     }
   }
@@ -637,20 +602,15 @@ public class Cardboard : MonoBehaviour {
   /// Presents the #StereoScreen to the device for distortion correction and display.
   /// @note This function is only used if #DistortionCorrection is set to _Native_,
   /// and it only has an effect if the device supports it.
-  public void PostRender() {
-    if (NativeDistortionCorrectionSupported) {
-      device.PostRender();
+  public void PostRender(RenderTexture stereoScreen) {
+    if (NativeDistortionCorrectionSupported && stereoScreen != null && stereoScreen.IsCreated()) {
+      device.PostRender(stereoScreen);
     }
   }
 
   /// Resets the tracker so that the user's current direction becomes forward.
   public void Recenter() {
     device.Recenter();
-  }
-
-  /// @deprecated Sets the coordinates of the mouse/touch event in screen space.
-  public void SetTouchCoordinates(int x, int y) {
-    device.SetTouchCoordinates(x, y);
   }
 
   /// Launch the device pairing and setup dialog.
@@ -698,65 +658,4 @@ public class Cardboard : MonoBehaviour {
       sdk = null;
     }
   }
-
-  /// @deprecated Use #DistortionCorrection instead.
-  [System.Obsolete("Use DistortionCorrection instead.")]
-  public bool nativeDistortionCorrection {
-    // Attempt to replicate original behavior of this property.
-    get { return DistortionCorrection == DistortionCorrectionMethod.Native; }
-    set { DistortionCorrection = value ? DistortionCorrectionMethod.Native
-                                       : DistortionCorrectionMethod.None; }
-  }
-
-  /// @deprecated
-  [System.Obsolete("InCardboard is deprecated.")]
-  public bool InCardboard { get { return true; } }
-
-  /// @deprecated Use #Triggered instead.
-  [System.Obsolete("Use Triggered instead.")]
-  public bool CardboardTriggered { get { return Triggered; } }
-
-  /// @deprecated Use #HeadPose instead.
-  [System.Obsolete("Use HeadPose instead.")]
-  public Matrix4x4 HeadView { get { return HeadPose.Matrix; } }
-
-  /// @deprecated Use #HeadPose instead.
-  [System.Obsolete("Use HeadPose instead.")]
-  public Quaternion HeadRotation { get { return HeadPose.Orientation; } }
-
-  /// @deprecated Use #HeadPose instead.
-  [System.Obsolete("Use HeadPose instead.")]
-  public Vector3 HeadPosition { get { return HeadPose.Position; } }
-
-  /// @deprecated Use #EyePose instead.
-  [System.Obsolete("Use EyePose() instead.")]
-  public Matrix4x4 EyeView(Eye eye) {
-    return EyePose(eye).Matrix;
-  }
-
-  /// @deprecated Use #EyePose instead.
-  [System.Obsolete("Use EyePose() instead.")]
-  public Vector3 EyeOffset(Eye eye) {
-    return EyePose(eye).Position;
-  }
-
-  /// @deprecated Use #Projection instead.
-  [System.Obsolete("Use Projection() instead.")]
-  public Matrix4x4 UndistortedProjection(Eye eye) {
-    return Projection(eye, Distortion.Undistorted);
-  }
-
-  /// @deprecated Use #Viewport instead.
-  [System.Obsolete("Use Viewport() instead.")]
-  public Rect EyeRect(Eye eye) {
-    return Viewport(eye, Distortion.Distorted);
-  }
-
-  /// @deprecated Use #ComfortableViewingRange instead.
-  [System.Obsolete("Use ComfortableViewingRange instead.")]
-  public float MinimumComfortDistance { get { return ComfortableViewingRange.x; } }
-
-  /// @deprecated Use #ComfortableViewingRange instead.
-  [System.Obsolete("Use ComfortableViewingRange instead.")]
-  public float MaximumComfortDistance { get { return ComfortableViewingRange.y; } }
 }

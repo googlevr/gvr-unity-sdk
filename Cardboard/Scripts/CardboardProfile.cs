@@ -67,12 +67,27 @@ public class CardboardProfile {
   /// distortion.  Assumes a radially symmetric pincushion/barrel distortion model.
   [System.Serializable]
   public struct Distortion {
-    public float k1;
-    public float k2;
+    private float[] coef;
+    public float[] Coef {
+      get {
+        return coef;
+      }
+      set {
+        if (value != null) {
+          coef = (float[])value.Clone();
+        } else {
+          coef = null;
+        }
+      }
+    }
 
     public float distort(float r) {
       float r2 = r * r;
-      return ((k2 * r2 + k1) * r2 + 1) * r;
+      float ret = 0;
+      for (int j=coef.Length-1; j>=0; j--) {
+        ret = r2 * (ret + coef[j]);
+      }
+      return (ret + 1) * r;
     }
 
     public float distortInv(float radius) {
@@ -212,10 +227,9 @@ public class CardboardProfile {
       lower = 40.0f
     },
     distortion = {
-      k1 = 0.441f,
-      k2 = 0.156f
+      Coef = new [] { 0.441f, 0.156f },
     },
-    inverse = ApproximateInverse(0.441f, 0.156f)
+    inverse = ApproximateInverse(new [] { 0.441f, 0.156f })
   };
 
   /// Parameters for a Cardboard v2.
@@ -233,10 +247,9 @@ public class CardboardProfile {
       lower = 60.0f
     },
     distortion = {
-      k1 = 0.34f,
-      k2 = 0.55f
+      Coef = new [] { 0.34f, 0.55f },
     },
-    inverse = ApproximateInverse(0.34f, 0.55f)
+    inverse = ApproximateInverse(new [] { 0.34f, 0.55f })
   };
 
   /// Parameters for a Go4D C1-Glass.
@@ -254,10 +267,9 @@ public class CardboardProfile {
       lower = 50.0f
     },
     distortion = {
-      k1 = 0.3f,
-      k2 = 0
+      Coef = new [] { 0.3f, 0 },
     },
-    inverse = ApproximateInverse(0.3f, 0)
+    inverse = ApproximateInverse(new [] { 0.3f, 0 })
   };
 
   /// Nexus 5 in a Cardboard v1.
@@ -386,6 +398,52 @@ public class CardboardProfile {
     return Mathf.Sqrt(x * x + y * y);
   }
 
+  // Solves a small linear equation via destructive gaussian
+  // elimination and back substitution.  This isn't generic numeric
+  // code, it's just a quick hack to work with the generally
+  // well-behaved symmetric matrices for least-squares fitting.
+  // Not intended for reuse.
+  //
+  // @param a Input positive definite symmetrical matrix. Destroyed
+  //     during calculation.
+  // @param y Input right-hand-side values. Destroyed during calculation.
+  // @return Resulting x value vector.
+  //
+  private static double[] solveLinear(double[,] a, double[] y) {
+    int n = a.GetLength(0);
+
+    // Gaussian elimination (no row exchange) to triangular matrix.
+    // The input matrix is a A^T A product which should be a positive
+    // definite symmetrical matrix, and if I remember my linear
+    // algebra right this implies that the pivots will be nonzero and
+    // calculations sufficiently accurate without needing row
+    // exchange.
+    for (int j = 0; j < n - 1; ++j) {
+      for (int k = j + 1; k < n; ++k) {
+        double p = a[k, j] / a[j, j];
+        for (int i = j + 1; i < n; ++i) {
+          a[k, i] -= p * a[j, i];
+        }
+        y[k] -= p * y[j];
+      }
+    }
+    // From this point on, only the matrix elements a[j][i] with i>=j are
+    // valid. The elimination doesn't fill in eliminated 0 values.
+
+    double[] x = new double[n];
+
+    // Back substitution.
+    for (int j = n - 1; j >= 0; --j) {
+      double v = y[j];
+      for (int i = j + 1; i < n; ++i) {
+        v -= a[j, i] * x[i];
+      }
+      x[j] = v / a[j, j];
+    }
+
+    return x;
+  }
+
   // Solves a least-squares matrix equation.  Given the equation A * x = y, calculate the
   // least-square fit x = inverse(A * transpose(A)) * transpose(A) * y.  The way this works
   // is that, while A is typically not a square matrix (and hence not invertible), A * transpose(A)
@@ -403,10 +461,6 @@ public class CardboardProfile {
       Debug.LogError("Matrix / vector dimension mismatch");
       return null;
     }
-    if (numCoefficients != 2) {
-      Debug.LogError("Only 2 coefficients supported.");
-      return null;
-    }
 
     // Calculate transpose(A) * A
     double[,] matATA = new double[numCoefficients, numCoefficients];
@@ -420,16 +474,6 @@ public class CardboardProfile {
       }
     }
 
-    // Calculate the inverse of transpose(A) * A.  Inverting isn't recommended for numerical
-    // stability, but should be ok for small and well-behaved data sets.  Using manual matrix
-    // inversion here (hence the restriction of numCoefficients to 2 in this function).
-    double[,] matInvATA = new double[numCoefficients, numCoefficients];
-    double det = matATA[0, 0] * matATA[1, 1] - matATA[0, 1] * matATA[1, 0];
-    matInvATA[0, 0] = matATA[1, 1] / det;
-    matInvATA[1, 1] = matATA[0, 0] / det;
-    matInvATA[0, 1] = -matATA[1, 0] / det;
-    matInvATA[1, 0] = -matATA[0, 1] / det;
-
     // Calculate transpose(A) * y
     double[] vecATY = new double[numCoefficients];
     for (int j = 0; j < numCoefficients; ++j) {
@@ -440,30 +484,22 @@ public class CardboardProfile {
       vecATY[j] = sum;
     }
 
-    // Now matrix multiply the previous values to get the result.
-    double[] vecX = new double[numCoefficients];
-    for (int j = 0; j < numCoefficients; ++j) {
-      double sum = 0.0;
-      for (int i = 0; i < numCoefficients; ++i) {
-        sum += matInvATA[i, j] * vecATY[i];
-      }
-      vecX[j] = sum;
-    }
-    return vecX;
+    // Now solve (A * transpose(A)) * x = transpose(A) * y.
+    return solveLinear(matATA, vecATY);
   }
 
   /// Calculates an approximate inverse to the given radial distortion parameters.
-  public static Distortion ApproximateInverse(float k1, float k2, float maxRadius = 1,
-                                              int numSamples = 10) {
-    return ApproximateInverse(new Distortion { k1=k1, k2=k2 }, maxRadius, numSamples);
+  public static Distortion ApproximateInverse(float[] coef, float maxRadius = 1,
+                                              int numSamples = 100) {
+    return ApproximateInverse(new Distortion { Coef=coef }, maxRadius, numSamples);
   }
 
   /// Calculates an approximate inverse to the given radial distortion parameters.
   public static Distortion ApproximateInverse(Distortion distort, float maxRadius = 1,
-                                              int numSamples = 10) {
-    const int numCoefficients = 2;
+                                              int numSamples = 100) {
+    const int numCoefficients = 6;
 
-    // R + k1*R^3 + k2*R^5 = r, with R = rp = distort(r)
+    // R + K1*R^3 + K2*R^5 = r, with R = rp = distort(r)
     // Repeating for numSamples:
     //   [ R0^3, R0^5 ] * [ K1 ] = [ r0 - R0 ]
     //   [ R1^3, R1^5 ]   [ K2 ]   [ r1 - R1 ]
@@ -486,10 +522,12 @@ public class CardboardProfile {
       vecY[i] = r - rp;
     }
     double[] vecK = solveLeastSquares(matA, vecY);
-    return new Distortion {
-      k1 = (float)vecK[0],
-      k2 = (float)vecK[1]
-    };
+    // Convert to float for use in a fresh Distortion object.
+    float[] coefficients = new float[vecK.Length];
+    for (int i = 0; i < vecK.Length; ++i) {
+      coefficients[i] = (float) vecK[i];
+    }
+    return new Distortion { Coef = coefficients };
   }
 }
 /// @endcond

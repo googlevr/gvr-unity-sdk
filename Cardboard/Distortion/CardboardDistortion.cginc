@@ -15,15 +15,17 @@
 
 // To use in a surface shader, add the following text to the code:
 //
-// #pragma surface ... vertex:vert         <-- add "vertex:vert" to this line
-// #include "CardboardDistortion.cginc"    <-- copy the next 4 lines
+// #pragma surface ... vertex:vert                 <-- add "vertex:vert" to this line
+// #pragma multi_compile __ CARDBOARD_DISTORTION   <-- copy the next 5 lines
+// #include "CardboardDistortion.cginc"
 // void vert (inout appdata_base v) {
 //   v.vertex = undistortSurface(v.vertex);
 // }
 
 // To use in a vertex shader, modify it as follows:
 //
-// #include "CardboardDistortion.cginc"  <-- add this
+// #pragma multi_compile __ CARDBOARD_DISTORTION   <-- add these 2 lines
+// #include "CardboardDistortion.cginc"
 //
 // v2f vert (appdata_blah v) {
 //   v2f o;
@@ -32,11 +34,24 @@
 //   return o;
 // }
 
-float4    _Undistortion;
+#if defined(CARDBOARD_DISTORTION)
+
+float4x4  _Undistortion;
 float     _MaxRadSq;
 float     _NearClip;
 float4x4  _RealProjection;
 float4x4  _FixProjection;
+
+float distortionFactor(float rSquared) {
+  float ret = 0.0;
+  ret = rSquared * (ret + _Undistortion[1][1]);
+  ret = rSquared * (ret + _Undistortion[0][1]);
+  ret = rSquared * (ret + _Undistortion[3][0]);
+  ret = rSquared * (ret + _Undistortion[2][0]);
+  ret = rSquared * (ret + _Undistortion[1][0]);
+  ret = rSquared * (ret + _Undistortion[0][0]);
+  return ret + 1.0;
+}
 
 // Convert point from world space to undistorted camera space.
 float4 undistort(float4 pos) {
@@ -45,7 +60,7 @@ float4 undistort(float4 pos) {
   if (pos.z <= -_NearClip) {  // Reminder: Forward is -Z.
     // Undistort the point's coordinates in XY.
     float r2 = clamp(dot(pos.xy, pos.xy) / (pos.z*pos.z), 0, _MaxRadSq);
-    pos.xy *= 1 + (_Undistortion.x + _Undistortion.y*r2)*r2;
+    pos.xy *= distortionFactor(r2);
   }
   return pos;
 }
@@ -60,3 +75,18 @@ float4 undistortVertex(float4 pos) {
 float4 undistortSurface(float4 pos) {
   return mul(_FixProjection, undistort(pos));
 }
+
+#else
+// Distortion disabled.
+
+// Just do the standard MVP transform.
+float4 undistortVertex(float4 pos) {
+  return mul(UNITY_MATRIX_MVP, pos);
+}
+
+// Surface shader hides away the MVP multiplication, so just return pos.
+float4 undistortSurface(float4 pos) {
+  return pos;
+}
+
+#endif

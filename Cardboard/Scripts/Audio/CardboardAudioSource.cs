@@ -12,19 +12,17 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#if !(UNITY_4_5 || UNITY_4_6 || UNITY_4_7 || UNITY_5_0 || UNITY_5_1 || UNITY_IOS)
-// Cardboard native audio spatializer plugin is only supported by Unity 5.2+.
-// If you get script compile errors in this file, comment out the line below.
-#define USE_SPATIALIZER_PLUGIN
-#endif
-
 using UnityEngine;
+using UnityEngine.Audio;
 using System.Collections;
 
 /// Cardboard audio source component that enhances AudioSource to provide advanced spatial audio
 /// features.
 [AddComponentMenu("Cardboard/Audio/CardboardAudioSource")]
 public class CardboardAudioSource : MonoBehaviour {
+  /// Denotes whether the room effects should be bypassed.
+  public bool bypassRoomEffects = false;
+
   /// Directivity pattern shaping factor.
   public float directivityAlpha = 0.0f;
 
@@ -43,9 +41,13 @@ public class CardboardAudioSource : MonoBehaviour {
   /// Volume rolloff model with respect to the distance.
   public AudioRolloffMode rolloffMode = AudioRolloffMode.Logarithmic;
 
+  /// Spread in degrees.
+  [Range(0.0f, 360.0f)]
+  public float spread = 0.0f;
+
   /// The default AudioClip to play.
   public AudioClip clip {
-    get { return clip; }
+    get { return sourceClip; }
     set {
       sourceClip = value;
       if (audioSource != null) {
@@ -152,9 +154,6 @@ public class CardboardAudioSource : MonoBehaviour {
   // Current occlusion value;
   private float currentOcclusion = 0.0f;
 
-  // Target occlusion value.
-  private float targetOcclusion = 0.0f;
-
   // Next occlusion update time in seconds.
   private float nextOcclusionUpdate = 0.0f;
 
@@ -166,15 +165,20 @@ public class CardboardAudioSource : MonoBehaviour {
 
   void Awake () {
     audioSource = gameObject.AddComponent<AudioSource>();
-    audioSource.hideFlags = HideFlags.HideInInspector;
+    audioSource.enabled = false;
+    audioSource.hideFlags = HideFlags.HideInInspector | HideFlags.HideAndDontSave;
     audioSource.playOnAwake = false;
     audioSource.bypassReverbZones = true;
-#if UNITY_4_5 || UNITY_4_6 || UNITY_4_7
-    audioSource.panLevel = 0.0f;
-#else
     audioSource.spatialBlend = 0.0f;
-#endif
     OnValidate();
+    // Route the source output to |CardboardAudioMixer|.
+    AudioMixer mixer = (Resources.Load("CardboardAudioMixer") as AudioMixer);
+    if(mixer != null) {
+      audioSource.outputAudioMixerGroup = mixer.FindMatchingGroups("Master")[0];
+    } else {
+      Debug.LogError("CardboardAudioMixer could not be found in Resources. Make sure that " +
+                     "the Cardboard SDK Unity package is imported properly.");
+    }
   }
 
   void OnEnable () {
@@ -202,36 +206,20 @@ public class CardboardAudioSource : MonoBehaviour {
   void Update () {
     // Update occlusion state.
     if (!occlusionEnabled) {
-      targetOcclusion = 0.0f;
+      currentOcclusion = 0.0f;
     } else if (Time.time >= nextOcclusionUpdate) {
       nextOcclusionUpdate = Time.time + CardboardAudio.occlusionDetectionInterval;
-      targetOcclusion = CardboardAudio.ComputeOcclusion(transform);
+      currentOcclusion = CardboardAudio.ComputeOcclusion(transform);
     }
-    currentOcclusion = Mathf.Lerp(currentOcclusion, targetOcclusion,
-                                  CardboardAudio.occlusionLerpSpeed * Time.deltaTime);
     // Update source.
     if (!isPlaying && !isPaused) {
       Stop();
     } else {
-      CardboardAudio.UpdateAudioSource(id, transform, gainDb, rolloffMode, sourceMinDistance,
-                                       sourceMaxDistance, directivityAlpha, directivitySharpness,
-                                       currentOcclusion);
+      CardboardAudio.UpdateAudioSource(id, transform, bypassRoomEffects, gainDb, spread,
+                                       rolloffMode, sourceMinDistance, sourceMaxDistance,
+                                       directivityAlpha, directivitySharpness, currentOcclusion);
     }
   }
-
-#if !USE_SPATIALIZER_PLUGIN
-  void OnAudioFilterRead (float[] data, int channels) {
-    if (id >= 0) {
-      // Pass the next buffer to the audio system.
-      CardboardAudio.ProcessAudioSource(id, data, data.Length);
-    } else {
-      // Fill the buffer with zeros if the source has not been initialized yet.
-      for (int i = 0; i < data.Length; ++i) {
-        data[i] = 0.0f;
-      }
-    }
-  }
-#endif
 
   /// Pauses playing the clip.
   public void Pause () {
@@ -279,7 +267,6 @@ public class CardboardAudioSource : MonoBehaviour {
     }
   }
 
-#if !(UNITY_4_5 || UNITY_4_6 || UNITY_4_7)
   /// Unpauses the paused playback.
   public void UnPause () {
     if (audioSource != null) {
@@ -287,20 +274,17 @@ public class CardboardAudioSource : MonoBehaviour {
       isPaused = false;
     }
   }
-#endif
 
   // Initializes the source.
   private bool InitializeSource () {
     if (id < 0) {
       id = CardboardAudio.CreateAudioSource(hrtfEnabled);
       if (id >= 0) {
-        CardboardAudio.UpdateAudioSource(id, transform, gainDb, rolloffMode, sourceMinDistance,
-                                         sourceMaxDistance, directivityAlpha, directivitySharpness,
-                                         currentOcclusion);
-#if USE_SPATIALIZER_PLUGIN
+        CardboardAudio.UpdateAudioSource(id, transform, bypassRoomEffects, gainDb, spread,
+                                         rolloffMode, sourceMinDistance, sourceMaxDistance,
+                                         directivityAlpha, directivitySharpness, currentOcclusion);
         audioSource.spatialize = true;
         audioSource.SetSpatializerFloat(0, id);
-#endif
       }
     }
     return id >= 0;
@@ -309,13 +293,15 @@ public class CardboardAudioSource : MonoBehaviour {
   // Shuts down the source.
   private void ShutdownSource () {
     if (id >= 0) {
-#if USE_SPATIALIZER_PLUGIN
       audioSource.SetSpatializerFloat(0, -1.0f);
       audioSource.spatialize = false;
-#endif
       CardboardAudio.DestroyAudioSource(id);
       id = -1;
     }
+  }
+
+  void OnDidApplyAnimationProperties () {
+    OnValidate();
   }
 
   void OnValidate () {
@@ -328,7 +314,6 @@ public class CardboardAudioSource : MonoBehaviour {
     maxDistance = sourceMaxDistance;
   }
 
-#if !(UNITY_4_5 || UNITY_4_6 || UNITY_4_7)
   void OnDrawGizmosSelected () {
     Gizmos.color = new Color(0.75f, 0.75f, 1.0f, 0.5f);
     DrawDirectivityGizmo(180);
@@ -374,5 +359,4 @@ public class CardboardAudioSource : MonoBehaviour {
     Vector3 scale = 2.0f * Mathf.Max(transform.lossyScale.x, transform.lossyScale.z) * Vector3.one;
     Gizmos.DrawMesh(directivityGizmoMesh, transform.position, transform.rotation, scale);
   }
-#endif
 }

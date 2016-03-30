@@ -256,12 +256,6 @@ public class StereoController : MonoBehaviour {
   /// Helper routine for creation of a stereo rig.  Used by the
   /// custom editor for this class, or to build the rig at runtime.
   public void AddStereoRig() {
-#if UNITY_EDITOR
-    // Member variable 'cam' not always initialized when this method called in Editor.
-    // So, we'll just make a local of the same name.
-    var cam = GetComponent<Camera>();
-#endif
-
     // Simplistic test if rig already exists.
     // Note: Do not use Eyes property, because it caches the result before we have created the rig.
     var eyes = GetComponentsInChildren<CardboardEye>(true).Where(eye => eye.Controller == this);
@@ -276,11 +270,6 @@ public class StereoController : MonoBehaviour {
       // you may unexpectedly find your camera pinned to the origin.
       head.trackPosition = false;
     }
-#if !UNITY_5
-    if (cam.tag == "MainCamera" && GetComponent<SkyboxMesh>() == null) {
-      gameObject.AddComponent<SkyboxMesh>();
-    }
-#endif
   }
 
   // Helper routine for creation of a stereo eye.
@@ -289,11 +278,6 @@ public class StereoController : MonoBehaviour {
     GameObject go = new GameObject(nm);
     go.transform.SetParent(transform, false);
     go.AddComponent<Camera>().enabled = false;
-#if !UNITY_5
-    if (GetComponent("FlareLayer") != null) {
-      go.AddComponent("FlareLayer");
-    }
-#endif
     var cardboardEye = go.AddComponent<CardboardEye>();
     cardboardEye.eye = eye;
     cardboardEye.CopyCameraAndMakeSideBySide(this);
@@ -363,10 +347,6 @@ public class StereoController : MonoBehaviour {
       renderedStereo = true;
     } else {
       Cardboard.SDK.UpdateState();
-      // Make sure any vertex-distorting shaders don't break completely.
-      Shader.SetGlobalMatrix("_RealProjection", cam.projectionMatrix);
-      Shader.SetGlobalMatrix("_FixProjection", cam.cameraToWorldMatrix);
-      Shader.SetGlobalFloat("_NearClip", cam.nearClipPlane);
     }
   }
 

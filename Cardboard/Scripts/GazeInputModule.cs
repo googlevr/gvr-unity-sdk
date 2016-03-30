@@ -50,8 +50,7 @@ public class GazeInputModule : BaseInputModule {
   public bool vrModeOnly = false;
 
   /// Time in seconds between the pointer down and up events sent by a Cardboard trigger.
-  /// Allows time for the UI elements to make their state transitions.  If you turn off
-  /// _TapIsTrigger_ in Cardboard, then this setting has no effect.
+  /// Allows time for the UI elements to make their state transitions.
   [HideInInspector]
   public float clickTime = 0.1f;  // Based on default time for a button to animate to Pressed.
 
@@ -63,8 +62,8 @@ public class GazeInputModule : BaseInputModule {
   private PointerEventData pointerData;
   private Vector2 lastHeadPose;
 
-  // GazePointer callbacks
-  public static ICardboardPointer cardboardPointer;
+  /// The ICardboardGazePointer which will be responding to gaze events.
+  public static ICardboardGazePointer cardboardPointer;
   // Active state
   private bool isActive = false;
 
@@ -112,22 +111,15 @@ public class GazeInputModule : BaseInputModule {
     UpdateCurrentObject();
     UpdateReticle(gazeObjectPrevious);
 
-    // Get the camera
-    Camera camera = pointerData.enterEventCamera;
-
     // Handle input
-    if (!Cardboard.SDK.TapIsTrigger && !Input.GetMouseButtonDown(0) && Input.GetMouseButton(0)) {
-      // Drag is only supported if TapIsTrigger is false.
+    if (!Input.GetMouseButtonDown(0) && Input.GetMouseButton(0)) {
       HandleDrag();
     } else if (Time.unscaledTime - pointerData.clickTime < clickTime) {
       // Delay new events until clickTime has passed.
     } else if (!pointerData.eligibleForClick &&
-               (Cardboard.SDK.Triggered || !Cardboard.SDK.TapIsTrigger && Input.GetMouseButtonDown(0))) {
+               (Cardboard.SDK.Triggered || Input.GetMouseButtonDown(0))) {
       // New trigger action.
       HandleTrigger();
-      if (cardboardPointer != null) {
-        cardboardPointer.OnGazeTriggerStart(camera);
-      }
     } else if (!Cardboard.SDK.Triggered && !Input.GetMouseButton(0)) {
       // Check if there is a pending click to handle.
       HandlePendingClick();
@@ -174,20 +166,22 @@ public class GazeInputModule : BaseInputModule {
     }
 
     Camera camera = pointerData.enterEventCamera; // Get the camera
-    GameObject currentGazeObject = GetCurrentGameObject(); // Get the gaze target
+    GameObject gazeObject = GetCurrentGameObject(); // Get the gaze target
     Vector3 intersectionPosition = GetIntersectionPosition();
+    bool isInteractive = pointerData.pointerPress != null ||
+        ExecuteEvents.GetEventHandler<IPointerClickHandler>(gazeObject) != null;
 
-    if (currentGazeObject == previousGazedObject) {
-      if (currentGazeObject != null) {
-        cardboardPointer.OnGazeStay(camera, currentGazeObject, intersectionPosition);
+    if (gazeObject == previousGazedObject) {
+      if (gazeObject != null) {
+        cardboardPointer.OnGazeStay(camera, gazeObject, intersectionPosition, isInteractive);
       }
     } else {
       if (previousGazedObject != null) {
         cardboardPointer.OnGazeExit(camera, previousGazedObject);
       }
 
-      if (currentGazeObject != null) {
-        cardboardPointer.OnGazeStart(camera, currentGazeObject, intersectionPosition);
+      if (gazeObject != null) {
+        cardboardPointer.OnGazeStart(camera, gazeObject, intersectionPosition, isInteractive);
       }
     }
   }
@@ -217,7 +211,7 @@ public class GazeInputModule : BaseInputModule {
   }
 
   private void HandlePendingClick() {
-    if (!pointerData.eligibleForClick) {
+    if (!pointerData.eligibleForClick && !pointerData.dragging) {
       return;
     }
 
@@ -230,13 +224,10 @@ public class GazeInputModule : BaseInputModule {
 
     // Send pointer up and click events.
     ExecuteEvents.Execute(pointerData.pointerPress, pointerData, ExecuteEvents.pointerUpHandler);
-    ExecuteEvents.Execute(pointerData.pointerPress, pointerData, ExecuteEvents.pointerClickHandler);
-
-    if (pointerData.pointerDrag != null) {
+    if (pointerData.eligibleForClick) {
+      ExecuteEvents.Execute(pointerData.pointerPress, pointerData, ExecuteEvents.pointerClickHandler);
+    } else if (pointerData.dragging) {
       ExecuteEvents.ExecuteHierarchy(go, pointerData, ExecuteEvents.dropHandler);
-    }
-
-    if (pointerData.pointerDrag != null && pointerData.dragging) {
       ExecuteEvents.Execute(pointerData.pointerDrag, pointerData, ExecuteEvents.endDragHandler);
     }
 
@@ -245,6 +236,7 @@ public class GazeInputModule : BaseInputModule {
     pointerData.rawPointerPress = null;
     pointerData.eligibleForClick = false;
     pointerData.clickCount = 0;
+    pointerData.clickTime = 0;
     pointerData.pointerDrag = null;
     pointerData.dragging = false;
   }
@@ -261,7 +253,7 @@ public class GazeInputModule : BaseInputModule {
 
     // Save the drag handler as well
     pointerData.pointerDrag = ExecuteEvents.GetEventHandler<IDragHandler>(go);
-    if (pointerData.pointerDrag != null && !Cardboard.SDK.TapIsTrigger) {
+    if (pointerData.pointerDrag != null) {
       ExecuteEvents.Execute(pointerData.pointerDrag, pointerData, ExecuteEvents.initializePotentialDrag);
     }
 
@@ -273,6 +265,10 @@ public class GazeInputModule : BaseInputModule {
     pointerData.useDragThreshold = true;
     pointerData.clickCount = 1;
     pointerData.clickTime = Time.unscaledTime;
+
+    if (cardboardPointer != null) {
+      cardboardPointer.OnGazeTriggerStart(pointerData.enterEventCamera);
+    }
   }
 
   private Vector2 NormalizedCartesianToSpherical(Vector3 cartCoords) {

@@ -28,34 +28,23 @@ BaseVRDevice
   // A relatively unique id to use when calling our C++ native render plugin.
   private const int kCardboardRenderEvent = 0x47554342;
 
-  // Event IDs sent up from native layer.
-  private const int kTriggered = 1;
-  private const int kTilted = 2;
-  private const int kProfileChanged = 3;
-  private const int kVRBackButton = 4;
+  // Event IDs sent up from native layer.  Bit flags.
+  // Keep in sync with the corresponding declaration in unity.h.
+  private const int kTriggered = 1 << 0;
+  private const int kTilted = 1 << 1;
+  private const int kProfileChanged = 1 << 2;
+  private const int kVRBackButtonPressed = 1 << 3;
 
   private float[] headData = new float[16];
-  private float[] viewData = new float[16 * 6 + 10];
+  private float[] viewData = new float[16 * 6 + 12];
   private float[] profileData = new float[13];
 
   private Matrix4x4 headView = new Matrix4x4();
   private Matrix4x4 leftEyeView = new Matrix4x4();
   private Matrix4x4 rightEyeView = new Matrix4x4();
 
-  private Queue<int> eventQueue = new Queue<int>();
-
   protected bool debugDisableNativeProjections = false;
-  protected bool debugDisableNativeDistortion = false;
   protected bool debugDisableNativeUILayer = false;
-
-  public override bool SupportsNativeDistortionCorrection(List<string> diagnostics) {
-    bool supported = base.SupportsNativeDistortionCorrection(diagnostics);
-    if (debugDisableNativeDistortion) {
-      supported = false;
-      diagnostics.Add("Debug override");
-    }
-    return supported;
-  }
 
   public override void SetDistortionCorrectionEnabled(bool enabled) {
     EnableDistortionCorrection(enabled);
@@ -79,22 +68,10 @@ BaseVRDevice
   }
 
   public override void Init() {
-    DisplayMetrics dm = GetDisplayMetrics();
-
     // Start will send a log event, so SetUnityVersion first.
     byte[] version = System.Text.Encoding.UTF8.GetBytes(Application.unityVersion);
     SetUnityVersion(version, version.Length);
-    Start(dm.width, dm.height, dm.xdpi, dm.ydpi);
-    SetEventCallback(OnVREvent);
-  }
-
-  public override void SetStereoScreen(RenderTexture stereoScreen) {
-#if UNITY_5 || !UNITY_IOS
-    SetTextureId(stereoScreen != null ? (int)stereoScreen.GetNativeTexturePtr() : 0);
-#else
-    // Using old API for Unity 4.x and iOS because Metal crashes on GetNativeTexturePtr()
-    SetTextureId(stereoScreen != null ? stereoScreen.GetNativeTextureID() : 0);
-#endif
+    Start();
   }
 
   public override void UpdateState() {
@@ -118,7 +95,8 @@ BaseVRDevice
     ResetHeadTracker();
   }
 
-  public override void PostRender() {
+  public override void PostRender(RenderTexture stereoScreen) {
+    SetTextureId((int)stereoScreen.GetNativeTexturePtr());
     GL.IssuePluginEvent(kCardboardRenderEvent);
   }
 
@@ -157,6 +135,10 @@ BaseVRDevice
     rightEyeDistortedViewport = rightEyeUndistortedViewport;
     j += 4;
 
+    leftEyeOrientation = (int)viewData[j];
+    rightEyeOrientation = (int)viewData[j+1];
+    j += 2;
+
     recommendedTextureSize = new Vector2(viewData[j], viewData[j+1]);
     j += 2;
   }
@@ -176,11 +158,15 @@ BaseVRDevice
     device.lenses.offset = profileData[8];
     device.lenses.screenDistance = profileData[9];
     device.lenses.alignment = (int)profileData[10];
-    device.distortion.k1 = profileData[11];
-    device.distortion.k2 = profileData[12];
-    device.inverse = CardboardProfile.ApproximateInverse(device.distortion);
+    device.distortion.Coef = new [] { profileData[11], profileData[12] };
     Profile.screen = screen;
     Profile.device = device;
+
+    float[] rect = new float[4];
+    Profile.GetLeftEyeNoLensTanAngles(rect);
+    float maxRadius = CardboardProfile.GetMaxRadius(rect);
+    Profile.device.inverse = CardboardProfile.ApproximateInverse(
+        Profile.device.distortion, maxRadius);
   }
 
   private static int ExtractMatrix(ref Matrix4x4 mat, float[] data, int i = 0) {
@@ -193,45 +179,13 @@ BaseVRDevice
     return i;
   }
 
-  private int[] events = new int[4];
-
   protected virtual void ProcessEvents() {
-    int num = 0;
-    lock (eventQueue) {
-      num = eventQueue.Count;
-      if (num == 0) {
-        return;
-      }
-      if (num > events.Length) {
-        events = new int[num];
-      }
-      eventQueue.CopyTo(events, 0);
-      eventQueue.Clear();
-    }
-    for (int i = 0; i < num; i++) {
-      switch (events[i]) {
-        case kTriggered:
-          triggered = true;
-          break;
-        case kTilted:
-          tilted = true;
-          break;
-        case kProfileChanged:
-          UpdateScreenData();
-          break;
-        case kVRBackButton:
-          backButtonPressed = true;
-          break;
-      }
-    }
-  }
-
-  [MonoPInvokeCallback(typeof(VREventCallback))]
-  private static void OnVREvent(int eventID) {
-    BaseCardboardDevice device = GetDevice() as BaseCardboardDevice;
-    // This function is called back from random native code threads.
-    lock (device.eventQueue) {
-      device.eventQueue.Enqueue(eventID);
+    int flags = GetEventFlags();
+    triggered = ((flags & kTriggered) != 0);
+    tilted = ((flags & kTilted) != 0);
+    backButtonPressed = ((flags & kVRBackButtonPressed) != 0);
+    if ((flags & kProfileChanged) != 0) {
+      UpdateScreenData();
     }
   }
 
@@ -241,13 +195,8 @@ BaseVRDevice
   private const string dllName = "vrunity";
 #endif
 
-  delegate void VREventCallback(int eventID);
-
   [DllImport(dllName)]
-  private static extern void Start(int width, int height, float xdpi, float ydpi);
-
-  [DllImport(dllName)]
-  private static extern void SetEventCallback(VREventCallback callback);
+  private static extern void Start();
 
   [DllImport(dllName)]
   private static extern void SetTextureId(int id);
@@ -272,6 +221,9 @@ BaseVRDevice
 
   [DllImport(dllName)]
   private static extern void ResetHeadTracker();
+
+  [DllImport(dllName)]
+  private static extern int  GetEventFlags();
 
   [DllImport(dllName)]
   private static extern void GetProfile(float[] profile);
