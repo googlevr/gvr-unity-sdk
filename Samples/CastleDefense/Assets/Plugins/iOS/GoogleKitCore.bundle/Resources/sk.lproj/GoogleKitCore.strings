@@ -1,0 +1,89 @@
+/* Accessibility button label for navigating backwards in the application hierarchy. */
+"GoogleKitCoreAccessibilityNavigateBack" = "Späť";
+
+/* Label for a button indicating that an item can be added to a collection. */
+"GoogleKitCoreAddButton" = "Pridať";
+
+/* Label for a button for navgiating backwards in the application hierarchy. */
+"GoogleKitCoreArrowBackButton" = "Späť";
+
+/* Label for a button for navgiating forwards in the application hierarchy. */
+"GoogleKitCoreArrowForwardButton" = "Dopredu";
+
+/* Label for a button for lowering the device's volume. */
+"GoogleKitCoreVolumeDownButton" = "Znížiť hlasitosť";
+
+/* Label for a button for muting the device's volume. */
+"GoogleKitCoreVolumeMuteButton" = "Stlmiť zvuk";
+
+/* Label for a button for turning the device's volume off. */
+"GoogleKitCoreVolumeOffButton" = "Vypnúť zvuk";
+
+/* Label for a button for raising the device's volume. */
+"GoogleKitCoreVolumeUpButton" = "Zvýšiť hlasitosť";
+
+/* Label for a button for canceling the current user action. */
+"GoogleKitCoreCancelButton" = "Zrušiť";
+
+/* Label for a button for completing the current user action. */
+"GoogleKitCoreCheckButton" = "Skontrolovať";
+
+/* Label for a button for navigating to the previous item */
+"GoogleKitCoreChevronLeftButton" = "Naspäť";
+
+/* Label for a button for navigating to the next item. */
+"GoogleKitCoreChevronRightButton" = "Ďalej";
+
+/* Label for a button for clearing the user's current edits. */
+"GoogleKitCoreClearButton" = "Vymazať";
+
+/* Label for a button for closing the current screen. */
+"GoogleKitCoreCloseButton" = "Zavrieť";
+
+/* Label for a button for creating new content. */
+"GoogleKitCoreCreateButton" = "Vytvoriť";
+
+/* Label for a button for deleting an item. */
+"GoogleKitCoreDeleteButton" = "Odstrániť";
+
+/* Label for a button for composing an email. */
+"GoogleKitCoreEmailButton" = "Napísať";
+
+/* Label for a button for accessing help content. */
+"GoogleKitCoreHelpButton" = "Pomocník";
+
+/* Label for a button for accessing extra information. */
+"GoogleKitCoreInfoButton" = "Informácie";
+
+/* Label for a button for showing the keyboard. */
+"GoogleKitCoreKeyboardButton" = "Klávesnica";
+
+/* Label for a button for opening a menu. */
+"GoogleKitCoreMenuButton" = "Ponuka";
+
+/* Label for a button for opening a menu of extra actions. */
+"GoogleKitCoreMoreVertButton" = "Ďalšie";
+
+/* Label for a button for information related to a person. */
+"GoogleKitCorePersonButton" = "Osoba";
+
+/* Label for a button for refreshing the current content. */
+"GoogleKitCoreRefreshButton" = "Obnoviť";
+
+/* Label for a button for replying to the author of a message. */
+"GoogleKitCoreReplyButton" = "Odpovedať";
+
+/* Label for a button for replying to all recipients of a message. */
+"GoogleKitCoreReplyAllButton" = "Odpovedať všetkým";
+
+/* Label for a button for initiating a search operation. */
+"GoogleKitCoreSearchButton" = "Vyhľadať";
+
+/* Label for a button for showing settings related to the current screen. */
+"GoogleKitCoreSettingsButton" = "Nastavenia";
+
+/* Label for a button for "starring" the current content (marking it as special). */
+"GoogleKitCoreStarButton" = "Označiť hviezdičkou";
+
+/* Label for a button for composing a text/SMS message. */
+"GoogleKitCoreTextSMSButton" = "Poslať správu";

@@ -1,0 +1,89 @@
+/* Accessibility button label for navigating backwards in the application hierarchy. */
+"GoogleKitCoreAccessibilityNavigateBack" = "Буцах";
+
+/* Label for a button indicating that an item can be added to a collection. */
+"GoogleKitCoreAddButton" = "Нэмэх";
+
+/* Label for a button for navgiating backwards in the application hierarchy. */
+"GoogleKitCoreArrowBackButton" = "Буцах";
+
+/* Label for a button for navgiating forwards in the application hierarchy. */
+"GoogleKitCoreArrowForwardButton" = "Урагшлах";
+
+/* Label for a button for lowering the device's volume. */
+"GoogleKitCoreVolumeDownButton" = "Дууг багасгах";
+
+/* Label for a button for muting the device's volume. */
+"GoogleKitCoreVolumeMuteButton" = "Дууг хаах";
+
+/* Label for a button for turning the device's volume off. */
+"GoogleKitCoreVolumeOffButton" = "Дууг унтраах";
+
+/* Label for a button for raising the device's volume. */
+"GoogleKitCoreVolumeUpButton" = "Дууг чангалах";
+
+/* Label for a button for canceling the current user action. */
+"GoogleKitCoreCancelButton" = "Цуцлах";
+
+/* Label for a button for completing the current user action. */
+"GoogleKitCoreCheckButton" = "Шалгах";
+
+/* Label for a button for navigating to the previous item */
+"GoogleKitCoreChevronLeftButton" = "Өмнөх";
+
+/* Label for a button for navigating to the next item. */
+"GoogleKitCoreChevronRightButton" = "Дараах";
+
+/* Label for a button for clearing the user's current edits. */
+"GoogleKitCoreClearButton" = "Арилгах";
+
+/* Label for a button for closing the current screen. */
+"GoogleKitCoreCloseButton" = "Хаах";
+
+/* Label for a button for creating new content. */
+"GoogleKitCoreCreateButton" = "Үүсгэх";
+
+/* Label for a button for deleting an item. */
+"GoogleKitCoreDeleteButton" = "Устгах";
+
+/* Label for a button for composing an email. */
+"GoogleKitCoreEmailButton" = "Э-мэйл";
+
+/* Label for a button for accessing help content. */
+"GoogleKitCoreHelpButton" = "Тусламж";
+
+/* Label for a button for accessing extra information. */
+"GoogleKitCoreInfoButton" = "Мэдээлэл";
+
+/* Label for a button for showing the keyboard. */
+"GoogleKitCoreKeyboardButton" = "Гар";
+
+/* Label for a button for opening a menu. */
+"GoogleKitCoreMenuButton" = "Цэс";
+
+/* Label for a button for opening a menu of extra actions. */
+"GoogleKitCoreMoreVertButton" = "Дэлгэрэнгүй";
+
+/* Label for a button for information related to a person. */
+"GoogleKitCorePersonButton" = "Хүн";
+
+/* Label for a button for refreshing the current content. */
+"GoogleKitCoreRefreshButton" = "Дахин ачаалах";
+
+/* Label for a button for replying to the author of a message. */
+"GoogleKitCoreReplyButton" = "Хариулах";
+
+/* Label for a button for replying to all recipients of a message. */
+"GoogleKitCoreReplyAllButton" = "Бүгдэд хариу илгээх";
+
+/* Label for a button for initiating a search operation. */
+"GoogleKitCoreSearchButton" = "Хайх";
+
+/* Label for a button for showing settings related to the current screen. */
+"GoogleKitCoreSettingsButton" = "Тохиргоо";
+
+/* Label for a button for "starring" the current content (marking it as special). */
+"GoogleKitCoreStarButton" = "Од өгөх";
+
+/* Label for a button for composing a text/SMS message. */
+"GoogleKitCoreTextSMSButton" = "Мессеж бичих";

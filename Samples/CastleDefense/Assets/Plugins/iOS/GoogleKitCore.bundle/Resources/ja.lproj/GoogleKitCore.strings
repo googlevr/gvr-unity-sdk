@@ -1,0 +1,89 @@
+/* Accessibility button label for navigating backwards in the application hierarchy. */
+"GoogleKitCoreAccessibilityNavigateBack" = "戻る";
+
+/* Label for a button indicating that an item can be added to a collection. */
+"GoogleKitCoreAddButton" = "追加";
+
+/* Label for a button for navgiating backwards in the application hierarchy. */
+"GoogleKitCoreArrowBackButton" = "戻る";
+
+/* Label for a button for navgiating forwards in the application hierarchy. */
+"GoogleKitCoreArrowForwardButton" = "進む";
+
+/* Label for a button for lowering the device's volume. */
+"GoogleKitCoreVolumeDownButton" = "音量を下げる";
+
+/* Label for a button for muting the device's volume. */
+"GoogleKitCoreVolumeMuteButton" = "ミュート";
+
+/* Label for a button for turning the device's volume off. */
+"GoogleKitCoreVolumeOffButton" = "音量オフ";
+
+/* Label for a button for raising the device's volume. */
+"GoogleKitCoreVolumeUpButton" = "音量を上げる";
+
+/* Label for a button for canceling the current user action. */
+"GoogleKitCoreCancelButton" = "キャンセル";
+
+/* Label for a button for completing the current user action. */
+"GoogleKitCoreCheckButton" = "チェック";
+
+/* Label for a button for navigating to the previous item */
+"GoogleKitCoreChevronLeftButton" = "前へ";
+
+/* Label for a button for navigating to the next item. */
+"GoogleKitCoreChevronRightButton" = "次へ";
+
+/* Label for a button for clearing the user's current edits. */
+"GoogleKitCoreClearButton" = "消去";
+
+/* Label for a button for closing the current screen. */
+"GoogleKitCoreCloseButton" = "閉じる";
+
+/* Label for a button for creating new content. */
+"GoogleKitCoreCreateButton" = "作成";
+
+/* Label for a button for deleting an item. */
+"GoogleKitCoreDeleteButton" = "削除";
+
+/* Label for a button for composing an email. */
+"GoogleKitCoreEmailButton" = "メール";
+
+/* Label for a button for accessing help content. */
+"GoogleKitCoreHelpButton" = "ヘルプ";
+
+/* Label for a button for accessing extra information. */
+"GoogleKitCoreInfoButton" = "情報";
+
+/* Label for a button for showing the keyboard. */
+"GoogleKitCoreKeyboardButton" = "キーボード";
+
+/* Label for a button for opening a menu. */
+"GoogleKitCoreMenuButton" = "メニュー";
+
+/* Label for a button for opening a menu of extra actions. */
+"GoogleKitCoreMoreVertButton" = "その他";
+
+/* Label for a button for information related to a person. */
+"GoogleKitCorePersonButton" = "人物";
+
+/* Label for a button for refreshing the current content. */
+"GoogleKitCoreRefreshButton" = "更新";
+
+/* Label for a button for replying to the author of a message. */
+"GoogleKitCoreReplyButton" = "返信";
+
+/* Label for a button for replying to all recipients of a message. */
+"GoogleKitCoreReplyAllButton" = "全員に返信";
+
+/* Label for a button for initiating a search operation. */
+"GoogleKitCoreSearchButton" = "検索";
+
+/* Label for a button for showing settings related to the current screen. */
+"GoogleKitCoreSettingsButton" = "設定";
+
+/* Label for a button for "starring" the current content (marking it as special). */
+"GoogleKitCoreStarButton" = "スターを付ける";
+
+/* Label for a button for composing a text/SMS message. */
+"GoogleKitCoreTextSMSButton" = "テキスト";
