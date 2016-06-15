@@ -56,16 +56,9 @@ namespace Gvr.Internal {
       setShowVrBackButtonOnlyInVR(only);
     }
 
-    public override void SetAutoDriftCorrectionEnabled(bool enabled){
-      // For iOS don't use Drift Correction.
-      base.SetAutoDriftCorrectionEnabled(false);
-    }
-
     public override void Init() {
       isOpenGL = isOpenGLAPI();
       base.Init();
-      // For iOS don't use Drift Correction.
-      SetAutoDriftCorrectionEnabled(false);
     }
 
     public override void ShowSettingsDialog() {

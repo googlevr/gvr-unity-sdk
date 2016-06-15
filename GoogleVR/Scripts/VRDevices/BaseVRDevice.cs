@@ -48,7 +48,6 @@ namespace Gvr.Internal {
     public abstract void SetShowVrBackButtonOnlyInVR(bool only);
 
     public abstract void SetNeckModelScale(float scale);
-    public abstract void SetAutoDriftCorrectionEnabled(bool enabled);
     public abstract void SetElectronicDisplayStabilizationEnabled(bool enabled);
 
     public virtual bool SupportsNativeDistortionCorrection(List<string> diagnostics) {

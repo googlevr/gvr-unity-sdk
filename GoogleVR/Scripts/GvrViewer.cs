@@ -218,21 +218,6 @@ public class GvrViewer : MonoBehaviour {
   [SerializeField]
   private float neckModelScale = 0.0f;
 
-  /// When enabled, drift in the gyro readings is estimated and removed.
-  public bool AutoDriftCorrection {
-    get {
-      return autoDriftCorrection;
-    }
-    set {
-      if (value != autoDriftCorrection && device != null) {
-        device.SetAutoDriftCorrectionEnabled(value);
-      }
-      autoDriftCorrection = value;
-    }
-  }
-  [SerializeField]
-  private bool autoDriftCorrection = true;
-
   /// @cond
   public bool ElectronicDisplayStabilization {
     get {
@@ -460,7 +445,6 @@ public class GvrViewer : MonoBehaviour {
     device.SetDistortionCorrectionEnabled(distortionCorrection == DistortionCorrectionMethod.Native
         && NativeDistortionCorrectionSupported);
     device.SetNeckModelScale(neckModelScale);
-    device.SetAutoDriftCorrectionEnabled(autoDriftCorrection);
     device.SetElectronicDisplayStabilizationEnabled(electronicDisplayStabilization);
 
     device.SetVRModeEnabled(vrModeEnabled);

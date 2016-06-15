@@ -34,9 +34,6 @@ public class GvrViewerEditor : Editor {
       "The screen resolution is multiplied by this value when creating the " +
       "RenderTexture for the stereo screen.");
 
-  GUIContent autoDriftCorrectionLabel = new GUIContent("Auto Drift Correction",
-      "When enabled, drift in the gyro readings is estimated and removed.");
-
   GUIContent neckModelScaleLabel = new GUIContent("Neck Model Scale",
       "The scale factor of the builtin neck model [0..1].  To disable, set to 0.");
 
@@ -84,8 +81,6 @@ public class GvrViewerEditor : Editor {
     }
     gvrViewer.NeckModelScale =
         EditorGUILayout.Slider(neckModelScaleLabel, gvrViewer.NeckModelScale, 0, 1);
-    gvrViewer.AutoDriftCorrection =
-      EditorGUILayout.Toggle(autoDriftCorrectionLabel, gvrViewer.AutoDriftCorrection);
 
     EditorGUILayout.Separator();
 

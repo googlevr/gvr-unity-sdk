@@ -51,7 +51,6 @@ namespace Gvr.Internal {
     public override void SetVRBackButtonEnabled(bool enabled) {}
     public override void SetShowVrBackButtonOnlyInVR(bool only) {}
     public override void SetNeckModelScale(float scale) {}
-    public override void SetAutoDriftCorrectionEnabled(bool enabled) {}
     public override void SetElectronicDisplayStabilizationEnabled(bool enabled) {}
 
     private Quaternion initialRotation = Quaternion.identity;

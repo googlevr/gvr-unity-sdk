@@ -53,10 +53,6 @@ namespace Gvr.Internal {
       SetNeckModelFactor(scale);
     }
 
-    public override void SetAutoDriftCorrectionEnabled(bool enabled) {
-      EnableAutoDriftCorrection(enabled);
-    }
-
     public override void SetElectronicDisplayStabilizationEnabled(bool enabled) {
       EnableElectronicDisplayStabilization(enabled);
     }
@@ -208,9 +204,6 @@ namespace Gvr.Internal {
 
     [DllImport(dllName)]
     private static extern void EnableDistortionCorrection(bool enable);
-
-    [DllImport(dllName)]
-    private static extern void EnableAutoDriftCorrection(bool enable);
 
     [DllImport(dllName)]
     private static extern void EnableElectronicDisplayStabilization(bool enable);
