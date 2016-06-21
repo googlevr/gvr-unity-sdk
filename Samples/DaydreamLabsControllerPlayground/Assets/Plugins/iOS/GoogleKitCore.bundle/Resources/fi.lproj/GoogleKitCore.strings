@@ -1,0 +1,89 @@
+/* Accessibility button label for navigating backwards in the application hierarchy. */
+"GoogleKitCoreAccessibilityNavigateBack" = "Edellinen";
+
+/* Label for a button indicating that an item can be added to a collection. */
+"GoogleKitCoreAddButton" = "Lisää";
+
+/* Label for a button for navgiating backwards in the application hierarchy. */
+"GoogleKitCoreArrowBackButton" = "Edellinen";
+
+/* Label for a button for navgiating forwards in the application hierarchy. */
+"GoogleKitCoreArrowForwardButton" = "Seuraava";
+
+/* Label for a button for lowering the device's volume. */
+"GoogleKitCoreVolumeDownButton" = "Vähennä äänenvoimakkuutta";
+
+/* Label for a button for muting the device's volume. */
+"GoogleKitCoreVolumeMuteButton" = "Mykistä ääni";
+
+/* Label for a button for turning the device's volume off. */
+"GoogleKitCoreVolumeOffButton" = "Ääni pois";
+
+/* Label for a button for raising the device's volume. */
+"GoogleKitCoreVolumeUpButton" = "Lisää äänenvoimakkuutta";
+
+/* Label for a button for canceling the current user action. */
+"GoogleKitCoreCancelButton" = "Peruuta";
+
+/* Label for a button for completing the current user action. */
+"GoogleKitCoreCheckButton" = "Valmis";
+
+/* Label for a button for navigating to the previous item */
+"GoogleKitCoreChevronLeftButton" = "Edellinen";
+
+/* Label for a button for navigating to the next item. */
+"GoogleKitCoreChevronRightButton" = "Seuraava";
+
+/* Label for a button for clearing the user's current edits. */
+"GoogleKitCoreClearButton" = "Tyhjennä";
+
+/* Label for a button for closing the current screen. */
+"GoogleKitCoreCloseButton" = "Sulje";
+
+/* Label for a button for creating new content. */
+"GoogleKitCoreCreateButton" = "Luo";
+
+/* Label for a button for deleting an item. */
+"GoogleKitCoreDeleteButton" = "Poista";
+
+/* Label for a button for composing an email. */
+"GoogleKitCoreEmailButton" = "Sähköposti";
+
+/* Label for a button for accessing help content. */
+"GoogleKitCoreHelpButton" = "Ohje";
+
+/* Label for a button for accessing extra information. */
+"GoogleKitCoreInfoButton" = "Tietoja";
+
+/* Label for a button for showing the keyboard. */
+"GoogleKitCoreKeyboardButton" = "Näppäimistö";
+
+/* Label for a button for opening a menu. */
+"GoogleKitCoreMenuButton" = "Valikko";
+
+/* Label for a button for opening a menu of extra actions. */
+"GoogleKitCoreMoreVertButton" = "Lisää";
+
+/* Label for a button for information related to a person. */
+"GoogleKitCorePersonButton" = "Henkilö";
+
+/* Label for a button for refreshing the current content. */
+"GoogleKitCoreRefreshButton" = "Päivitä";
+
+/* Label for a button for replying to the author of a message. */
+"GoogleKitCoreReplyButton" = "Vastaa";
+
+/* Label for a button for replying to all recipients of a message. */
+"GoogleKitCoreReplyAllButton" = "Vastaa kaikille";
+
+/* Label for a button for initiating a search operation. */
+"GoogleKitCoreSearchButton" = "Hae";
+
+/* Label for a button for showing settings related to the current screen. */
+"GoogleKitCoreSettingsButton" = "Asetukset";
+
+/* Label for a button for "starring" the current content (marking it as special). */
+"GoogleKitCoreStarButton" = "Merkitse tähdellä";
+
+/* Label for a button for composing a text/SMS message. */
+"GoogleKitCoreTextSMSButton" = "Tekstivesti";

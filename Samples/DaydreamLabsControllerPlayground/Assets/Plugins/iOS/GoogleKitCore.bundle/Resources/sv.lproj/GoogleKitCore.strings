@@ -1,0 +1,89 @@
+/* Accessibility button label for navigating backwards in the application hierarchy. */
+"GoogleKitCoreAccessibilityNavigateBack" = "Bakåt";
+
+/* Label for a button indicating that an item can be added to a collection. */
+"GoogleKitCoreAddButton" = "Lägg till";
+
+/* Label for a button for navgiating backwards in the application hierarchy. */
+"GoogleKitCoreArrowBackButton" = "Bakåt";
+
+/* Label for a button for navgiating forwards in the application hierarchy. */
+"GoogleKitCoreArrowForwardButton" = "Fortsätt";
+
+/* Label for a button for lowering the device's volume. */
+"GoogleKitCoreVolumeDownButton" = "Sänk volymen";
+
+/* Label for a button for muting the device's volume. */
+"GoogleKitCoreVolumeMuteButton" = "Stäng av ljudet";
+
+/* Label for a button for turning the device's volume off. */
+"GoogleKitCoreVolumeOffButton" = "Stäng av ljudet";
+
+/* Label for a button for raising the device's volume. */
+"GoogleKitCoreVolumeUpButton" = "Höj volymen";
+
+/* Label for a button for canceling the current user action. */
+"GoogleKitCoreCancelButton" = "Avbryt";
+
+/* Label for a button for completing the current user action. */
+"GoogleKitCoreCheckButton" = "Markera";
+
+/* Label for a button for navigating to the previous item */
+"GoogleKitCoreChevronLeftButton" = "Föregående";
+
+/* Label for a button for navigating to the next item. */
+"GoogleKitCoreChevronRightButton" = "Nästa";
+
+/* Label for a button for clearing the user's current edits. */
+"GoogleKitCoreClearButton" = "Ta bort";
+
+/* Label for a button for closing the current screen. */
+"GoogleKitCoreCloseButton" = "Stäng";
+
+/* Label for a button for creating new content. */
+"GoogleKitCoreCreateButton" = "Skapa";
+
+/* Label for a button for deleting an item. */
+"GoogleKitCoreDeleteButton" = "Radera";
+
+/* Label for a button for composing an email. */
+"GoogleKitCoreEmailButton" = "E-postadress";
+
+/* Label for a button for accessing help content. */
+"GoogleKitCoreHelpButton" = "Hjälp";
+
+/* Label for a button for accessing extra information. */
+"GoogleKitCoreInfoButton" = "Information";
+
+/* Label for a button for showing the keyboard. */
+"GoogleKitCoreKeyboardButton" = "Tangentbord";
+
+/* Label for a button for opening a menu. */
+"GoogleKitCoreMenuButton" = "Meny";
+
+/* Label for a button for opening a menu of extra actions. */
+"GoogleKitCoreMoreVertButton" = "Mer";
+
+/* Label for a button for information related to a person. */
+"GoogleKitCorePersonButton" = "Person";
+
+/* Label for a button for refreshing the current content. */
+"GoogleKitCoreRefreshButton" = "Uppdatera";
+
+/* Label for a button for replying to the author of a message. */
+"GoogleKitCoreReplyButton" = "Svara";
+
+/* Label for a button for replying to all recipients of a message. */
+"GoogleKitCoreReplyAllButton" = "Svara alla";
+
+/* Label for a button for initiating a search operation. */
+"GoogleKitCoreSearchButton" = "Sök";
+
+/* Label for a button for showing settings related to the current screen. */
+"GoogleKitCoreSettingsButton" = "Inställningar";
+
+/* Label for a button for "starring" the current content (marking it as special). */
+"GoogleKitCoreStarButton" = "Stjärna";
+
+/* Label for a button for composing a text/SMS message. */
+"GoogleKitCoreTextSMSButton" = "Sms";

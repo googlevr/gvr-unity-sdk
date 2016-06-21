@@ -1,0 +1,102 @@
+fileFormatVersion: 2
+guid: 4982825cd22feb54eae4a7d8ff5990fc
+timeCreated: 1461626400
+licenseType: Pro
+ModelImporter:
+  serializedVersion: 19
+  fileIDToRecycleName:
+    100000: ENV_Xylophone_Pipe_08
+    100002: //RootNode
+    100004: root
+    100006: xylophone_rig_chain_01
+    100008: xylophone_rig_chain_02
+    100010: xylophone_rig_chain_03
+    100012: xylophone_rig_chain_04
+    100014: xylophone_rig_chain_05
+    100016: xylophone_rig_chain_06
+    100018: xylophone_rig_chain_07
+    100020: xylophone_rig_chain_08
+    100022: xylophone_rig_chain_09
+    100024: xylophone_rig_chain_end
+    100026: xylophone_rig_chain_00
+    400000: ENV_Xylophone_Pipe_08
+    400002: //RootNode
+    400004: root
+    400006: xylophone_rig_chain_01
+    400008: xylophone_rig_chain_02
+    400010: xylophone_rig_chain_03
+    400012: xylophone_rig_chain_04
+    400014: xylophone_rig_chain_05
+    400016: xylophone_rig_chain_06
+    400018: xylophone_rig_chain_07
+    400020: xylophone_rig_chain_08
+    400022: xylophone_rig_chain_09
+    400024: xylophone_rig_chain_end
+    400026: xylophone_rig_chain_00
+    4300000: ENV_Xylophone_Pipe_08
+    9500000: //RootNode
+    13700000: ENV_Xylophone_Pipe_08
+  materials:
+    importMaterials: 0
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleRotations: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+  importAnimation: 0
+  copyAvatar: 0
+  humanDescription:
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

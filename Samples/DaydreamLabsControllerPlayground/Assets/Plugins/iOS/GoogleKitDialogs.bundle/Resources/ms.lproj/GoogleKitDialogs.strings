@@ -1,0 +1,20 @@
+/* Label for the close button on a dialog that needs acknowledgement. (15 chars.) */
+"AcknowledgeAction" = "OK";
+
+/* "Cancel" text label where the standard 'abort this action' button is offered. (8 chars.) */
+"CancelAction" = "Batal";
+
+/* Label for a button indicating an action should be attempted again. (40 chars.) */
+"TryAgainAction" = "Cuba lagi";
+
+/* Label for the close button on a dialog that needs acknowledgement. (15 chars.) */
+"GoogleKitDialogsAcknowledgeAction" = "OK";
+
+/* "Cancel" text label where the standard 'abort this action' button is offered. (8 chars.) */
+"GoogleKitDialogsCancelAction" = "Batal";
+
+/* Label for a button indicating an action should be attempted again. (40 chars.) */
+"GoogleKitDialogsTryAgainAction" = "Cuba lagi";
+
+/* Word read aloud when VoiceOver is enabled before showing an alert. (No limit chars.) */
+"GoogleKitDialogsAccessibilityAlertAnnouncement" = "Makluman";

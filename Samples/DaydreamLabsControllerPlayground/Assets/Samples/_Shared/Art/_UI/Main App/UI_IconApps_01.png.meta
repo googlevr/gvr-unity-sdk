@@ -1,0 +1,398 @@
+fileFormatVersion: 2
+guid: 0d3ee96429216d04dabd167c31c6ef12
+timeCreated: 1461863401
+licenseType: Pro
+TextureImporter:
+  fileIDToRecycleName:
+    21300000: UI_IconApps_01_Boomerang
+    21300002: UI_IconApps_01_Tennis
+    21300004: UI_IconApps_01_Wand
+    21300006: UI_IconApps_00_Return
+    21300008: UI_IconApps_01_Pottery
+    21300010: UI_IconApps_01_5
+    21300012: UI_IconApps_01_Painting
+    21300014: UI_IconApps_01_Music
+    21300016: UI_IconApps_01_Sculpture
+    21300018: UI_IconApps_01_Ninja
+    21300020: UI_IconApps_01_Dragon
+    21300022: UI_IconApps_01_Adventure
+    21300024: UI_IconApps_01_DragonTeam
+    21300026: UI_IconApps_01_Skyship
+    21300028: UI_IconApps_01_Archeology
+    21300030: UI_IconApps_01_Crane
+    21300032: UI_IconApps_01_Statue
+    21300034: UI_IconApps_02_Tennis
+    21300036: UI_IconApps_03_Wand
+    21300038: UI_IconApps_04_Pottery
+    21300040: UI_IconApps_05_Painting
+    21300042: UI_IconApps_06_Music
+    21300044: UI_IconApps_07_Sculpture
+    21300046: UI_IconApps_08_Ninja
+    21300048: UI_IconApps_09_Dragon
+    21300050: UI_IconApps_10_Adventure
+    21300052: UI_IconApps_11_DragonTeam
+    21300054: UI_IconApps_12_Skyship
+    21300056: UI_IconApps_13_Archeology
+    21300058: UI_IconApps_14_Crane
+    21300060: UI_IconApps_15_Statue
+  serializedVersion: 2
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 1
+    linearTexture: 0
+    correctGamma: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+  isReadable: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 0
+  cubemapConvolution: 0
+  cubemapConvolutionSteps: 7
+  cubemapConvolutionExponent: 1.5
+  seamlessCubemap: 0
+  textureFormat: -3
+  maxTextureSize: 4096
+  textureSettings:
+    filterMode: -1
+    aniso: 16
+    mipBias: -1
+    wrapMode: 1
+  nPOTScale: 0
+  lightmap: 0
+  rGBM: 0
+  compressionQuality: 50
+  allowsAlphaSplitting: 0
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spritePixelsToUnits: 1.5
+  alphaIsTransparency: 1
+  textureType: 8
+  buildTargetSettings: []
+  spriteSheet:
+    sprites:
+    - name: UI_IconApps_01_Boomerang
+      rect:
+        serializedVersion: 2
+        x: 16
+        y: 1483
+        width: 465
+        height: 465
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 231.5, y: 232.5}
+        - {x: -230.5, y: 232.5}
+        - {x: -232.5, y: 231.5}
+        - {x: -232.5, y: -232.5}
+        - {x: 231.5, y: -232.5}
+        - {x: 232.5, y: -231.5}
+        - {x: 232.5, y: 230.5}
+    - name: UI_IconApps_02_Tennis
+      rect:
+        serializedVersion: 2
+        x: 504
+        y: 1483
+        width: 465
+        height: 465
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 231.5, y: 232.5}
+        - {x: -230.5, y: 232.5}
+        - {x: -232.5, y: 231.5}
+        - {x: -232.5, y: -232.5}
+        - {x: 231.5, y: -232.5}
+        - {x: 232.5, y: -231.5}
+        - {x: 232.5, y: 230.5}
+    - name: UI_IconApps_03_Wand
+      rect:
+        serializedVersion: 2
+        x: 992
+        y: 1483
+        width: 465
+        height: 465
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 231.5, y: 232.5}
+        - {x: -230.5, y: 232.5}
+        - {x: -232.5, y: 231.5}
+        - {x: -232.5, y: -232.5}
+        - {x: 231.5, y: -232.5}
+        - {x: 232.5, y: -231.5}
+        - {x: 232.5, y: 230.5}
+    - name: UI_IconApps_00_Return
+      rect:
+        serializedVersion: 2
+        x: 1480
+        y: 1484
+        width: 465
+        height: 465
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 231.5, y: 232.5}
+        - {x: -230.5, y: 232.5}
+        - {x: -232.5, y: 231.5}
+        - {x: -232.5, y: -232.5}
+        - {x: 231.5, y: -232.5}
+        - {x: 232.5, y: -231.5}
+        - {x: 232.5, y: 230.5}
+    - name: UI_IconApps_04_Pottery
+      rect:
+        serializedVersion: 2
+        x: 16
+        y: 999
+        width: 465
+        height: 465
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 231.5, y: 232.5}
+        - {x: -230.5, y: 232.5}
+        - {x: -232.5, y: 231.5}
+        - {x: -232.5, y: -232.5}
+        - {x: 231.5, y: -232.5}
+        - {x: 232.5, y: -231.5}
+        - {x: 232.5, y: 230.5}
+    - name: UI_IconApps_05_Painting
+      rect:
+        serializedVersion: 2
+        x: 494
+        y: 998
+        width: 475
+        height: 466
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 236.5, y: 233}
+        - {x: -225.5, y: 233}
+        - {x: -227.5, y: 231}
+        - {x: -227.5, y: 230}
+        - {x: -229.5, y: 228}
+        - {x: -229.5, y: -168}
+        - {x: -231.5, y: -167}
+        - {x: -234.5, y: -168}
+        - {x: -237.5, y: -172}
+        - {x: -237.5, y: -183}
+        - {x: -232.5, y: -185}
+        - {x: -229.5, y: -185}
+        - {x: -229.5, y: -227}
+        - {x: -225.5, y: -232}
+        - {x: -224.5, y: -232}
+        - {x: -223.5, y: -233}
+        - {x: 234.5, y: -233}
+        - {x: 237.5, y: -231}
+        - {x: 237.5, y: 231}
+      - - {x: -235.5, y: -108}
+        - {x: -237.5, y: -108}
+        - {x: -237.5, y: -121}
+        - {x: -236.5, y: -121}
+        - {x: -232.5, y: -118}
+        - {x: -231.5, y: -115}
+        - {x: -231.5, y: -113}
+    - name: UI_IconApps_06_Music
+      rect:
+        serializedVersion: 2
+        x: 991
+        y: 999
+        width: 465
+        height: 465
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 231.5, y: 232.5}
+        - {x: -230.5, y: 232.5}
+        - {x: -232.5, y: 231.5}
+        - {x: -232.5, y: -232.5}
+        - {x: 231.5, y: -232.5}
+        - {x: 232.5, y: -231.5}
+        - {x: 232.5, y: 230.5}
+    - name: UI_IconApps_07_Sculpture
+      rect:
+        serializedVersion: 2
+        x: 1478
+        y: 998
+        width: 465
+        height: 465
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 231.5, y: 232.5}
+        - {x: -230.5, y: 232.5}
+        - {x: -232.5, y: 231.5}
+        - {x: -232.5, y: -232.5}
+        - {x: 231.5, y: -232.5}
+        - {x: 232.5, y: -231.5}
+        - {x: 232.5, y: 230.5}
+    - name: UI_IconApps_08_Ninja
+      rect:
+        serializedVersion: 2
+        x: 16
+        y: 513
+        width: 465
+        height: 465
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 231.5, y: 232.5}
+        - {x: -230.5, y: 232.5}
+        - {x: -232.5, y: 231.5}
+        - {x: -232.5, y: -232.5}
+        - {x: 231.5, y: -232.5}
+        - {x: 232.5, y: -231.5}
+        - {x: 232.5, y: 230.5}
+    - name: UI_IconApps_09_Dragon
+      rect:
+        serializedVersion: 2
+        x: 504
+        y: 513
+        width: 465
+        height: 465
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 231.5, y: 232.5}
+        - {x: -230.5, y: 232.5}
+        - {x: -232.5, y: 231.5}
+        - {x: -232.5, y: -232.5}
+        - {x: 231.5, y: -232.5}
+        - {x: 232.5, y: -231.5}
+        - {x: 232.5, y: 230.5}
+    - name: UI_IconApps_10_Adventure
+      rect:
+        serializedVersion: 2
+        x: 992
+        y: 513
+        width: 465
+        height: 465
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 231.5, y: 232.5}
+        - {x: -230.5, y: 232.5}
+        - {x: -232.5, y: 231.5}
+        - {x: -232.5, y: -232.5}
+        - {x: 231.5, y: -232.5}
+        - {x: 232.5, y: -231.5}
+        - {x: 232.5, y: 230.5}
+    - name: UI_IconApps_11_DragonTeam
+      rect:
+        serializedVersion: 2
+        x: 1480
+        y: 512
+        width: 465
+        height: 465
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 231.5, y: 232.5}
+        - {x: -230.5, y: 232.5}
+        - {x: -232.5, y: 231.5}
+        - {x: -232.5, y: -232.5}
+        - {x: 231.5, y: -232.5}
+        - {x: 232.5, y: -231.5}
+        - {x: 232.5, y: 230.5}
+    - name: UI_IconApps_12_Skyship
+      rect:
+        serializedVersion: 2
+        x: 16
+        y: 28
+        width: 465
+        height: 465
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 231.5, y: 232.5}
+        - {x: -230.5, y: 232.5}
+        - {x: -232.5, y: 231.5}
+        - {x: -232.5, y: -232.5}
+        - {x: 231.5, y: -232.5}
+        - {x: 232.5, y: -231.5}
+        - {x: 232.5, y: 230.5}
+    - name: UI_IconApps_13_Archeology
+      rect:
+        serializedVersion: 2
+        x: 504
+        y: 27
+        width: 467
+        height: 467
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: -230.5, y: 233.5}
+        - {x: -233.5, y: 230.5}
+        - {x: -233.5, y: -231.5}
+        - {x: -232.5, y: -233.5}
+        - {x: 229.5, y: -233.5}
+        - {x: 233.5, y: -230.5}
+        - {x: 233.5, y: 231.5}
+        - {x: 232.5, y: 233.5}
+    - name: UI_IconApps_14_Crane
+      rect:
+        serializedVersion: 2
+        x: 992
+        y: 24
+        width: 469
+        height: 467
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 228.5, y: 233.5}
+        - {x: -232.5, y: 233.5}
+        - {x: -234.5, y: 232.5}
+        - {x: -234.5, y: -229.5}
+        - {x: -233.5, y: -231.5}
+        - {x: -228.5, y: -233.5}
+        - {x: 234.5, y: -233.5}
+        - {x: 234.5, y: 230.5}
+        - {x: 233.5, y: 231.5}
+    - name: UI_IconApps_15_Statue
+      rect:
+        serializedVersion: 2
+        x: 1478
+        y: 24
+        width: 465
+        height: 465
+      alignment: 0
+      pivot: {x: 0.5, y: 0.5}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      outline:
+      - - {x: 231.5, y: 232.5}
+        - {x: -230.5, y: 232.5}
+        - {x: -232.5, y: 231.5}
+        - {x: -232.5, y: -232.5}
+        - {x: 231.5, y: -232.5}
+        - {x: 232.5, y: -231.5}
+        - {x: 232.5, y: 230.5}
+    outline: []
+  spritePackingTag: 
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -1,0 +1,89 @@
+/* Accessibility button label for navigating backwards in the application hierarchy. */
+"GoogleKitCoreAccessibilityNavigateBack" = "后退";
+
+/* Label for a button indicating that an item can be added to a collection. */
+"GoogleKitCoreAddButton" = "添加";
+
+/* Label for a button for navgiating backwards in the application hierarchy. */
+"GoogleKitCoreArrowBackButton" = "后退";
+
+/* Label for a button for navgiating forwards in the application hierarchy. */
+"GoogleKitCoreArrowForwardButton" = "前进";
+
+/* Label for a button for lowering the device's volume. */
+"GoogleKitCoreVolumeDownButton" = "调低音量";
+
+/* Label for a button for muting the device's volume. */
+"GoogleKitCoreVolumeMuteButton" = "静音";
+
+/* Label for a button for turning the device's volume off. */
+"GoogleKitCoreVolumeOffButton" = "关闭音量";
+
+/* Label for a button for raising the device's volume. */
+"GoogleKitCoreVolumeUpButton" = "调高音量";
+
+/* Label for a button for canceling the current user action. */
+"GoogleKitCoreCancelButton" = "取消";
+
+/* Label for a button for completing the current user action. */
+"GoogleKitCoreCheckButton" = "确认";
+
+/* Label for a button for navigating to the previous item */
+"GoogleKitCoreChevronLeftButton" = "上一项";
+
+/* Label for a button for navigating to the next item. */
+"GoogleKitCoreChevronRightButton" = "下一项";
+
+/* Label for a button for clearing the user's current edits. */
+"GoogleKitCoreClearButton" = "清除";
+
+/* Label for a button for closing the current screen. */
+"GoogleKitCoreCloseButton" = "关闭";
+
+/* Label for a button for creating new content. */
+"GoogleKitCoreCreateButton" = "创建";
+
+/* Label for a button for deleting an item. */
+"GoogleKitCoreDeleteButton" = "删除";
+
+/* Label for a button for composing an email. */
+"GoogleKitCoreEmailButton" = "电子邮件";
+
+/* Label for a button for accessing help content. */
+"GoogleKitCoreHelpButton" = "帮助";
+
+/* Label for a button for accessing extra information. */
+"GoogleKitCoreInfoButton" = "信息";
+
+/* Label for a button for showing the keyboard. */
+"GoogleKitCoreKeyboardButton" = "键盘";
+
+/* Label for a button for opening a menu. */
+"GoogleKitCoreMenuButton" = "菜单";
+
+/* Label for a button for opening a menu of extra actions. */
+"GoogleKitCoreMoreVertButton" = "更多";
+
+/* Label for a button for information related to a person. */
+"GoogleKitCorePersonButton" = "人物";
+
+/* Label for a button for refreshing the current content. */
+"GoogleKitCoreRefreshButton" = "刷新";
+
+/* Label for a button for replying to the author of a message. */
+"GoogleKitCoreReplyButton" = "回复";
+
+/* Label for a button for replying to all recipients of a message. */
+"GoogleKitCoreReplyAllButton" = "全部回复";
+
+/* Label for a button for initiating a search operation. */
+"GoogleKitCoreSearchButton" = "搜索";
+
+/* Label for a button for showing settings related to the current screen. */
+"GoogleKitCoreSettingsButton" = "设置";
+
+/* Label for a button for "starring" the current content (marking it as special). */
+"GoogleKitCoreStarButton" = "加注星标";
+
+/* Label for a button for composing a text/SMS message. */
+"GoogleKitCoreTextSMSButton" = "短信";

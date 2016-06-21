@@ -1,0 +1,89 @@
+/* Accessibility button label for navigating backwards in the application hierarchy. */
+"GoogleKitCoreAccessibilityNavigateBack" = "Հետ";
+
+/* Label for a button indicating that an item can be added to a collection. */
+"GoogleKitCoreAddButton" = "Ավելացնել";
+
+/* Label for a button for navgiating backwards in the application hierarchy. */
+"GoogleKitCoreArrowBackButton" = "Հետ";
+
+/* Label for a button for navgiating forwards in the application hierarchy. */
+"GoogleKitCoreArrowForwardButton" = "Առաջ";
+
+/* Label for a button for lowering the device's volume. */
+"GoogleKitCoreVolumeDownButton" = "Ցածրացնել ձայնը";
+
+/* Label for a button for muting the device's volume. */
+"GoogleKitCoreVolumeMuteButton" = "Անջատել ձայնը";
+
+/* Label for a button for turning the device's volume off. */
+"GoogleKitCoreVolumeOffButton" = "Առանց ձայնի";
+
+/* Label for a button for raising the device's volume. */
+"GoogleKitCoreVolumeUpButton" = "Բարձրացնել ձայնը";
+
+/* Label for a button for canceling the current user action. */
+"GoogleKitCoreCancelButton" = "Չեղարկել";
+
+/* Label for a button for completing the current user action. */
+"GoogleKitCoreCheckButton" = "Պատրաստ է";
+
+/* Label for a button for navigating to the previous item */
+"GoogleKitCoreChevronLeftButton" = "Նախորդը";
+
+/* Label for a button for navigating to the next item. */
+"GoogleKitCoreChevronRightButton" = "Հաջորդը";
+
+/* Label for a button for clearing the user's current edits. */
+"GoogleKitCoreClearButton" = "Մաքրել";
+
+/* Label for a button for closing the current screen. */
+"GoogleKitCoreCloseButton" = "Փակել";
+
+/* Label for a button for creating new content. */
+"GoogleKitCoreCreateButton" = "Ստեղծել";
+
+/* Label for a button for deleting an item. */
+"GoogleKitCoreDeleteButton" = "Ջնջել";
+
+/* Label for a button for composing an email. */
+"GoogleKitCoreEmailButton" = "Էլփոստի հասցե";
+
+/* Label for a button for accessing help content. */
+"GoogleKitCoreHelpButton" = "Օգնություն";
+
+/* Label for a button for accessing extra information. */
+"GoogleKitCoreInfoButton" = "Տեղեկություններ";
+
+/* Label for a button for showing the keyboard. */
+"GoogleKitCoreKeyboardButton" = "Ստեղնաշար";
+
+/* Label for a button for opening a menu. */
+"GoogleKitCoreMenuButton" = "Ընտրացանկ";
+
+/* Label for a button for opening a menu of extra actions. */
+"GoogleKitCoreMoreVertButton" = "Ավելին";
+
+/* Label for a button for information related to a person. */
+"GoogleKitCorePersonButton" = "Օգտվող";
+
+/* Label for a button for refreshing the current content. */
+"GoogleKitCoreRefreshButton" = "Թարմացնել";
+
+/* Label for a button for replying to the author of a message. */
+"GoogleKitCoreReplyButton" = "Պատասխանել";
+
+/* Label for a button for replying to all recipients of a message. */
+"GoogleKitCoreReplyAllButton" = "Պատասխանել բոլորին";
+
+/* Label for a button for initiating a search operation. */
+"GoogleKitCoreSearchButton" = "Որոնում";
+
+/* Label for a button for showing settings related to the current screen. */
+"GoogleKitCoreSettingsButton" = "Կարգավորումներ";
+
+/* Label for a button for "starring" the current content (marking it as special). */
+"GoogleKitCoreStarButton" = "Աստղանշել";
+
+/* Label for a button for composing a text/SMS message. */
+"GoogleKitCoreTextSMSButton" = "Տեքստ";

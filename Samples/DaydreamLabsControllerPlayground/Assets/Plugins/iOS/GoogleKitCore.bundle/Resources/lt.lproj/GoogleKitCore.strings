@@ -1,0 +1,89 @@
+/* Accessibility button label for navigating backwards in the application hierarchy. */
+"GoogleKitCoreAccessibilityNavigateBack" = "Atgal";
+
+/* Label for a button indicating that an item can be added to a collection. */
+"GoogleKitCoreAddButton" = "Pridėti";
+
+/* Label for a button for navgiating backwards in the application hierarchy. */
+"GoogleKitCoreArrowBackButton" = "Atgal";
+
+/* Label for a button for navgiating forwards in the application hierarchy. */
+"GoogleKitCoreArrowForwardButton" = "Pirmyn";
+
+/* Label for a button for lowering the device's volume. */
+"GoogleKitCoreVolumeDownButton" = "Mažinti garsą";
+
+/* Label for a button for muting the device's volume. */
+"GoogleKitCoreVolumeMuteButton" = "Nutildyti";
+
+/* Label for a button for turning the device's volume off. */
+"GoogleKitCoreVolumeOffButton" = "Išjungti garsą";
+
+/* Label for a button for raising the device's volume. */
+"GoogleKitCoreVolumeUpButton" = "Pagarsinti";
+
+/* Label for a button for canceling the current user action. */
+"GoogleKitCoreCancelButton" = "Atšaukti";
+
+/* Label for a button for completing the current user action. */
+"GoogleKitCoreCheckButton" = "Pažymėti";
+
+/* Label for a button for navigating to the previous item */
+"GoogleKitCoreChevronLeftButton" = "Ankstesnis";
+
+/* Label for a button for navigating to the next item. */
+"GoogleKitCoreChevronRightButton" = "Kitas";
+
+/* Label for a button for clearing the user's current edits. */
+"GoogleKitCoreClearButton" = "Išvalyti";
+
+/* Label for a button for closing the current screen. */
+"GoogleKitCoreCloseButton" = "Uždaryti";
+
+/* Label for a button for creating new content. */
+"GoogleKitCoreCreateButton" = "Kurti";
+
+/* Label for a button for deleting an item. */
+"GoogleKitCoreDeleteButton" = "Ištrinti";
+
+/* Label for a button for composing an email. */
+"GoogleKitCoreEmailButton" = "Siųsti el. laišką";
+
+/* Label for a button for accessing help content. */
+"GoogleKitCoreHelpButton" = "Pagalba";
+
+/* Label for a button for accessing extra information. */
+"GoogleKitCoreInfoButton" = "Informacija";
+
+/* Label for a button for showing the keyboard. */
+"GoogleKitCoreKeyboardButton" = "Klaviatūra";
+
+/* Label for a button for opening a menu. */
+"GoogleKitCoreMenuButton" = "Meniu";
+
+/* Label for a button for opening a menu of extra actions. */
+"GoogleKitCoreMoreVertButton" = "Daugiau";
+
+/* Label for a button for information related to a person. */
+"GoogleKitCorePersonButton" = "Asmuo";
+
+/* Label for a button for refreshing the current content. */
+"GoogleKitCoreRefreshButton" = "Atnaujinti";
+
+/* Label for a button for replying to the author of a message. */
+"GoogleKitCoreReplyButton" = "Atsakyti";
+
+/* Label for a button for replying to all recipients of a message. */
+"GoogleKitCoreReplyAllButton" = "Atsakyti visiems";
+
+/* Label for a button for initiating a search operation. */
+"GoogleKitCoreSearchButton" = "Ieškoti";
+
+/* Label for a button for showing settings related to the current screen. */
+"GoogleKitCoreSettingsButton" = "Nustatymai";
+
+/* Label for a button for "starring" the current content (marking it as special). */
+"GoogleKitCoreStarButton" = "Pažymėti žvaigždute";
+
+/* Label for a button for composing a text/SMS message. */
+"GoogleKitCoreTextSMSButton" = "Teksto pranešimas";

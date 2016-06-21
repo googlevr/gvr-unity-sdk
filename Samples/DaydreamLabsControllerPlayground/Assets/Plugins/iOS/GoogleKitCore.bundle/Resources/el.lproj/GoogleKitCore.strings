@@ -1,0 +1,89 @@
+/* Accessibility button label for navigating backwards in the application hierarchy. */
+"GoogleKitCoreAccessibilityNavigateBack" = "Πίσω";
+
+/* Label for a button indicating that an item can be added to a collection. */
+"GoogleKitCoreAddButton" = "Προσθήκη";
+
+/* Label for a button for navgiating backwards in the application hierarchy. */
+"GoogleKitCoreArrowBackButton" = "Πίσω";
+
+/* Label for a button for navgiating forwards in the application hierarchy. */
+"GoogleKitCoreArrowForwardButton" = "Προώθηση";
+
+/* Label for a button for lowering the device's volume. */
+"GoogleKitCoreVolumeDownButton" = "Μείωση έντασης ήχου";
+
+/* Label for a button for muting the device's volume. */
+"GoogleKitCoreVolumeMuteButton" = "Σίγαση ήχου";
+
+/* Label for a button for turning the device's volume off. */
+"GoogleKitCoreVolumeOffButton" = "Απενεργοποίηση ήχου";
+
+/* Label for a button for raising the device's volume. */
+"GoogleKitCoreVolumeUpButton" = "Αύξηση έντασης ήχου";
+
+/* Label for a button for canceling the current user action. */
+"GoogleKitCoreCancelButton" = "Ακύρωση";
+
+/* Label for a button for completing the current user action. */
+"GoogleKitCoreCheckButton" = "Επιλογή";
+
+/* Label for a button for navigating to the previous item */
+"GoogleKitCoreChevronLeftButton" = "Προηγούμενη";
+
+/* Label for a button for navigating to the next item. */
+"GoogleKitCoreChevronRightButton" = "Επόμενο";
+
+/* Label for a button for clearing the user's current edits. */
+"GoogleKitCoreClearButton" = "Εκκαθάριση";
+
+/* Label for a button for closing the current screen. */
+"GoogleKitCoreCloseButton" = "Κλείσιμο";
+
+/* Label for a button for creating new content. */
+"GoogleKitCoreCreateButton" = "Δημιουργία";
+
+/* Label for a button for deleting an item. */
+"GoogleKitCoreDeleteButton" = "Διαγραφή";
+
+/* Label for a button for composing an email. */
+"GoogleKitCoreEmailButton" = "Ηλεκτρονικό ταχυδρομείο";
+
+/* Label for a button for accessing help content. */
+"GoogleKitCoreHelpButton" = "Βοήθεια";
+
+/* Label for a button for accessing extra information. */
+"GoogleKitCoreInfoButton" = "Πληροφορίες";
+
+/* Label for a button for showing the keyboard. */
+"GoogleKitCoreKeyboardButton" = "Πληκτρολόγιο";
+
+/* Label for a button for opening a menu. */
+"GoogleKitCoreMenuButton" = "Μενού";
+
+/* Label for a button for opening a menu of extra actions. */
+"GoogleKitCoreMoreVertButton" = "Περισσότερα";
+
+/* Label for a button for information related to a person. */
+"GoogleKitCorePersonButton" = "Άτομο";
+
+/* Label for a button for refreshing the current content. */
+"GoogleKitCoreRefreshButton" = "Ανανέωση";
+
+/* Label for a button for replying to the author of a message. */
+"GoogleKitCoreReplyButton" = "Απάντηση";
+
+/* Label for a button for replying to all recipients of a message. */
+"GoogleKitCoreReplyAllButton" = "Απάντηση σε όλους";
+
+/* Label for a button for initiating a search operation. */
+"GoogleKitCoreSearchButton" = "Αναζήτηση";
+
+/* Label for a button for showing settings related to the current screen. */
+"GoogleKitCoreSettingsButton" = "Ρυθμίσεις";
+
+/* Label for a button for "starring" the current content (marking it as special). */
+"GoogleKitCoreStarButton" = "Προσθήκη αστεριού";
+
+/* Label for a button for composing a text/SMS message. */
+"GoogleKitCoreTextSMSButton" = "Κείμενο";

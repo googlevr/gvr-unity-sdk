@@ -1,0 +1,89 @@
+/* Accessibility button label for navigating backwards in the application hierarchy. */
+"GoogleKitCoreAccessibilityNavigateBack" = "Atrás";
+
+/* Label for a button indicating that an item can be added to a collection. */
+"GoogleKitCoreAddButton" = "Agregar";
+
+/* Label for a button for navgiating backwards in the application hierarchy. */
+"GoogleKitCoreArrowBackButton" = "Atrás";
+
+/* Label for a button for navgiating forwards in the application hierarchy. */
+"GoogleKitCoreArrowForwardButton" = "Adelante";
+
+/* Label for a button for lowering the device's volume. */
+"GoogleKitCoreVolumeDownButton" = "Bajar el volumen";
+
+/* Label for a button for muting the device's volume. */
+"GoogleKitCoreVolumeMuteButton" = "Silenciar";
+
+/* Label for a button for turning the device's volume off. */
+"GoogleKitCoreVolumeOffButton" = "Apagar el volumen";
+
+/* Label for a button for raising the device's volume. */
+"GoogleKitCoreVolumeUpButton" = "Subir el volumen";
+
+/* Label for a button for canceling the current user action. */
+"GoogleKitCoreCancelButton" = "Cancelar";
+
+/* Label for a button for completing the current user action. */
+"GoogleKitCoreCheckButton" = "Verificar";
+
+/* Label for a button for navigating to the previous item */
+"GoogleKitCoreChevronLeftButton" = "Anterior";
+
+/* Label for a button for navigating to the next item. */
+"GoogleKitCoreChevronRightButton" = "Siguiente";
+
+/* Label for a button for clearing the user's current edits. */
+"GoogleKitCoreClearButton" = "Borrar";
+
+/* Label for a button for closing the current screen. */
+"GoogleKitCoreCloseButton" = "Cerrar";
+
+/* Label for a button for creating new content. */
+"GoogleKitCoreCreateButton" = "Crear";
+
+/* Label for a button for deleting an item. */
+"GoogleKitCoreDeleteButton" = "Borrar";
+
+/* Label for a button for composing an email. */
+"GoogleKitCoreEmailButton" = "Redactar";
+
+/* Label for a button for accessing help content. */
+"GoogleKitCoreHelpButton" = "Ayuda";
+
+/* Label for a button for accessing extra information. */
+"GoogleKitCoreInfoButton" = "Más información";
+
+/* Label for a button for showing the keyboard. */
+"GoogleKitCoreKeyboardButton" = "Teclado";
+
+/* Label for a button for opening a menu. */
+"GoogleKitCoreMenuButton" = "Menú";
+
+/* Label for a button for opening a menu of extra actions. */
+"GoogleKitCoreMoreVertButton" = "Más";
+
+/* Label for a button for information related to a person. */
+"GoogleKitCorePersonButton" = "Información personal";
+
+/* Label for a button for refreshing the current content. */
+"GoogleKitCoreRefreshButton" = "Actualizar";
+
+/* Label for a button for replying to the author of a message. */
+"GoogleKitCoreReplyButton" = "Responder";
+
+/* Label for a button for replying to all recipients of a message. */
+"GoogleKitCoreReplyAllButton" = "Responder a todos";
+
+/* Label for a button for initiating a search operation. */
+"GoogleKitCoreSearchButton" = "Buscar";
+
+/* Label for a button for showing settings related to the current screen. */
+"GoogleKitCoreSettingsButton" = "Configuración";
+
+/* Label for a button for "starring" the current content (marking it as special). */
+"GoogleKitCoreStarButton" = "Destacar";
+
+/* Label for a button for composing a text/SMS message. */
+"GoogleKitCoreTextSMSButton" = "Redactar mensaje de texto";

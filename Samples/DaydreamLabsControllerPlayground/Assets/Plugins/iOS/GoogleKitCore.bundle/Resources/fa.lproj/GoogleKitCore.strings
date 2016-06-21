@@ -1,0 +1,89 @@
+/* Accessibility button label for navigating backwards in the application hierarchy. */
+"GoogleKitCoreAccessibilityNavigateBack" = "بازگشت";
+
+/* Label for a button indicating that an item can be added to a collection. */
+"GoogleKitCoreAddButton" = "افزودن";
+
+/* Label for a button for navgiating backwards in the application hierarchy. */
+"GoogleKitCoreArrowBackButton" = "بازگشت";
+
+/* Label for a button for navgiating forwards in the application hierarchy. */
+"GoogleKitCoreArrowForwardButton" = "به سمت جلو";
+
+/* Label for a button for lowering the device's volume. */
+"GoogleKitCoreVolumeDownButton" = "کاهش صدا";
+
+/* Label for a button for muting the device's volume. */
+"GoogleKitCoreVolumeMuteButton" = "بی‌صدا کردن";
+
+/* Label for a button for turning the device's volume off. */
+"GoogleKitCoreVolumeOffButton" = "قطع صدا";
+
+/* Label for a button for raising the device's volume. */
+"GoogleKitCoreVolumeUpButton" = "افزایش صدا";
+
+/* Label for a button for canceling the current user action. */
+"GoogleKitCoreCancelButton" = "لغو";
+
+/* Label for a button for completing the current user action. */
+"GoogleKitCoreCheckButton" = "بررسی";
+
+/* Label for a button for navigating to the previous item */
+"GoogleKitCoreChevronLeftButton" = "قبلی";
+
+/* Label for a button for navigating to the next item. */
+"GoogleKitCoreChevronRightButton" = "بعدی";
+
+/* Label for a button for clearing the user's current edits. */
+"GoogleKitCoreClearButton" = "پاک کردن";
+
+/* Label for a button for closing the current screen. */
+"GoogleKitCoreCloseButton" = "بستن";
+
+/* Label for a button for creating new content. */
+"GoogleKitCoreCreateButton" = "ایجاد کردن";
+
+/* Label for a button for deleting an item. */
+"GoogleKitCoreDeleteButton" = "حذف";
+
+/* Label for a button for composing an email. */
+"GoogleKitCoreEmailButton" = "ایمیل";
+
+/* Label for a button for accessing help content. */
+"GoogleKitCoreHelpButton" = "راهنما";
+
+/* Label for a button for accessing extra information. */
+"GoogleKitCoreInfoButton" = "اطلاعات";
+
+/* Label for a button for showing the keyboard. */
+"GoogleKitCoreKeyboardButton" = "صفحه‌کلید";
+
+/* Label for a button for opening a menu. */
+"GoogleKitCoreMenuButton" = "منو";
+
+/* Label for a button for opening a menu of extra actions. */
+"GoogleKitCoreMoreVertButton" = "بیشتر";
+
+/* Label for a button for information related to a person. */
+"GoogleKitCorePersonButton" = "شخص";
+
+/* Label for a button for refreshing the current content. */
+"GoogleKitCoreRefreshButton" = "بازخوانی";
+
+/* Label for a button for replying to the author of a message. */
+"GoogleKitCoreReplyButton" = "پاسخ";
+
+/* Label for a button for replying to all recipients of a message. */
+"GoogleKitCoreReplyAllButton" = "پاسخ به همه";
+
+/* Label for a button for initiating a search operation. */
+"GoogleKitCoreSearchButton" = "جستجو";
+
+/* Label for a button for showing settings related to the current screen. */
+"GoogleKitCoreSettingsButton" = "تنظیمات";
+
+/* Label for a button for "starring" the current content (marking it as special). */
+"GoogleKitCoreStarButton" = "ستاره‌دار کردن";
+
+/* Label for a button for composing a text/SMS message. */
+"GoogleKitCoreTextSMSButton" = "نوشتن";

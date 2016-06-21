@@ -1,0 +1,89 @@
+/* Accessibility button label for navigating backwards in the application hierarchy. */
+"GoogleKitCoreAccessibilityNavigateBack" = "Назад";
+
+/* Label for a button indicating that an item can be added to a collection. */
+"GoogleKitCoreAddButton" = "Додати";
+
+/* Label for a button for navgiating backwards in the application hierarchy. */
+"GoogleKitCoreArrowBackButton" = "Назад";
+
+/* Label for a button for navgiating forwards in the application hierarchy. */
+"GoogleKitCoreArrowForwardButton" = "Уперед";
+
+/* Label for a button for lowering the device's volume. */
+"GoogleKitCoreVolumeDownButton" = "Зменшити гучність";
+
+/* Label for a button for muting the device's volume. */
+"GoogleKitCoreVolumeMuteButton" = "Вимкнути звук";
+
+/* Label for a button for turning the device's volume off. */
+"GoogleKitCoreVolumeOffButton" = "Повністю вимкнути звук";
+
+/* Label for a button for raising the device's volume. */
+"GoogleKitCoreVolumeUpButton" = "Збільшити гучність";
+
+/* Label for a button for canceling the current user action. */
+"GoogleKitCoreCancelButton" = "Скасувати";
+
+/* Label for a button for completing the current user action. */
+"GoogleKitCoreCheckButton" = "Готово";
+
+/* Label for a button for navigating to the previous item */
+"GoogleKitCoreChevronLeftButton" = "Назад";
+
+/* Label for a button for navigating to the next item. */
+"GoogleKitCoreChevronRightButton" = "Далі";
+
+/* Label for a button for clearing the user's current edits. */
+"GoogleKitCoreClearButton" = "Очистити";
+
+/* Label for a button for closing the current screen. */
+"GoogleKitCoreCloseButton" = "Закрити";
+
+/* Label for a button for creating new content. */
+"GoogleKitCoreCreateButton" = "Створити";
+
+/* Label for a button for deleting an item. */
+"GoogleKitCoreDeleteButton" = "Видалити";
+
+/* Label for a button for composing an email. */
+"GoogleKitCoreEmailButton" = "Електронна адреса";
+
+/* Label for a button for accessing help content. */
+"GoogleKitCoreHelpButton" = "Довідка";
+
+/* Label for a button for accessing extra information. */
+"GoogleKitCoreInfoButton" = "Інформація";
+
+/* Label for a button for showing the keyboard. */
+"GoogleKitCoreKeyboardButton" = "Клавіатура";
+
+/* Label for a button for opening a menu. */
+"GoogleKitCoreMenuButton" = "Меню";
+
+/* Label for a button for opening a menu of extra actions. */
+"GoogleKitCoreMoreVertButton" = "Більше";
+
+/* Label for a button for information related to a person. */
+"GoogleKitCorePersonButton" = "Особа";
+
+/* Label for a button for refreshing the current content. */
+"GoogleKitCoreRefreshButton" = "Оновити";
+
+/* Label for a button for replying to the author of a message. */
+"GoogleKitCoreReplyButton" = "Відповісти";
+
+/* Label for a button for replying to all recipients of a message. */
+"GoogleKitCoreReplyAllButton" = "Відповісти всім";
+
+/* Label for a button for initiating a search operation. */
+"GoogleKitCoreSearchButton" = "Шукати";
+
+/* Label for a button for showing settings related to the current screen. */
+"GoogleKitCoreSettingsButton" = "Налаштування";
+
+/* Label for a button for "starring" the current content (marking it as special). */
+"GoogleKitCoreStarButton" = "Позначити зірочкою";
+
+/* Label for a button for composing a text/SMS message. */
+"GoogleKitCoreTextSMSButton" = "SMS";

@@ -1,0 +1,89 @@
+/* Accessibility button label for navigating backwards in the application hierarchy. */
+"GoogleKitCoreAccessibilityNavigateBack" = "Wstecz";
+
+/* Label for a button indicating that an item can be added to a collection. */
+"GoogleKitCoreAddButton" = "Dodaj";
+
+/* Label for a button for navgiating backwards in the application hierarchy. */
+"GoogleKitCoreArrowBackButton" = "Wstecz";
+
+/* Label for a button for navgiating forwards in the application hierarchy. */
+"GoogleKitCoreArrowForwardButton" = "Dalej";
+
+/* Label for a button for lowering the device's volume. */
+"GoogleKitCoreVolumeDownButton" = "Ciszej";
+
+/* Label for a button for muting the device's volume. */
+"GoogleKitCoreVolumeMuteButton" = "Wycisz";
+
+/* Label for a button for turning the device's volume off. */
+"GoogleKitCoreVolumeOffButton" = "Wyłącz dźwięk";
+
+/* Label for a button for raising the device's volume. */
+"GoogleKitCoreVolumeUpButton" = "Głośniej";
+
+/* Label for a button for canceling the current user action. */
+"GoogleKitCoreCancelButton" = "Anuluj";
+
+/* Label for a button for completing the current user action. */
+"GoogleKitCoreCheckButton" = "Gotowe";
+
+/* Label for a button for navigating to the previous item */
+"GoogleKitCoreChevronLeftButton" = "Wstecz";
+
+/* Label for a button for navigating to the next item. */
+"GoogleKitCoreChevronRightButton" = "Dalej";
+
+/* Label for a button for clearing the user's current edits. */
+"GoogleKitCoreClearButton" = "Wyczyść";
+
+/* Label for a button for closing the current screen. */
+"GoogleKitCoreCloseButton" = "Zamknij";
+
+/* Label for a button for creating new content. */
+"GoogleKitCoreCreateButton" = "Utwórz";
+
+/* Label for a button for deleting an item. */
+"GoogleKitCoreDeleteButton" = "Usuń";
+
+/* Label for a button for composing an email. */
+"GoogleKitCoreEmailButton" = "Napisz e-maila";
+
+/* Label for a button for accessing help content. */
+"GoogleKitCoreHelpButton" = "Pomoc";
+
+/* Label for a button for accessing extra information. */
+"GoogleKitCoreInfoButton" = "Informacje";
+
+/* Label for a button for showing the keyboard. */
+"GoogleKitCoreKeyboardButton" = "Klawiatura";
+
+/* Label for a button for opening a menu. */
+"GoogleKitCoreMenuButton" = "Menu";
+
+/* Label for a button for opening a menu of extra actions. */
+"GoogleKitCoreMoreVertButton" = "Więcej";
+
+/* Label for a button for information related to a person. */
+"GoogleKitCorePersonButton" = "Osoba";
+
+/* Label for a button for refreshing the current content. */
+"GoogleKitCoreRefreshButton" = "Odśwież";
+
+/* Label for a button for replying to the author of a message. */
+"GoogleKitCoreReplyButton" = "Odpowiedz";
+
+/* Label for a button for replying to all recipients of a message. */
+"GoogleKitCoreReplyAllButton" = "Odpowiedz wszystkim";
+
+/* Label for a button for initiating a search operation. */
+"GoogleKitCoreSearchButton" = "Wyszuka";
+
+/* Label for a button for showing settings related to the current screen. */
+"GoogleKitCoreSettingsButton" = "Ustawienia";
+
+/* Label for a button for "starring" the current content (marking it as special). */
+"GoogleKitCoreStarButton" = "Oznacz gwiazdką";
+
+/* Label for a button for composing a text/SMS message. */
+"GoogleKitCoreTextSMSButton" = "Napisz SMS-a";

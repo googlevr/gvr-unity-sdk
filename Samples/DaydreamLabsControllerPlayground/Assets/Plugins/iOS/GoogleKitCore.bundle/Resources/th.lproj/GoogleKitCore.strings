@@ -1,0 +1,89 @@
+/* Accessibility button label for navigating backwards in the application hierarchy. */
+"GoogleKitCoreAccessibilityNavigateBack" = "กลับ";
+
+/* Label for a button indicating that an item can be added to a collection. */
+"GoogleKitCoreAddButton" = "เพิ่ม";
+
+/* Label for a button for navgiating backwards in the application hierarchy. */
+"GoogleKitCoreArrowBackButton" = "กลับ";
+
+/* Label for a button for navgiating forwards in the application hierarchy. */
+"GoogleKitCoreArrowForwardButton" = "ไปข้างหน้า";
+
+/* Label for a button for lowering the device's volume. */
+"GoogleKitCoreVolumeDownButton" = "ลดเสียง";
+
+/* Label for a button for muting the device's volume. */
+"GoogleKitCoreVolumeMuteButton" = "เงียบเสียง";
+
+/* Label for a button for turning the device's volume off. */
+"GoogleKitCoreVolumeOffButton" = "ปิดเสียง";
+
+/* Label for a button for raising the device's volume. */
+"GoogleKitCoreVolumeUpButton" = "เพิ่มเสียง";
+
+/* Label for a button for canceling the current user action. */
+"GoogleKitCoreCancelButton" = "ยกเลิก";
+
+/* Label for a button for completing the current user action. */
+"GoogleKitCoreCheckButton" = "เสร็จ";
+
+/* Label for a button for navigating to the previous item */
+"GoogleKitCoreChevronLeftButton" = "ก่อนหน้า";
+
+/* Label for a button for navigating to the next item. */
+"GoogleKitCoreChevronRightButton" = "ถัดไป";
+
+/* Label for a button for clearing the user's current edits. */
+"GoogleKitCoreClearButton" = "ล้าง";
+
+/* Label for a button for closing the current screen. */
+"GoogleKitCoreCloseButton" = "ปิด";
+
+/* Label for a button for creating new content. */
+"GoogleKitCoreCreateButton" = "สร้าง";
+
+/* Label for a button for deleting an item. */
+"GoogleKitCoreDeleteButton" = "ลบ";
+
+/* Label for a button for composing an email. */
+"GoogleKitCoreEmailButton" = "อีเมล";
+
+/* Label for a button for accessing help content. */
+"GoogleKitCoreHelpButton" = "ความช่วยเหลือ";
+
+/* Label for a button for accessing extra information. */
+"GoogleKitCoreInfoButton" = "ข้อมูล";
+
+/* Label for a button for showing the keyboard. */
+"GoogleKitCoreKeyboardButton" = "แป้นพิมพ์";
+
+/* Label for a button for opening a menu. */
+"GoogleKitCoreMenuButton" = "เมนู";
+
+/* Label for a button for opening a menu of extra actions. */
+"GoogleKitCoreMoreVertButton" = "เพิ่มเติม";
+
+/* Label for a button for information related to a person. */
+"GoogleKitCorePersonButton" = "บุคคล";
+
+/* Label for a button for refreshing the current content. */
+"GoogleKitCoreRefreshButton" = "รีเฟรช";
+
+/* Label for a button for replying to the author of a message. */
+"GoogleKitCoreReplyButton" = "ตอบกลับ";
+
+/* Label for a button for replying to all recipients of a message. */
+"GoogleKitCoreReplyAllButton" = "ตอบกลับทั้งหมด";
+
+/* Label for a button for initiating a search operation. */
+"GoogleKitCoreSearchButton" = "ค้นหา";
+
+/* Label for a button for showing settings related to the current screen. */
+"GoogleKitCoreSettingsButton" = "การตั้งค่า";
+
+/* Label for a button for "starring" the current content (marking it as special). */
+"GoogleKitCoreStarButton" = "ดาว";
+
+/* Label for a button for composing a text/SMS message. */
+"GoogleKitCoreTextSMSButton" = "ข้อความ";

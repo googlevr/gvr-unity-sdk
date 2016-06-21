@@ -1,0 +1,210 @@
+fileFormatVersion: 2
+guid: 933826613e9547a44baea936fe29c402
+timeCreated: 1461092114
+licenseType: Pro
+ModelImporter:
+  serializedVersion: 19
+  fileIDToRecycleName:
+    100000: //RootNode
+    100002: Head
+    100004: Jaw
+    100006: JawTip
+    100008: Spine_1
+    100010: Spine_10
+    100012: Spine_11
+    100014: Spine_12
+    100016: Spine_13
+    100018: Spine_14
+    100020: Spine_15
+    100022: Spine_16
+    100024: Spine_17
+    100026: Spine_2
+    100028: Spine_3
+    100030: Spine_4
+    100032: Spine_5
+    100034: Spine_6
+    100036: Spine_7
+    100038: Spine_8
+    100040: Spine_9
+    400000: //RootNode
+    400002: Head
+    400004: Jaw
+    400006: JawTip
+    400008: Spine_1
+    400010: Spine_10
+    400012: Spine_11
+    400014: Spine_12
+    400016: Spine_13
+    400018: Spine_14
+    400020: Spine_15
+    400022: Spine_16
+    400024: Spine_17
+    400026: Spine_2
+    400028: Spine_3
+    400030: Spine_4
+    400032: Spine_5
+    400034: Spine_6
+    400036: Spine_7
+    400038: Spine_8
+    400040: Spine_9
+    7400000: Snap
+    9500000: //RootNode
+  materials:
+    importMaterials: 0
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleRotations: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 3
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations:
+    - serializedVersion: 16
+      name: Snap
+      takeName: Take 001
+      firstFrame: 1
+      lastFrame: 20
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 1
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 1
+      keepOriginalPositionY: 0
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves:
+      - name: GravityWeight
+        curve:
+          serializedVersion: 2
+          curve:
+          - time: 0
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+          - time: 1
+            value: 0
+            inSlope: 0
+            outSlope: 0
+            tangentMode: 0
+          preInfinity: 3
+          postInfinity: 3
+          rotationOrder: 0
+      events:
+      - time: 0.087173045
+        functionName: TriggerEvent
+        data: Roar
+        objectReferenceParameter: {instanceID: 0}
+        floatParameter: 0
+        intParameter: 0
+        messageOptions: 0
+      transformMask:
+      - path: 
+        weight: 1
+      - path: Head
+        weight: 1
+      - path: Head/Jaw
+        weight: 1
+      - path: Head/Jaw/JawTip
+        weight: 1
+      - path: Head/Spine_1
+        weight: 1
+      - path: Head/Spine_1/Spine_2
+        weight: 1
+      - path: Head/Spine_1/Spine_2/Spine_3
+        weight: 1
+      - path: Head/Spine_1/Spine_2/Spine_3/Spine_4
+        weight: 1
+      - path: Head/Spine_1/Spine_2/Spine_3/Spine_4/Spine_5
+        weight: 1
+      - path: Head/Spine_1/Spine_2/Spine_3/Spine_4/Spine_5/Spine_6
+        weight: 1
+      - path: Head/Spine_1/Spine_2/Spine_3/Spine_4/Spine_5/Spine_6/Spine_7
+        weight: 1
+      - path: Head/Spine_1/Spine_2/Spine_3/Spine_4/Spine_5/Spine_6/Spine_7/Spine_8
+        weight: 1
+      - path: Head/Spine_1/Spine_2/Spine_3/Spine_4/Spine_5/Spine_6/Spine_7/Spine_8/Spine_9
+        weight: 1
+      - path: Head/Spine_1/Spine_2/Spine_3/Spine_4/Spine_5/Spine_6/Spine_7/Spine_8/Spine_9/Spine_10
+        weight: 1
+      - path: Head/Spine_1/Spine_2/Spine_3/Spine_4/Spine_5/Spine_6/Spine_7/Spine_8/Spine_9/Spine_10/Spine_11
+        weight: 1
+      - path: Head/Spine_1/Spine_2/Spine_3/Spine_4/Spine_5/Spine_6/Spine_7/Spine_8/Spine_9/Spine_10/Spine_11/Spine_12
+        weight: 1
+      - path: Head/Spine_1/Spine_2/Spine_3/Spine_4/Spine_5/Spine_6/Spine_7/Spine_8/Spine_9/Spine_10/Spine_11/Spine_12/Spine_13
+        weight: 1
+      - path: Head/Spine_1/Spine_2/Spine_3/Spine_4/Spine_5/Spine_6/Spine_7/Spine_8/Spine_9/Spine_10/Spine_11/Spine_12/Spine_13/Spine_14
+        weight: 1
+      - path: Head/Spine_1/Spine_2/Spine_3/Spine_4/Spine_5/Spine_6/Spine_7/Spine_8/Spine_9/Spine_10/Spine_11/Spine_12/Spine_13/Spine_14/Spine_15
+        weight: 1
+      - path: Head/Spine_1/Spine_2/Spine_3/Spine_4/Spine_5/Spine_6/Spine_7/Spine_8/Spine_9/Spine_10/Spine_11/Spine_12/Spine_13/Spine_14/Spine_15/Spine_16
+        weight: 1
+      - path: Head/Spine_1/Spine_2/Spine_3/Spine_4/Spine_5/Spine_6/Spine_7/Spine_8/Spine_9/Spine_10/Spine_11/Spine_12/Spine_13/Spine_14/Spine_15/Spine_16/Spine_17
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 1
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 250
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 0
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+  importAnimation: 1
+  copyAvatar: 1
+  humanDescription:
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: Head
+    hasTranslationDoF: 0
+  lastHumanDescriptionAvatarSource: {fileID: 9000000, guid: d3aba7310b7b937438319037f4fbd17f,
+    type: 3}
+  animationType: 2
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

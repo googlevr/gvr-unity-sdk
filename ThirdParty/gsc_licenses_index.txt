@@ -1,20 +1,23 @@
 GL.html/GL
+OpenCV.html/OpenCV
 Xorg.html/Xorg
-bazel.html/protobuf
 chromium_audio.html/chromium_audio
 curl.html/curl
 dynamic_annotations.html/DynamicAnnotations
 eigen3.html/Eigen 3
 freetype2.html/freetype2
-googleurl.html/googleurl
-grte.html/GRTE
 icu.html/ICU4C
 java_android_libs_protobuf_nano.html/Protobuf Nano
+javascript_jquery2.html/jquery2
 javascript_jquery_ui.html/jquery_ui
-javascript_jquery_v2_0_1.html/jquery
 javascript_tracing_framework.html/tracing_framework
+jpeg.html/libjpeg
+libjpeg_turbo_src.html/libjpeg-turbo
+libogg.html/libogg
 libunwind.html/libunwind
+libvorbis.html/libvorbis
 libxcb.html/XCB library
+libxml.html/Libxml2
 lodepng.html/lodepng
 minizip.html/minizip
 mongoose.html/mongoose
@@ -26,11 +29,14 @@ openctm.html/openctm
 openssl.html/BoringSSL
 pcre.html/PCRE
 pffft.html/pffft
+png.html/png
 protobuf.html/Protocol Buffers
 re2.html/RE2
 stblib.html/stblib
-stl.html/STL
 tinyxml.html/tinyxml
 tz.html/tz database
+unity_nativeaudioplugins.html/nativeaudioplugins
 utf.html/UTF
+xmpmeta.html/includes
+xmpmeta.html/xmpmeta
 zlib.html/zlib

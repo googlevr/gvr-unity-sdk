@@ -1,0 +1,89 @@
+/* Accessibility button label for navigating backwards in the application hierarchy. */
+"GoogleKitCoreAccessibilityNavigateBack" = "뒤로";
+
+/* Label for a button indicating that an item can be added to a collection. */
+"GoogleKitCoreAddButton" = "추가";
+
+/* Label for a button for navgiating backwards in the application hierarchy. */
+"GoogleKitCoreArrowBackButton" = "뒤로";
+
+/* Label for a button for navgiating forwards in the application hierarchy. */
+"GoogleKitCoreArrowForwardButton" = "다음";
+
+/* Label for a button for lowering the device's volume. */
+"GoogleKitCoreVolumeDownButton" = "볼륨 작게";
+
+/* Label for a button for muting the device's volume. */
+"GoogleKitCoreVolumeMuteButton" = "볼륨 음소거";
+
+/* Label for a button for turning the device's volume off. */
+"GoogleKitCoreVolumeOffButton" = "볼륨 끄기";
+
+/* Label for a button for raising the device's volume. */
+"GoogleKitCoreVolumeUpButton" = "볼륨 크게";
+
+/* Label for a button for canceling the current user action. */
+"GoogleKitCoreCancelButton" = "취소";
+
+/* Label for a button for completing the current user action. */
+"GoogleKitCoreCheckButton" = "확인";
+
+/* Label for a button for navigating to the previous item */
+"GoogleKitCoreChevronLeftButton" = "이전";
+
+/* Label for a button for navigating to the next item. */
+"GoogleKitCoreChevronRightButton" = "다음";
+
+/* Label for a button for clearing the user's current edits. */
+"GoogleKitCoreClearButton" = "지우기";
+
+/* Label for a button for closing the current screen. */
+"GoogleKitCoreCloseButton" = "닫기";
+
+/* Label for a button for creating new content. */
+"GoogleKitCoreCreateButton" = "만들기";
+
+/* Label for a button for deleting an item. */
+"GoogleKitCoreDeleteButton" = "삭제";
+
+/* Label for a button for composing an email. */
+"GoogleKitCoreEmailButton" = "이메일";
+
+/* Label for a button for accessing help content. */
+"GoogleKitCoreHelpButton" = "도움말";
+
+/* Label for a button for accessing extra information. */
+"GoogleKitCoreInfoButton" = "정보";
+
+/* Label for a button for showing the keyboard. */
+"GoogleKitCoreKeyboardButton" = "키보드";
+
+/* Label for a button for opening a menu. */
+"GoogleKitCoreMenuButton" = "메뉴";
+
+/* Label for a button for opening a menu of extra actions. */
+"GoogleKitCoreMoreVertButton" = "더보기";
+
+/* Label for a button for information related to a person. */
+"GoogleKitCorePersonButton" = "인물";
+
+/* Label for a button for refreshing the current content. */
+"GoogleKitCoreRefreshButton" = "새로고침";
+
+/* Label for a button for replying to the author of a message. */
+"GoogleKitCoreReplyButton" = "답장";
+
+/* Label for a button for replying to all recipients of a message. */
+"GoogleKitCoreReplyAllButton" = "전체답장";
+
+/* Label for a button for initiating a search operation. */
+"GoogleKitCoreSearchButton" = "검색";
+
+/* Label for a button for showing settings related to the current screen. */
+"GoogleKitCoreSettingsButton" = "설정";
+
+/* Label for a button for "starring" the current content (marking it as special). */
+"GoogleKitCoreStarButton" = "별표";
+
+/* Label for a button for composing a text/SMS message. */
+"GoogleKitCoreTextSMSButton" = "문자 메시지";
