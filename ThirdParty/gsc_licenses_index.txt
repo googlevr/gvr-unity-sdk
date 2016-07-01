@@ -14,7 +14,6 @@ javascript_tracing_framework.html/tracing_framework
 jpeg.html/libjpeg
 libjpeg_turbo_src.html/libjpeg-turbo
 libogg.html/libogg
-libunwind.html/libunwind
 libvorbis.html/libvorbis
 libxcb.html/XCB library
 libxml.html/Libxml2

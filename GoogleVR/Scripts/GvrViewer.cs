@@ -1,4 +1,4 @@
-﻿// Copyright 2014 Google Inc. All rights reserved.
+// Copyright 2014 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -80,22 +80,6 @@ public class GvrViewer : MonoBehaviour {
   private static Camera currentMainCamera;
   private static StereoController currentController;
 
-  /// @cond
-  public bool UILayerEnabled {
-    get {
-      return uiLayerEnabled;
-    }
-    private set {
-      if (value != uiLayerEnabled && device != null) {
-        device.SetUILayerEnabled(value);
-      }
-      uiLayerEnabled = value;
-    }
-  }
-  // Not serialized.
-  private bool uiLayerEnabled = false;
-  /// @endcond
-
   /// Determine whether the scene renders in stereo or mono.
   /// _True_ means to render in stereo, and _false_ means to render in mono.
   public bool VRModeEnabled {
@@ -140,63 +124,6 @@ public class GvrViewer : MonoBehaviour {
   }
   [SerializeField]
   private DistortionCorrectionMethod distortionCorrection = DistortionCorrectionMethod.Unity;
-
-  /// Enables or disables the vertical line rendered between the stereo views to
-  /// help the user align the viewer to the phone's screen.
-  public bool EnableAlignmentMarker {
-    get {
-      return enableAlignmentMarker;
-    }
-    set {
-      if (value != enableAlignmentMarker && device != null) {
-        device.SetAlignmentMarkerEnabled(value);
-      }
-      enableAlignmentMarker = value;
-    }
-  }
-  [SerializeField]
-  private bool enableAlignmentMarker = true;
-
-  /// Enables or disables the Cardboard settings button.  It appears as a gear icon
-  /// in the blank space between the stereo views.  The settings button opens the
-  /// Google Cardboard app to allow the user to configure their individual settings
-  /// and Cardboard headset parameters.
-  public bool EnableSettingsButton {
-    get {
-      return enableSettingsButton;
-    }
-    set {
-      if (value != enableSettingsButton && device != null) {
-        device.SetSettingsButtonEnabled(value);
-      }
-      enableSettingsButton = value;
-    }
-  }
-  [SerializeField]
-  private bool enableSettingsButton = true;
-
-  /// Display modes for the VR "Back Button".
-  public enum BackButtonModes {
-    Off,       /// Always off
-    OnlyInVR,  /// On in VR Mode, otherwise off
-    On         /// Always on
-  }
-
-  /// Whether to show the onscreen analog of the (Android) Back Button.
-  public BackButtonModes BackButtonMode {
-    get {
-      return backButtonMode;
-    }
-    set {
-      if (value != backButtonMode && device != null) {
-        device.SetVRBackButtonEnabled(value != BackButtonModes.Off);
-        device.SetShowVrBackButtonOnlyInVR(value == BackButtonModes.OnlyInVR);
-      }
-      backButtonMode = value;
-    }
-  }
-  [SerializeField]
-  private BackButtonModes backButtonMode = BackButtonModes.OnlyInVR;
 
   /// The native SDK will apply a neck offset to the head tracking, resulting in
   /// a more realistic model of a person's head position.  This control determines
@@ -438,10 +365,6 @@ public class GvrViewer : MonoBehaviour {
       device.SetDefaultDeviceProfile(DefaultDeviceProfile);
     }
 
-    device.SetAlignmentMarkerEnabled(enableAlignmentMarker);
-    device.SetSettingsButtonEnabled(enableSettingsButton);
-    device.SetVRBackButtonEnabled(backButtonMode != BackButtonModes.Off);
-    device.SetShowVrBackButtonOnlyInVR(backButtonMode == BackButtonModes.OnlyInVR);
     device.SetDistortionCorrectionEnabled(distortionCorrection == DistortionCorrectionMethod.Native
         && NativeDistortionCorrectionSupported);
     device.SetNeckModelScale(neckModelScale);
@@ -476,7 +399,7 @@ public class GvrViewer : MonoBehaviour {
   }
 
   void Start() {
-    UILayerEnabled = true;
+    AddStereoControllerToCameras();
   }
 
   void AddPrePostRenderStages() {
@@ -600,6 +523,21 @@ public class GvrViewer : MonoBehaviour {
     device.ShowSettingsDialog();
   }
 
+  /// Add a StereoController to any camera that does not have a Render Texture (meaning it is
+  /// rendering to the screen).
+  public static void AddStereoControllerToCameras() {
+    for (int i = 0; i < Camera.allCameras.Length; i++) {
+      Camera camera = Camera.allCameras[i];
+      if (camera.targetTexture == null &&
+          camera.GetComponent<StereoController>() == null &&
+          camera.GetComponent<GvrEye>() == null &&
+          camera.GetComponent<GvrPreRender>() == null &&
+          camera.GetComponent<GvrPostRender>() == null) {
+        camera.gameObject.AddComponent<StereoController>();
+      }
+    }
+  }
+
   void OnEnable() {
 #if UNITY_EDITOR
     // This can happen if you edit code while the editor is in Play mode.
@@ -632,7 +570,6 @@ public class GvrViewer : MonoBehaviour {
 
   void OnDestroy() {
     VRModeEnabled = false;
-    UILayerEnabled = false;
     if (device != null) {
       device.Destroy();
     }

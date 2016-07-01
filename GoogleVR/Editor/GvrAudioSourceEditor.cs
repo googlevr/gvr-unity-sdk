@@ -1,4 +1,4 @@
-// Copyright 2015 Google Inc. All rights reserved.
+// Copyright 2016 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ public class GvrAudioSourceEditor : Editor {
   private SerializedProperty mute = null;
   private SerializedProperty pitch = null;
   private SerializedProperty playOnAwake = null;
+  private SerializedProperty priority = null;
   private SerializedProperty volume = null;
   private SerializedProperty rolloffMode = null;
   private SerializedProperty maxDistance = null;
@@ -47,6 +48,9 @@ public class GvrAudioSourceEditor : Editor {
       "Mutes the sound.");
   private GUIContent pitchLabel = new GUIContent("Pitch",
       "Sets the frequency of the sound. Use this to slow down or speed up the sound.");
+  private GUIContent priorityLabel = new GUIContent("Priority",
+      "Sets the priority of the source. Note that a sound with a larger priority value will more " +
+      "likely be stolen by sounds with smaller priority values.");
   private GUIContent volumeLabel = new GUIContent("Volume",
       "Sets the overall volume of the sound.");
   private GUIContent rolloffModeLabel = new GUIContent("Volume Rolloff",
@@ -76,7 +80,7 @@ public class GvrAudioSourceEditor : Editor {
       "Sets HRTF binaural rendering for the source. Note that this setting has no effect when " +
       "stereo quality mode is selected globally.");
   private GUIContent occlusionLabel = new GUIContent("Enable Occlusion",
-      "Sets whether the sound of the source should be occluded when passing through objects " +
+      "Sets whether the sound of the source should be occluded when there are other objects " +
       "between the source and the listener.");
   private GUIContent spreadLabel = new GUIContent("Spread",
       "Source spread in degrees.");
@@ -87,6 +91,7 @@ public class GvrAudioSourceEditor : Editor {
     mute = serializedObject.FindProperty("sourceMute");
     pitch = serializedObject.FindProperty("sourcePitch");
     playOnAwake = serializedObject.FindProperty("playOnAwake");
+    priority = serializedObject.FindProperty("sourcePriority");
     volume = serializedObject.FindProperty("sourceVolume");
     rolloffMode = serializedObject.FindProperty("rolloffMode");
     maxDistance = serializedObject.FindProperty("sourceMaxDistance");
@@ -113,6 +118,10 @@ public class GvrAudioSourceEditor : Editor {
     EditorGUILayout.PropertyField(bypassRoomEffects, bypassRoomEffectsLabel);
     EditorGUILayout.PropertyField(playOnAwake, playOnAwakeLabel);
     EditorGUILayout.PropertyField(loop, loopLabel);
+
+    EditorGUILayout.Separator();
+
+    EditorGUILayout.PropertyField(priority, priorityLabel);
 
     EditorGUILayout.Separator();
 

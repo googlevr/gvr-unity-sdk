@@ -109,7 +109,7 @@ public class GvrPostRender : MonoBehaviour {
       Graphics.DrawMeshNow(distortionMesh, transform.position, transform.rotation);
     }
     stereoScreen.DiscardContents();
-    if (!GvrViewer.Instance.NativeUILayerSupported && GvrViewer.Instance.UILayerEnabled) {
+    if (!GvrViewer.Instance.NativeUILayerSupported) {
       DrawUILayer();
     }
   }
@@ -254,14 +254,9 @@ public class GvrPostRender : MonoBehaviour {
       ComputeUIMatrix();
     }
     uiMaterial.SetPass(0);
-    if (vrMode && GvrViewer.Instance.EnableSettingsButton) {
-      DrawSettingsButton();
-    }
-    if (vrMode && GvrViewer.Instance.EnableAlignmentMarker) {
-      DrawAlignmentMarker();
-    }
-    if (GvrViewer.Instance.BackButtonMode == GvrViewer.BackButtonModes.On
-        || vrMode && GvrViewer.Instance.BackButtonMode == GvrViewer.BackButtonModes.OnlyInVR) {
+    DrawSettingsButton();
+    DrawAlignmentMarker();
+    if (vrMode) {
       DrawVRBackButton();
     }
   }

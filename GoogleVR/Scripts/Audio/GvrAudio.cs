@@ -29,6 +29,12 @@ public static class GvrAudio {
     High = 2  /// High quality binaural rendering (third-order HRTF)
   }
 
+  /// Native audio spatializer type.
+  public enum SpatializerType {
+    Source = 0,  /// 3D sound object.
+    Soundfield = 1  /// First-order ambisonic soundfield.
+  }
+
   /// System sampling rate.
   public static int SampleRate {
     get { return sampleRate; }
@@ -101,6 +107,38 @@ public static class GvrAudio {
       SetListenerGain(globalGain);
       SetListenerTransform(position.x, position.y, position.z, rotation.x, rotation.y, rotation.z,
                            rotation.w);
+    }
+  }
+
+  /// Creates a new first-order ambisonic soundfield with a unique id.
+  /// @note This should only be called from the main Unity thread.
+  public static int CreateAudioSoundfield () {
+    int soundfieldId = -1;
+    if (initialized) {
+      soundfieldId = CreateSoundfield(numFoaChannels);
+    }
+    return soundfieldId;
+  }
+
+  /// Destroys the soundfield with given |id|.
+  /// @note This should only be called from the main Unity thread.
+  public static void DestroyAudioSoundfield (int id) {
+    if (initialized) {
+      DestroySoundfield(id);
+    }
+  }
+
+  /// Updates the soundfield with given |id| and its properties.
+  /// @note This should only be called from the main Unity thread.
+  public static void UpdateAudioSoundfield (int id,  Transform transform, float gainDb) {
+    if (initialized) {
+      float gain = ConvertAmplitudeFromDb(gainDb);
+      Vector3 position = transform.position;
+      Quaternion rotation = transform.rotation;
+      ConvertAudioTransformFromUnity(ref position, ref rotation);
+      // Pass the source properties to the audio system.
+      SetSoundfieldGain(id, gain);
+      SetSoundfieldRotation(id, rotation.x, rotation.y, rotation.z, rotation.w);
     }
   }
 
@@ -256,6 +294,9 @@ public static class GvrAudio {
   /// Source occlusion detection rate in seconds.
   public const float occlusionDetectionInterval = 0.2f;
 
+  // Number of first-order ambisonic input channels.
+  public const int numFoaChannels = 4;
+
   /// Number of surfaces in a room.
   public const int numRoomSurfaces = 6;
 
@@ -309,6 +350,20 @@ public static class GvrAudio {
   [DllImport(pluginName)]
   private static extern void SetListenerTransform (float px, float py, float pz, float qx, float qy,
                                                    float qz, float qw);
+
+  // Soundfield handlers.
+  [DllImport(pluginName)]
+  private static extern int CreateSoundfield (int numChannels);
+
+  [DllImport(pluginName)]
+  private static extern void DestroySoundfield (int soundfieldId);
+
+  [DllImport(pluginName)]
+  private static extern void SetSoundfieldGain(int soundfieldId, float gain);
+
+  [DllImport(pluginName)]
+  private static extern void SetSoundfieldRotation(int soundfieldId, float qx, float qy, float qz,
+                                                   float qw);
 
   // Source handlers.
   [DllImport(pluginName)]

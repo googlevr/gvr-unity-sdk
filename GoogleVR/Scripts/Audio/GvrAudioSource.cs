@@ -107,6 +107,49 @@ public class GvrAudioSource : MonoBehaviour {
   [Range(-3.0f, 3.0f)]
   private float sourcePitch = 1.0f;
 
+  /// Sets the priority of the audio source.
+  public int priority {
+    get { return sourcePriority; }
+    set {
+      if(audioSource != null) {
+        audioSource.priority = sourcePriority;
+      }
+    }
+  }
+  [SerializeField]
+  [Range(0, 256)]
+  private int sourcePriority = 128;
+
+  /// Playback position in seconds.
+  public float time {
+    get {
+      if(audioSource != null) {
+        return audioSource.time;
+      }
+      return 0.0f;
+    }
+    set {
+      if(audioSource != null) {
+        audioSource.time = value;
+      }
+    }
+  }
+
+  /// Playback position in PCM samples.
+  public int timeSamples {
+    get {
+      if(audioSource != null) {
+        return audioSource.timeSamples;
+      }
+      return 0;
+    }
+    set {
+      if(audioSource != null) {
+        audioSource.timeSamples = value;
+      }
+    }
+  }
+
   /// The volume of the audio source (0.0 to 1.0).
   public float volume {
     get { return sourceVolume; }
@@ -292,7 +335,8 @@ public class GvrAudioSource : MonoBehaviour {
                                    sourceMinDistance, sourceMaxDistance, directivityAlpha,
                                    directivitySharpness, currentOcclusion);
         audioSource.spatialize = true;
-        audioSource.SetSpatializerFloat(0, id);
+        audioSource.SetSpatializerFloat(0, (float)id);
+        audioSource.SetSpatializerFloat(1, (float)GvrAudio.SpatializerType.Source);
       }
     }
     return id >= 0;
@@ -317,6 +361,7 @@ public class GvrAudioSource : MonoBehaviour {
     loop = sourceLoop;
     mute = sourceMute;
     pitch = sourcePitch;
+    priority = sourcePriority;
     volume = sourceVolume;
     minDistance = sourceMinDistance;
     maxDistance = sourceMaxDistance;

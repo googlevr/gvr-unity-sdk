@@ -32,28 +32,8 @@ namespace Gvr.Internal {
       return support;
     }
 
-    public override void SetUILayerEnabled(bool enabled) {
-      setUILayerEnabled(enabled);
-    }
-
     public override void SetVRModeEnabled(bool enabled) {
       setVRModeEnabled(enabled);
-    }
-
-    public override void SetSettingsButtonEnabled(bool enabled) {
-      setSettingsButtonEnabled(enabled);
-    }
-
-    public override void SetAlignmentMarkerEnabled(bool enabled) {
-      setAlignmentMarkerEnabled(enabled);
-    }
-
-    public override void SetVRBackButtonEnabled(bool enabled) {
-      setVRBackButtonEnabled(enabled);
-    }
-
-    public override void SetShowVrBackButtonOnlyInVR(bool only) {
-      setShowVrBackButtonOnlyInVR(only);
     }
 
     public override void Init() {
@@ -69,22 +49,7 @@ namespace Gvr.Internal {
     private static extern bool isOpenGLAPI();
 
     [DllImport("__Internal")]
-    private static extern void setUILayerEnabled(bool enabled);
-
-    [DllImport("__Internal")]
     private static extern void setVRModeEnabled(bool enabled);
-
-    [DllImport("__Internal")]
-    private static extern void setShowVrBackButtonOnlyInVR(bool only);
-
-    [DllImport("__Internal")]
-    private static extern void setSettingsButtonEnabled(bool enabled);
-
-    [DllImport("__Internal")]
-    private static extern void setAlignmentMarkerEnabled(bool enabled);
-
-    [DllImport("__Internal")]
-    private static extern void setVRBackButtonEnabled(bool enabled);
 
     [DllImport("__Internal")]
     private static extern void launchSettingsDialog();

@@ -55,6 +55,7 @@ namespace Gvr.Internal {
     }
 
     private void setupPortForwarding(int port) {
+#if !UNITY_WEBPLAYER
       string adbCommand = string.Format("adb forward tcp:{0} tcp:{0}", port);
       System.Diagnostics.Process myProcess;
 
@@ -84,6 +85,7 @@ namespace Gvr.Internal {
             "is installed and that the adb command is in your PATH environment variable.",
             exitCode);
       }
+#endif
     }
 
     private void phoneEventSocketLoop() {

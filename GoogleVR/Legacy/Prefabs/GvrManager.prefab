@@ -105,7 +105,7 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: .300000012
+  near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
   orthographic: 0
@@ -121,7 +121,7 @@ Camera:
   m_HDR: 0
   m_OcclusionCulling: 0
   m_StereoConvergence: 10
-  m_StereoSeparation: .0219999999
+  m_StereoSeparation: 0.022
   m_StereoMirrorMode: 0
 --- !u!20 &2013104
 Camera:
@@ -139,11 +139,11 @@ Camera:
     y: 0
     width: 1
     height: 1
-  near clip plane: .300000012
+  near clip plane: 0.3
   far clip plane: 1000
   field of view: 60
   orthographic: 1
-  orthographic size: .5
+  orthographic size: 0.5
   m_Depth: 100
   m_CullingMask:
     serializedVersion: 2
@@ -155,7 +155,7 @@ Camera:
   m_HDR: 0
   m_OcclusionCulling: 0
   m_StereoConvergence: 10
-  m_StereoSeparation: .0219999999
+  m_StereoSeparation: 0.022
   m_StereoMirrorMode: 0
 --- !u!92 &9213102
 Behaviour:
@@ -185,7 +185,7 @@ MonoBehaviour:
   autoUntiltHead: 1
   UseUnityRemoteInput: 0
   screenSize: 0
-  deviceType: 1
+  viewerType: 1
   stereoScreenScale: 1
 --- !u!114 &11413102
 MonoBehaviour:
