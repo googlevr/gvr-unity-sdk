@@ -145,22 +145,6 @@ public class GvrViewer : MonoBehaviour {
   [SerializeField]
   private float neckModelScale = 0.0f;
 
-  /// @cond
-  public bool ElectronicDisplayStabilization {
-    get {
-      return electronicDisplayStabilization;
-    }
-    set {
-      if (value != electronicDisplayStabilization && device != null) {
-        device.SetElectronicDisplayStabilizationEnabled(value);
-      }
-      electronicDisplayStabilization = value;
-    }
-  }
-  [SerializeField]
-  private bool electronicDisplayStabilization = false;
-  /// @endcond
-
 #if UNITY_EDITOR
   /// Restores level head tilt in when playing in the Unity Editor after you
   /// release the Ctrl key.
@@ -168,7 +152,6 @@ public class GvrViewer : MonoBehaviour {
 
   /// @cond
   /// Use unity remote as the input source.
-  [HideInInspector]
   public bool UseUnityRemoteInput = false;
   /// @endcond
 
@@ -368,7 +351,6 @@ public class GvrViewer : MonoBehaviour {
     device.SetDistortionCorrectionEnabled(distortionCorrection == DistortionCorrectionMethod.Native
         && NativeDistortionCorrectionSupported);
     device.SetNeckModelScale(neckModelScale);
-    device.SetElectronicDisplayStabilizationEnabled(electronicDisplayStabilization);
 
     device.SetVRModeEnabled(vrModeEnabled);
 
@@ -416,19 +398,6 @@ public class GvrViewer : MonoBehaviour {
       go.transform.parent = transform;
     }
   }
-
-  /// Emitted whenever a trigger occurs.
-  public event Action OnTrigger;
-
-  /// Emitted whenever the viewer is tilted on its side.
-  public event Action OnTilt;
-
-  /// Emitted whenever the app should respond to a possible change in the device viewer
-  /// profile, that is, the QR code scanned by the user.
-  public event Action OnProfileChange;
-
-  /// Emitted whenever the user presses the "VR Back Button".
-  public event Action OnBackButton;
 
   /// Whether the viewer's trigger was pulled. True for exactly one complete frame
   /// after each pull.
@@ -479,29 +448,15 @@ public class GvrViewer : MonoBehaviour {
   }
 
   private void DispatchEvents() {
-    // Update flags first by copying from device and other inputs.
-    Triggered = device.triggered || Input.GetMouseButtonDown(0);
+      // Update flags first by copying from device and other inputs.
+    Triggered = Input.GetMouseButtonDown(0);
     Tilted = device.tilted;
     ProfileChanged = device.profileChanged;
     BackButtonPressed = device.backButtonPressed || Input.GetKeyDown(KeyCode.Escape);
     // Reset device flags.
-    device.triggered = false;
     device.tilted = false;
     device.profileChanged = false;
     device.backButtonPressed = false;
-    // All flags updated.  Now emit events.
-    if (Tilted && OnTilt != null) {
-      OnTilt();
-    }
-    if (Triggered && OnTrigger != null) {
-      OnTrigger();
-    }
-    if (ProfileChanged && OnProfileChange != null) {
-      OnProfileChange();
-    }
-    if (BackButtonPressed && OnBackButton != null) {
-      OnBackButton();
-    }
   }
 
   /// Presents the #StereoScreen to the device for distortion correction and display.

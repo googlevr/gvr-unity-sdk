@@ -59,7 +59,7 @@ namespace Gvr.Internal {
       string adbCommand = string.Format("adb forward tcp:{0} tcp:{0}", port);
       System.Diagnostics.Process myProcess;
 
-#if UNITY_EDITOR_WIN
+#if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
       string cmd = @"/k " + adbCommand + " & exit";
       Debug.Log ("Executing: [" + cmd + "]");
       myProcess = new System.Diagnostics.Process();
@@ -74,7 +74,7 @@ namespace Gvr.Internal {
       Debug.LogFormat("Trying to launch adb: {0}", adbCommand);
       myProcess = System.Diagnostics.Process.Start("bash", string.Format("-l -c \"{0}\"",
                                                                          adbCommand));
-#endif
+#endif  // UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
       myProcess.WaitForExit();
       int exitCode = myProcess.ExitCode;
       myProcess.Close();
@@ -85,7 +85,7 @@ namespace Gvr.Internal {
             "is installed and that the adb command is in your PATH environment variable.",
             exitCode);
       }
-#endif
+#endif  // !UNITY_WEBPLAYER
     }
 
     private void phoneEventSocketLoop() {

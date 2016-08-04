@@ -42,7 +42,6 @@ namespace Gvr.Internal {
     public abstract void SetDistortionCorrectionEnabled(bool enabled);
 
     public abstract void SetNeckModelScale(float scale);
-    public abstract void SetElectronicDisplayStabilizationEnabled(bool enabled);
 
     public virtual bool SupportsNativeDistortionCorrection(List<string> diagnostics) {
       return true;
@@ -146,7 +145,6 @@ namespace Gvr.Internal {
     protected int leftEyeOrientation;
     protected int rightEyeOrientation;
 
-    public bool triggered;
     public bool tilted;
     public bool profileChanged;
     public bool backButtonPressed;

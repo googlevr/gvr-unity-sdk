@@ -172,6 +172,9 @@ namespace Gvr.Internal {
         enabled = false;
         return;
       }
+    }
+
+    public void Start() {
       socket = gameObject.AddComponent<EmulatorClientSocket>();
       socket.Init(this);
       StartCoroutine("EndOfFrame");

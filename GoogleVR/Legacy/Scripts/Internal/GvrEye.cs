@@ -88,7 +88,7 @@ public class GvrEye : MonoBehaviour {
     // Save reference to the found controller and it's camera.
     controller = ctlr;
     monoCamera = controller.GetComponent<Camera>();
-    UpdateStereoValues();
+    SetupStereo(/*forceUpdate=*/true);
   }
 
   public void UpdateStereoValues() {
@@ -135,24 +135,24 @@ public class GvrEye : MonoBehaviour {
     }
   }
 
-  private void SetupStereo() {
+  private void SetupStereo(bool forceUpdate) {
     GvrViewer.Instance.UpdateState();
+
+    bool updateValues = forceUpdate  // Being called from Start(), most likely.
+        || controller.keepStereoUpdated  // Parent camera may be animating.
+        || GvrViewer.Instance.ProfileChanged  // New QR code.
+        || cam.targetTexture == null
+            && GvrViewer.Instance.StereoScreen != null ;  // Need to (re)assign targetTexture.
+    if (updateValues) {
+      // Set projection, viewport and targetTexture.
+      UpdateStereoValues();
+    }
 
     // Will need to update view transform if there is a COI, or if there is a remnant of
     // prior stereo-adjustment smoothing to finish off.
     bool haveCOI = controller.centerOfInterest != null
         && controller.centerOfInterest.gameObject.activeInHierarchy;
-    bool updatePosition = haveCOI || interpPosition < 1;
-
-    if (controller.keepStereoUpdated || GvrViewer.Instance.ProfileChanged
-        || cam.targetTexture == null && GvrViewer.Instance.StereoScreen != null) {
-      // Set projection and viewport.
-      UpdateStereoValues();
-      // Also view transform.
-      updatePosition = true;
-    }
-
-    if (updatePosition) {
+    if (updateValues || haveCOI || interpPosition < 1) {
       // Set view transform.
       float proj11 = cam.projectionMatrix[1, 1];
       float zScale = transform.lossyScale.z;
@@ -183,7 +183,7 @@ public class GvrEye : MonoBehaviour {
       cam.enabled = false;
       return;
     }
-    SetupStereo();
+    SetupStereo(/*forceUpdate=*/false);
     if (!controller.directRender && GvrViewer.Instance.StereoScreen != null) {
       // Some image effects clobber the whole screen.  Add a final image effect to the chain
       // which restores side-by-side stereo.
