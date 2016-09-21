@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissioßns and
 // limitations under the License.
 
-#if UNITY_ANDROID
+#if UNITY_HAS_GOOGLEVR && UNITY_ANDROID
 using UnityEngine;
 
 using System;
@@ -71,7 +71,7 @@ namespace Gvr.Internal {
       internal float y;
     }
 
-    private const string dllName = "gvrunity";
+    private const string dllName = "gvr";
 
     [DllImport(dllName)]
     private static extern int gvr_controller_get_default_options();
@@ -97,7 +97,7 @@ namespace Gvr.Internal {
     private static extern void gvr_controller_state_destroy(ref IntPtr state);
 
     [DllImport(dllName)]
-    private static extern void gvr_controller_state_update(IntPtr api, IntPtr out_state);
+    private static extern void gvr_controller_state_update(IntPtr api, int flags, IntPtr out_state);
 
     [DllImport(dllName)]
     private static extern int gvr_controller_state_get_api_status(IntPtr state);
@@ -225,7 +225,7 @@ namespace Gvr.Internal {
         outState.errorDetails = errorDetails;
         return;
       }
-      gvr_controller_state_update(api, statePtr);
+      gvr_controller_state_update(api, 0, statePtr);
 
       outState.connectionState = ConvertConnectionState(
           gvr_controller_state_get_connection_state(statePtr));
@@ -337,4 +337,4 @@ namespace Gvr.Internal {
 }
 /// @endcond
 
-#endif
+#endif  // UNITY_HAS_GOOGLEVR && UNITY_ANDROID

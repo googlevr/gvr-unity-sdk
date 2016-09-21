@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/// This class is defined only if the editor does not natively support GVR, or if the current
+/// VR player is the in-editor emulator.
+
 using UnityEngine;
 
 /// Controls one camera of a stereo pair.  Each frame, it mirrors the settings of
@@ -65,15 +68,28 @@ public class GvrEye : MonoBehaviour {
     }
   }
 
+// C# stereo rendering is not used when UNITY_HAS_GOOGLEVR is true and this is running on a device.
+// Disable variable warnings in this case.
+#if UNITY_HAS_GOOGLEVR && !UNITY_EDITOR
+#pragma warning disable 649
+#pragma warning disable 414
+#endif  // UNITY_HAS_GOOGLEVR && !UNITY_EDITOR
+
   private StereoController controller;
   private StereoRenderEffect stereoEffect;
   private Camera monoCamera;
   private Matrix4x4 realProj;
   private float interpPosition = 1;
 
+#if UNITY_HAS_GOOGLEVR && !UNITY_EDITOR
+#pragma warning restore 414
+#pragma warning restore 649
+#endif  // UNITY_HAS_GOOGLEVR && !UNITY_EDITOR
+
   // Convenient accessor to the camera component used throughout this script.
   public Camera cam { get; private set; }
 
+#if !UNITY_HAS_GOOGLEVR || UNITY_EDITOR
   void Awake() {
     cam = GetComponent<Camera>();
   }
@@ -164,7 +180,7 @@ public class GvrEye : MonoBehaviour {
     }
 
     // Pass necessary information to any shaders doing distortion correction.
-    if (GvrViewer.Instance.DistortionCorrection == GvrViewer.DistortionCorrectionMethod.None) {
+    if (!GvrViewer.Instance.DistortionCorrectionEnabled) {
       // Correction matrix for use in surface shaders that do vertex warping for distortion.
       // Have to compute it every frame because cameraToWorldMatrix is changing constantly.
       var fixProj = cam.cameraToWorldMatrix *
@@ -283,4 +299,5 @@ public class GvrEye : MonoBehaviour {
 
     cam.rect = rect;
   }
+#endif  // !UNITY_HAS_GOOGLEVR || UNITY_EDITOR
 }

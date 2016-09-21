@@ -41,8 +41,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   leftWall: 4
   rightWall: 4
-  floor: 13
-  ceiling: 14
+  floor: 14
+  ceiling: 15
   backWall: 4
   frontWall: 4
   reflectivity: 1

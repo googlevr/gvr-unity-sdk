@@ -39,36 +39,18 @@ namespace Gvr.Internal {
     public abstract void Init();
 
     public abstract void SetVRModeEnabled(bool enabled);
-    public abstract void SetDistortionCorrectionEnabled(bool enabled);
 
     public abstract void SetNeckModelScale(float scale);
 
-    public virtual bool SupportsNativeDistortionCorrection(List<string> diagnostics) {
-      return true;
-    }
-
-    public virtual bool RequiresNativeDistortionCorrection() {
-      return leftEyeOrientation != 0 || rightEyeOrientation != 0;
-    }
-
     public virtual bool SupportsNativeUILayer(List<string> diagnostics) {
       return true;
-    }
-
-    public virtual bool ShouldRecreateStereoScreen(int curWidth, int curHeight) {
-      return this.RequiresNativeDistortionCorrection()
-             && (curWidth != (int)recommendedTextureSize[0]
-                 || curHeight != (int)recommendedTextureSize[1]);
     }
 
     public virtual RenderTexture CreateStereoScreen() {
       float scale = GvrViewer.Instance.StereoScreenScale;
       int width = Mathf.RoundToInt(Screen.width * scale);
       int height = Mathf.RoundToInt(Screen.height * scale);
-      if (this.RequiresNativeDistortionCorrection()) {
-        width = (int)recommendedTextureSize[0];
-        height = (int)recommendedTextureSize[1];
-      }
+
       //Debug.Log("Creating new default stereo screen texture "
       //    + width+ "x" + height + ".");
       var rt = new RenderTexture(width, height, 24, RenderTextureFormat.Default);
@@ -155,8 +137,6 @@ namespace Gvr.Internal {
 
     public abstract void Recenter();
 
-    public abstract void PostRender(RenderTexture stereoScreen);
-
     public virtual void OnPause(bool pause) {
       if (!pause) {
         UpdateScreenData();
@@ -164,10 +144,6 @@ namespace Gvr.Internal {
     }
 
     public virtual void OnFocus(bool focus) {
-      // Do nothing.
-    }
-
-    public virtual void OnLevelLoaded(int level) {
       // Do nothing.
     }
 
@@ -234,12 +210,16 @@ namespace Gvr.Internal {
 #if UNITY_EDITOR
         device = new EditorDevice();
 #elif ANDROID_DEVICE
+    #if UNITY_HAS_GOOGLEVR
+        device = new UnityVRDevice();
+    #else
         device = new AndroidDevice();
+    #endif  // UNITY_HAS_GOOGLEVR
 #elif IPHONE_DEVICE
         device = new iOSDevice();
 #else
         throw new InvalidOperationException("Unsupported device.");
-#endif
+#endif  // UNITY_EDITOR
       }
       return device;
     }

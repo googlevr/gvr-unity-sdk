@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// The controller is not available for versions of Unity without the
+// // GVR native integration.
+#if UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
+
 /// @cond
 namespace Gvr.Internal {
   /// Internal interface that abstracts an implementation of a controller.
@@ -32,3 +36,5 @@ namespace Gvr.Internal {
   }
 }
 /// @endcond
+
+#endif  // UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)

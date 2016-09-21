@@ -12,8 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using System.Collections;
+// The controller is not available for versions of Unity without the
+// // GVR native integration.
+#if UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
+
 using UnityEngine;
+using UnityEngine.VR;
+using System.Collections;
 
 using Gvr.Internal;
 
@@ -41,9 +46,12 @@ public enum GvrConnectionState {
 /// To access the controller state, simply read the static properties of this class. For example,
 /// to know the controller's current orientation, use GvrController.Orientation.
 public class GvrController : MonoBehaviour {
-  private ControllerState controllerState = new ControllerState();
   private static GvrController instance;
   private static IControllerProvider controllerProvider;
+
+  private ControllerState controllerState = new ControllerState();
+  private IEnumerator controllerUpdate;
+  private WaitForEndOfFrame waitForEndOfFrame = new WaitForEndOfFrame();
 
   /// If true, enable gyroscope on the controller.
   [Tooltip("If enabled, the controller will report gyroscope readings.")]
@@ -240,10 +248,14 @@ public class GvrController : MonoBehaviour {
 
     // If the controller was recentered, also recenter the headset.
     if (controllerState.recentered) {
+ #if UNITY_EDITOR
       GvrViewer sdk = GvrViewer.Instance;
       if (sdk) {
         sdk.Recenter();
       }
+#else
+      InputTracking.Recenter();
+#endif  // UNITY_EDITOR
     }
   }
 
@@ -258,11 +270,12 @@ public class GvrController : MonoBehaviour {
   }
 
   void OnEnable() {
-    StartCoroutine("EndOfFrame");
+    controllerUpdate = EndOfFrame();
+    StartCoroutine(controllerUpdate);
   }
 
   void OnDisable() {
-    StopCoroutine("EndOfFrame");
+    StopCoroutine(controllerUpdate);
   }
 
   IEnumerator EndOfFrame() {
@@ -270,8 +283,10 @@ public class GvrController : MonoBehaviour {
       // This must be done at the end of the frame to ensure that all GameObjects had a chance
       // to read transient controller state (e.g. events, etc) for the current frame before
       // it gets reset.
-      yield return new WaitForEndOfFrame();
+      yield return waitForEndOfFrame;
       UpdateController();
     }
   }
 }
+
+#endif  // UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)

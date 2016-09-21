@@ -15,6 +15,7 @@
 using UnityEngine;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -24,9 +25,9 @@ using System.Runtime.InteropServices;
 public static class GvrAudio {
   /// Audio system rendering quality.
   public enum Quality {
-    Stereo = 0,  /// Stereo-only rendering
-    Low = 1,  /// Low quality binaural rendering (first-order HRTF)
-    High = 2  /// High quality binaural rendering (third-order HRTF)
+    Stereo = 0,  ///< Stereo-only rendering
+    Low = 1,  ///< Low quality binaural rendering (first-order HRTF)
+    High = 2  ///< High quality binaural rendering (third-order HRTF)
   }
 
   /// Native audio spatializer type.
@@ -171,59 +172,50 @@ public static class GvrAudio {
       Vector3 position = transform.position;
       Quaternion rotation = transform.rotation;
       ConvertAudioTransformFromUnity(ref position, ref rotation);
+      float maxDistanceScaled = worldScaleInverse * maxDistance;
+      float minDistanceScaled = worldScaleInverse * minDistance;
       float spreadRad = Mathf.Deg2Rad * spread;
       // Pass the source properties to the audio system.
       SetSourceBypassRoomEffects(id, bypassRoomEffects);
       SetSourceDirectivity(id, alpha, sharpness);
       SetSourceGain(id, gain);
       SetSourceOcclusionIntensity(id, occlusion);
-      if (rolloffMode != AudioRolloffMode.Custom) {
-        float maxDistanceScaled = worldScaleInverse * maxDistance;
-        float minDistanceScaled = worldScaleInverse * minDistance;
-        SetSourceDistanceAttenuationMethod(id, rolloffMode, minDistanceScaled, maxDistanceScaled);
-      }
+      SetSourceDistanceAttenuationMethod(id, rolloffMode, minDistanceScaled, maxDistanceScaled);
       SetSourceSpread(id, spreadRad);
       SetSourceTransform(id, position.x, position.y, position.z, rotation.x, rotation.y, rotation.z,
                          rotation.w);
     }
   }
 
-  /// Creates a new room with a unique id.
-  /// @note This should only be called from the main Unity thread.
-  public static int CreateAudioRoom () {
-    int roomId = -1;
-    if (initialized) {
-      roomId = CreateRoom();
-    }
-    return roomId;
-  }
-
-  /// Destroys the room with given |id|.
-  /// @note This should only be called from the main Unity thread.
-  public static void DestroyAudioRoom (int id) {
-    if (initialized) {
-      DestroyRoom(id);
-    }
-  }
-
   /// Updates the room effects of the environment with given |room| properties.
   /// @note This should only be called from the main Unity thread.
-  public static void UpdateAudioRoom (int id, Transform transform,
-                                      GvrAudioRoom.SurfaceMaterial[] materials, float reflectivity,
-                                      float reverbGainDb, float reverbBrightness, float reverbTime,
-                                      Vector3 size) {
-    if (initialized) {
-      // Update room transform.
-      Vector3 position = transform.position;
-      Quaternion rotation = transform.rotation;
-      Vector3 scale = Vector3.Scale(size, transform.lossyScale);
-      scale = worldScaleInverse * new Vector3(Mathf.Abs(scale.x), Mathf.Abs(scale.y),
-                                              Mathf.Abs(scale.z));
-      ConvertAudioTransformFromUnity(ref position, ref rotation);
-      float reverbGain = ConvertAmplitudeFromDb(reverbGainDb);
-      SetRoomProperties(id, position.x, position.y, position.z, rotation.x, rotation.y, rotation.z,
-                        rotation.w, scale.x, scale.y, scale.z, materials, reflectivity, reverbGain,
-                        reverbBrightness, reverbTime);
+  public static void UpdateAudioRoom(GvrAudioRoom room, bool roomEnabled) {
+    // Update the enabled rooms list.
+    if (roomEnabled) {
+      if (!enabledRooms.Contains(room)) {
+        enabledRooms.Add(room);
+      }
+    } else {
+      enabledRooms.Remove(room);
+    }
+    // Update the current room effects to be applied.
+    if(initialized) {
+      if (enabledRooms.Count > 0) {
+        GvrAudioRoom currentRoom = enabledRooms[enabledRooms.Count - 1];
+        Vector3 position = currentRoom.transform.position;
+        Quaternion rotation = currentRoom.transform.rotation;
+        Vector3 scale = Vector3.Scale(currentRoom.transform.lossyScale, currentRoom.size);
+        ConvertAudioTransformFromUnity(ref position, ref rotation);
+        float reverbGain = ConvertAmplitudeFromDb(currentRoom.reverbGainDb);
+        SetRoomProperties(position.x, position.y, position.z, rotation.x, rotation.y, rotation.z,
+                          rotation.w, scale.x, scale.y, scale.z, currentRoom.GetSurfaceMaterials(),
+                          currentRoom.reflectivity, reverbGain, currentRoom.reverbBrightness,
+                          currentRoom.reverbTime);
+      } else {
+        // Set room properties to default, which will effectively disable the room effects.
+        SetRoomProperties(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, null, 1.0f,
+                          0.0f, 0.0f, 1.0f);
+      }
     }
   }
 
@@ -256,6 +248,19 @@ public static class GvrAudio {
       points[i] = new Vector2(r * Mathf.Sin(theta), r * Mathf.Cos(theta));
     }
     return points;
+  }
+
+  /// Returns whether the listener is currently inside the given |room| boundaries.
+  public static bool IsListenerInsideRoom(GvrAudioRoom room) {
+    bool isInside = false;
+    if(initialized) {
+      Vector3 relativePosition = listenerTransform.position - room.transform.position;
+      Quaternion rotationInverse = Quaternion.Inverse(room.transform.rotation);
+
+      bounds.size = Vector3.Scale(room.transform.lossyScale, room.size);
+      isInside = bounds.Contains(rotationInverse * relativePosition);
+    }
+    return isInside;
   }
 
   /// Minimum distance threshold between |minDistance| and |maxDistance|.
@@ -312,6 +317,12 @@ public static class GvrAudio {
     position = pose.Position * worldScaleInverse;
     rotation = pose.Orientation;
   }
+
+  // Boundaries instance to be used in room detection logic.
+  private static Bounds bounds = new Bounds(Vector3.zero, Vector3.zero);
+
+  // Container to store the currently active rooms in the scene.
+  private static List<GvrAudioRoom> enabledRooms = new List<GvrAudioRoom>();
 
   // Denotes whether the system is initialized properly.
   private static bool initialized = false;
@@ -399,15 +410,8 @@ public static class GvrAudio {
 
   // Room handlers.
   [DllImport(pluginName)]
-  private static extern int CreateRoom ();
-
-  [DllImport(pluginName)]
-  private static extern void DestroyRoom (int roomId);
-
-  [DllImport(pluginName)]
-  private static extern void SetRoomProperties (int roomId, float px, float py, float pz, float qx,
-                                                float qy, float qz, float qw, float dx, float dy,
-                                                float dz,
+  private static extern void SetRoomProperties (float px, float py, float pz, float qx, float qy,
+                                                float qz, float qw, float dx, float dy, float dz,
                                                 GvrAudioRoom.SurfaceMaterial[] materialNames,
                                                 float reflectionScalar, float reverbGain,
                                                 float reverbBrightness, float reverbTime);

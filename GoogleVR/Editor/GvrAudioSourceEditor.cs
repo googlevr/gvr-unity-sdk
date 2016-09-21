@@ -110,6 +110,12 @@ public class GvrAudioSourceEditor : Editor {
   public override void OnInspectorGUI () {
     serializedObject.Update();
 
+    // Add clickable script field, as would have been provided by DrawDefaultInspector()
+    MonoScript script = MonoScript.FromMonoBehaviour (target as MonoBehaviour);
+    EditorGUI.BeginDisabledGroup (true);
+    EditorGUILayout.ObjectField ("Script", script, typeof(MonoScript), false);
+    EditorGUI.EndDisabledGroup ();
+
     EditorGUILayout.PropertyField(clip, clipLabel);
 
     EditorGUILayout.Separator();
@@ -144,7 +150,8 @@ public class GvrAudioSourceEditor : Editor {
     EditorGUILayout.PropertyField(maxDistance, maxDistanceLabel);
     --EditorGUI.indentLevel;
     if (rolloffMode.enumValueIndex == (int)AudioRolloffMode.Custom) {
-      EditorGUILayout.HelpBox("Custom rolloff mode is not supported.", MessageType.Error);
+      EditorGUILayout.HelpBox("Custom rolloff mode is not supported, no distance attenuation " +
+                              "will be applied.", MessageType.Warning);
     }
 
     EditorGUILayout.Separator();

@@ -12,6 +12,9 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+/// This class is defined only the editor does not natively support GVR, or if the current
+/// VR player is the in-editor emulator.
+
 using UnityEngine;
 using System.Collections;
 using System.Linq;
@@ -233,19 +236,9 @@ public class StereoController : MonoBehaviour {
 #endif
   }
 
-  /// Updates the stereo cameras from the mono camera every frame.  This includes all Camera
-  /// component values such as background color, culling mask, viewport rect, and so on.  Also,
-  /// it includes updating the viewport rect and projection matrix for side-by-side stereo, plus
-  /// applying any adjustments for center of interest and stereo comfort.
-  public void UpdateStereoValues() {
-    GvrEye[] eyes = Eyes;
-    for (int i = 0, n = eyes.Length; i < n; i++) {
-      eyes[i].UpdateStereoValues();
-    }
-  }
-
   public Camera cam { get; private set; }
 
+#if !UNITY_HAS_GOOGLEVR || UNITY_EDITOR
   void Awake() {
     GvrViewer.Create();
     cam = GetComponent<Camera>();
@@ -271,6 +264,17 @@ public class StereoController : MonoBehaviour {
     }
   }
 
+  /// Updates the stereo cameras from the mono camera every frame.  This includes all Camera
+  /// component values such as background color, culling mask, viewport rect, and so on.  Also,
+  /// it includes updating the viewport rect and projection matrix for side-by-side stereo, plus
+  /// applying any adjustments for center of interest and stereo comfort.
+  public void UpdateStereoValues() {
+    GvrEye[] eyes = Eyes;
+    for (int i = 0, n = eyes.Length; i < n; i++) {
+      eyes[i].UpdateStereoValues();
+    }
+  }
+
   // Helper routine for creation of a stereo eye.
   private void CreateEye(GvrViewer.Eye eye) {
     string nm = name + (eye == GvrViewer.Eye.Left ? " Left" : " Right");
@@ -281,6 +285,7 @@ public class StereoController : MonoBehaviour {
     GvrEye.eye = eye;
     GvrEye.CopyCameraAndMakeSideBySide(this);
   }
+#endif  // !UNITY_HAS_GOOGLEVR || UNITY_EDITOR
 
   /// Compute the position of one of the stereo eye cameras.  Accounts for both
   /// FOV matching and stereo comfort, if those features are enabled.  The input is
@@ -360,3 +365,4 @@ public class StereoController : MonoBehaviour {
     }
   }
 }
+

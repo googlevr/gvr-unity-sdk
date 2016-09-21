@@ -32,6 +32,7 @@ public class ControllerDemoManager : MonoBehaviour {
   // True if we are dragging the currently selected GameObject.
   private bool dragging;
 
+#if UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
   void Awake() {
   }
 
@@ -126,4 +127,5 @@ public class ControllerDemoManager : MonoBehaviour {
         break;
     }
   }
+#endif  // UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
 }

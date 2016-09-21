@@ -33,10 +33,6 @@ namespace Gvr.Internal {
       Input.gyro.enabled = true;
     }
 
-    public override bool SupportsNativeDistortionCorrection(List<string> diagnostics) {
-      return false;  // No need for diagnostic message.
-    }
-
     public override bool SupportsNativeUILayer(List<string> diagnostics) {
       return false;  // No need for diagnostic message.
     }
@@ -44,7 +40,6 @@ namespace Gvr.Internal {
     // Since we can check all these settings by asking Gvr.Instance, no need
     // to keep a separate copy here.
     public override void SetVRModeEnabled(bool enabled) {}
-    public override void SetDistortionCorrectionEnabled(bool enabled) {}
     public override void SetNeckModelScale(float scale) {}
 
     private Quaternion initialRotation = Quaternion.identity;
@@ -91,10 +86,6 @@ namespace Gvr.Internal {
       headPose.Set(neck, rot);
 
       tilted = Input.GetKeyUp(KeyCode.Escape);
-    }
-
-    public override void PostRender(RenderTexture stereoScreen) {
-      // Do nothing.
     }
 
     public override void UpdateScreenData() {

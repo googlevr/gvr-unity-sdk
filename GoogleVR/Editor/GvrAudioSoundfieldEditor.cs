@@ -69,6 +69,12 @@ public class GvrAudioSoundfieldEditor : Editor {
   public override void OnInspectorGUI () {
     serializedObject.Update();
 
+    // Add clickable script field, as would have been provided by DrawDefaultInspector()
+    MonoScript script = MonoScript.FromMonoBehaviour (target as MonoBehaviour);
+    EditorGUI.BeginDisabledGroup (true);
+    EditorGUILayout.ObjectField ("Script", script, typeof(MonoScript), false);
+    EditorGUI.EndDisabledGroup ();
+
     EditorGUILayout.LabelField("AudioClip");
     EditorGUI.indentLevel++;
     EditorGUILayout.PropertyField(clip0102, clip0102Label);

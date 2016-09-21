@@ -46,6 +46,12 @@ public class GvrAudioListenerEditor : Editor {
   public override void OnInspectorGUI () {
     serializedObject.Update();
 
+    // Add clickable script field, as would have been provided by DrawDefaultInspector()
+    MonoScript script = MonoScript.FromMonoBehaviour (target as MonoBehaviour);
+    EditorGUI.BeginDisabledGroup (true);
+    EditorGUILayout.ObjectField ("Script", script, typeof(MonoScript), false);
+    EditorGUI.EndDisabledGroup ();
+
     // Rendering quality can only be modified through the Inspector in Edit mode.
     GUI.enabled = !EditorApplication.isPlaying;
     EditorGUILayout.PropertyField(quality, qualityLabel);

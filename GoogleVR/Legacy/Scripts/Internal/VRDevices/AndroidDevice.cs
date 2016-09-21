@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#if UNITY_ANDROID
+#if UNITY_ANDROID && !UNITY_HAS_GOOGLEVR
 
 using UnityEngine;
 
@@ -60,4 +60,4 @@ namespace Gvr.Internal {
 }
 /// @endcond
 
-#endif
+#endif  // UNITY_ANDROID && !UNITY_HAS_GOOGLEVR

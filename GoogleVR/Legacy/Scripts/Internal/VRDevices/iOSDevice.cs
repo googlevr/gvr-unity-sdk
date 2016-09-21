@@ -23,15 +23,6 @@ namespace Gvr.Internal {
     // Native code libraries use OpenGL, but Unity picks Metal for iOS by default.
     bool isOpenGL = false;
 
-    public override bool SupportsNativeDistortionCorrection(List<string> diagnostics) {
-      bool support = base.SupportsNativeDistortionCorrection(diagnostics);
-      if (!isOpenGL) {
-        diagnostics.Add("Requires OpenGL");
-        support = false;
-      }
-      return support;
-    }
-
     public override void SetVRModeEnabled(bool enabled) {
       setVRModeEnabled(enabled);
     }

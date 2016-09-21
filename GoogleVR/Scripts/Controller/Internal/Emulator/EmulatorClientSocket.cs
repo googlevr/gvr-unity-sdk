@@ -44,7 +44,7 @@ namespace Gvr.Internal {
     public bool connected { get; private set; }
 
     public void Init(EmulatorManager remote) {
-      Debug.Log ("Setting up socket.");
+      Debug.Log("Setting up socket.");
 
       phoneRemote = remote;
 
@@ -57,57 +57,56 @@ namespace Gvr.Internal {
     private void setupPortForwarding(int port) {
 #if !UNITY_WEBPLAYER
       string adbCommand = string.Format("adb forward tcp:{0} tcp:{0}", port);
-      System.Diagnostics.Process myProcess;
+      System.Diagnostics.Process myProcess = new System.Diagnostics.Process();
 
 #if UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
-      string cmd = @"/k " + adbCommand + " & exit";
-      Debug.Log ("Executing: [" + cmd + "]");
-      myProcess = new System.Diagnostics.Process();
+      string processFilename = "CMD.exe";
+      string processArguments = @"/k " + adbCommand + " & exit";
+
+      // See "Common Error Lookup Tool" (https://www.microsoft.com/en-us/download/details.aspx?id=985)
+      // MSG_DIR_BAD_COMMAND_OR_FILE (cmdmsg.h)
+      int kExitCodeCommandNotFound = 9009; // 0x2331
+
+#else
+      string processFilename = "bash";
+      string processArguments = string.Format("-l -c \"{0}\"", adbCommand);
+
+      // "command not found" (see http://tldp.org/LDP/abs/html/exitcodes.html)
+      int kExitCodeCommandNotFound = 127;
+#endif // UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
+
+      Debug.Log("Executing:\n" + processFilename + " " + processArguments);
       System.Diagnostics.ProcessStartInfo myProcessStartInfo =
-        new System.Diagnostics.ProcessStartInfo("CMD.exe", cmd);
+        new System.Diagnostics.ProcessStartInfo(processFilename, processArguments);
       myProcessStartInfo.UseShellExecute = false;
-      myProcessStartInfo.RedirectStandardOutput = true;
+      myProcessStartInfo.RedirectStandardError = true;
       myProcessStartInfo.CreateNoWindow = true;
       myProcess.StartInfo = myProcessStartInfo;
       myProcess.Start();
-#else
-      Debug.LogFormat("Trying to launch adb: {0}", adbCommand);
-      myProcess = System.Diagnostics.Process.Start("bash", string.Format("-l -c \"{0}\"",
-                                                                         adbCommand));
-#endif  // UNITY_EDITOR_WIN || UNITY_STANDALONE_WIN
       myProcess.WaitForExit();
       int exitCode = myProcess.ExitCode;
+      string standardError = myProcess.StandardError.ReadToEnd();
       myProcess.Close();
       if (exitCode == 0) {
-        Debug.LogFormat("adb process succeeded (exit code 0).");
+        Debug.Log("adb process succeeded (exit code 0).");
       } else {
-        Debug.LogErrorFormat("adb process FAILED (exit code {0}). Check that the Android SDK " +
-            "is installed and that the adb command is in your PATH environment variable.",
-            exitCode);
+        Debug.LogErrorFormat("adb process FAILED (exit code {0})\n{1}", exitCode, standardError);
+        if (exitCode == kExitCodeCommandNotFound) {
+          Debug.LogError(
+            "Check that the Android SDK is installed and that the" +
+            " `adb` command is in your PATH environment variable.");
+        }
       }
 #endif  // !UNITY_WEBPLAYER
     }
 
     private void phoneEventSocketLoop() {
-      long lastConnectionAttemptTime = 0;
-      bool isFirstTry = true;
 
       while (!shouldStop) {
         string addr = EmulatorConfig.Instance.PHONE_EVENT_MODE == EmulatorConfig.Mode.USB
           ? EmulatorConfig.USB_SERVER_IP : EmulatorConfig.WIFI_SERVER_IP;
 
-        // Wait a while in order to enforce the minimum time between connection attempts.
-        if (!isFirstTry) {
-          TimeSpan elapsed = new TimeSpan(DateTime.Now.Ticks - lastConnectionAttemptTime);
-          float toWait = kMinReconnectInterval - (float) elapsed.TotalSeconds;
-          if (toWait > 0) {
-            Thread.Sleep((int) (toWait * 1000));
-          }
-        }
-
-        isFirstTry = false;
-        lastConnectionAttemptTime = DateTime.Now.Ticks;
-
+        long lastConnectionAttemptTime = DateTime.Now.Ticks;
         try {
           if (EmulatorConfig.Instance.PHONE_EVENT_MODE == EmulatorConfig.Mode.USB) {
             Debug.LogFormat("Attempting to set up port forwarding.");
@@ -125,6 +124,13 @@ namespace Gvr.Internal {
         } catch (Exception e) {
           Debug.LogWarning("Error connecting to phone event socket: " + addr + ":"
               + kPhoneEventPort + ". " + e);
+        }
+
+        // Wait a while in order to enforce the minimum time between connection attempts.
+        TimeSpan elapsed = new TimeSpan(DateTime.Now.Ticks - lastConnectionAttemptTime);
+        float toWait = kMinReconnectInterval - (float) elapsed.TotalSeconds;
+        if (toWait > 0) {
+          Thread.Sleep((int) (toWait * 1000));
         }
       }
     }

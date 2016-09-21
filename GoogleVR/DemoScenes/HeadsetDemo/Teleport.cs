@@ -44,23 +44,15 @@ public class Teleport : MonoBehaviour, IGvrGazeResponder {
   }
 
   public void ToggleDistortionCorrection() {
-    switch(GvrViewer.Instance.DistortionCorrection) {
-    case GvrViewer.DistortionCorrectionMethod.Unity:
-      GvrViewer.Instance.DistortionCorrection = GvrViewer.DistortionCorrectionMethod.Native;
-      break;
-    case GvrViewer.DistortionCorrectionMethod.Native:
-      GvrViewer.Instance.DistortionCorrection = GvrViewer.DistortionCorrectionMethod.None;
-      break;
-    case GvrViewer.DistortionCorrectionMethod.None:
-    default:
-      GvrViewer.Instance.DistortionCorrection = GvrViewer.DistortionCorrectionMethod.Unity;
-      break;
-    }
+    GvrViewer.Instance.DistortionCorrectionEnabled =
+      !GvrViewer.Instance.DistortionCorrectionEnabled;
   }
 
+#if !UNITY_HAS_GOOGLEVR || UNITY_EDITOR
   public void ToggleDirectRender() {
     GvrViewer.Controller.directRender = !GvrViewer.Controller.directRender;
   }
+#endif  //  !UNITY_HAS_GOOGLEVR || UNITY_EDITOR
 
   public void TeleportRandomly() {
     Vector3 direction = Random.onUnitSphere;

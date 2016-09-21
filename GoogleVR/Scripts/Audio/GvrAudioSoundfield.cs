@@ -200,6 +200,7 @@ public class GvrAudioSoundfield : MonoBehaviour {
       audioSources[channelSet].enabled = false;
       audioSources[channelSet].playOnAwake = false;
       audioSources[channelSet].bypassReverbZones = true;
+      audioSources[channelSet].dopplerLevel = 0.0f;
       audioSources[channelSet].spatialBlend = 0.0f;
       audioSources[channelSet].outputAudioMixerGroup = mixer.FindMatchingGroups("Master")[0];
     }
@@ -210,7 +211,7 @@ public class GvrAudioSoundfield : MonoBehaviour {
     for (int channelSet = 0; channelSet < audioSources.Length; ++channelSet) {
       audioSources[channelSet].enabled = true;
     }
-    if (playOnAwake && !isPlaying) {
+    if (playOnAwake && !isPlaying && InitializeSoundfield()) {
       Play();
     }
   }
@@ -265,23 +266,27 @@ public class GvrAudioSoundfield : MonoBehaviour {
 
   /// Plays the clip.
   public void Play () {
-    if(audioSources != null && InitializeSoundfield()) {
-      double dspTime = AudioSettings.dspTime;
-      for (int channelSet = 0; channelSet < audioSources.Length; ++channelSet) {
-        audioSources[channelSet].PlayScheduled(dspTime);
-      }
-      isPaused = false;
-    }
+    double dspTime = AudioSettings.dspTime;
+    PlayScheduled(dspTime);
   }
 
   /// Plays the clip with a delay specified in seconds.
   public void PlayDelayed (float delay) {
-    if(audioSources != null && InitializeSoundfield()) {
-      double delayedDspTime = AudioSettings.dspTime + (double)delay;
+    double delayedDspTime = AudioSettings.dspTime + (double)delay;
+    PlayScheduled(delayedDspTime);
+  }
+
+  /// Plays the clip at a specific time on the absolute time-line that AudioSettings.dspTime reads
+  /// from.
+  public void PlayScheduled (double time) {
+    if (audioSources != null && InitializeSoundfield()) {
       for (int channelSet = 0; channelSet < audioSources.Length; ++channelSet) {
-        audioSources[channelSet].PlayScheduled(delayedDspTime);
+        audioSources[channelSet].PlayScheduled(time);
       }
       isPaused = false;
+    } else {
+      Debug.LogWarning ("GVR Audio soundfield not initialized. Audio playback not supported " +
+                        "until after Awake() and OnEnable(). Try calling from Start() instead.");
     }
   }
 
