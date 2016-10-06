@@ -18,7 +18,7 @@
 /// </summary>
 
 // This class is defined only for versions of Unity with the GVR native integration.
-#if UNITY_HAS_GOOGLEVR && UNITY_ANDROID
+#if UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
 using UnityEngine;
 using UnityEngine.VR;
 using System;
@@ -153,4 +153,4 @@ public static class GvrSettings {
   private static extern int gvr_user_prefs_get_controller_handedness(IntPtr gvrUserPrefsPtr);
 
 }
-#endif  // UNITY_HAS_GOOGLEVR && UNITY_ANDROID
+#endif  // UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
