@@ -86,16 +86,23 @@ public class GvrViewer : MonoBehaviour {
 
   /// Determine whether the scene renders in stereo or mono.
   /// Supported only for versions of Unity *without* the GVR integration.
+  /// VRModeEnabled will be a no-op for versions of Unity with the GVR integration.
   /// _True_ means to render in stereo, and _false_ means to render in mono.
   public bool VRModeEnabled {
     get {
+#if !UNITY_HAS_GOOGLEVR || UNITY_EDITOR
       return vrModeEnabled;
+#else
+      return UnityEngine.VR.VRSettings.enabled;
+#endif  // !UNITY_HAS_GOOGLEVR || UNITY_EDITOR
     }
     set {
+#if !UNITY_HAS_GOOGLEVR || UNITY_EDITOR
       if (value != vrModeEnabled && device != null) {
         device.SetVRModeEnabled(value);
       }
       vrModeEnabled = value;
+#endif  // !UNITY_HAS_GOOGLEVR || UNITY_EDITOR
     }
   }
   [SerializeField]
@@ -212,7 +219,7 @@ public class GvrViewer : MonoBehaviour {
   public RenderTexture StereoScreen {
     get {
       // Don't need it except for distortion correction.
-      if (!distortionCorrectionEnabled || !vrModeEnabled) {
+      if (!distortionCorrectionEnabled || !VRModeEnabled) {
         return null;
       }
       if (stereoScreen == null) {
@@ -346,7 +353,9 @@ public class GvrViewer : MonoBehaviour {
 
     device.SetNeckModelScale(neckModelScale);
 
+#if !UNITY_HAS_GOOGLEVR || UNITY_EDITOR
     device.SetVRModeEnabled(vrModeEnabled);
+#endif  // !UNITY_HAS_GOOGLEVR || UNITY_EDITOR
 
     device.UpdateScreenData();
   }
@@ -522,7 +531,9 @@ public class GvrViewer : MonoBehaviour {
   }
 
   void OnDestroy() {
+#if !UNITY_HAS_GOOGLEVR || UNITY_EDITOR
     VRModeEnabled = false;
+#endif  // !UNITY_HAS_GOOGLEVR || UNITY_EDITOR
     if (device != null) {
       device.Destroy();
     }
