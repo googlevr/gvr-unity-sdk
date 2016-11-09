@@ -199,6 +199,25 @@ namespace Gvr.Internal {
         return;
       }
 
+      // Use IntPtr instead of GetRawObject() so that Unity can shut down gracefully on
+      // Application.Quit(). Note that GetRawObject() is not pinned by the receiver so it's not
+      // cleaned up appropriately on shutdown, which is a known bug in Unity.
+      IntPtr androidContextPtr = AndroidJNI.NewLocalRef(androidContext.GetRawObject());
+      IntPtr classLoaderPtr = AndroidJNI.NewLocalRef(classLoader.GetRawObject());
+      Debug.Log ("Creating and initializing GVR API controller object.");
+      api = gvr_controller_create_and_init_android (IntPtr.Zero, androidContextPtr, classLoaderPtr,
+          options, IntPtr.Zero);
+      AndroidJNI.DeleteLocalRef(androidContextPtr);
+      AndroidJNI.DeleteLocalRef(classLoaderPtr);
+      if (IntPtr.Zero == api) {
+        Debug.LogError("Error creating/initializing Daydream controller API.");
+        error = true;
+        errorDetails = "Failed to initialize Daydream controller API.";
+        return;
+      }
+
+
+
       Debug.Log("Creating and initializing GVR API controller object.");
       api = gvr_controller_create_and_init_android(IntPtr.Zero, androidContext.GetRawObject(),
           classLoader.GetRawObject(), options, IntPtr.Zero);
