@@ -51,7 +51,7 @@ MonoBehaviour:
   sourcePitch: 1
   sourceVolume: 1
   sourceMaxDistance: 500
-  sourceMinDistance: 0
+  sourceMinDistance: 1
   hrtfEnabled: 1
 --- !u!1001 &100100000
 Prefab:

@@ -28,6 +28,12 @@ public class GvrAudioSource : MonoBehaviour {
   /// Directivity pattern order.
   public float directivitySharpness = 1.0f;
 
+  /// Listener directivity pattern shaping factor.
+  public float listenerDirectivityAlpha = 0.0f;
+
+  /// Listener directivity pattern order.
+  public float listenerDirectivitySharpness = 1.0f;
+
   /// Input gain in decibels.
   public float gainDb = 0.0f;
 
@@ -36,13 +42,6 @@ public class GvrAudioSource : MonoBehaviour {
 
   /// Play source on awake.
   public bool playOnAwake = true;
-
-  /// Volume rolloff model with respect to the distance.
-  public AudioRolloffMode rolloffMode = AudioRolloffMode.Logarithmic;
-
-  /// Spread in degrees.
-  [Range(0.0f, 360.0f)]
-  public float spread = 0.0f;
 
   /// The default AudioClip to play.
   public AudioClip clip {
@@ -111,6 +110,7 @@ public class GvrAudioSource : MonoBehaviour {
   public int priority {
     get { return sourcePriority; }
     set {
+      sourcePriority = value;
       if(audioSource != null) {
         audioSource.priority = sourcePriority;
       }
@@ -119,6 +119,34 @@ public class GvrAudioSource : MonoBehaviour {
   [SerializeField]
   [Range(0, 256)]
   private int sourcePriority = 128;
+
+  /// Sets the Doppler scale for this audio source.
+  public float dopplerLevel {
+    get { return sourceDopplerLevel; }
+    set {
+      sourceDopplerLevel = value;
+      if(audioSource != null) {
+        audioSource.dopplerLevel = sourceDopplerLevel;
+      }
+    }
+  }
+  [SerializeField]
+  [Range(0.0f, 5.0f)]
+  private float sourceDopplerLevel = 1.0f;
+
+  /// Sets the spread angle (in degrees) in 3D space.
+  public float spread {
+    get { return sourceSpread; }
+    set {
+      sourceSpread = value;
+      if(audioSource != null) {
+        audioSource.spread = sourceSpread;
+      }
+    }
+  }
+  [SerializeField]
+  [Range(0.0f, 360.0f)]
+  private float sourceSpread = 0.0f;
 
   /// Playback position in seconds.
   public float time {
@@ -164,12 +192,34 @@ public class GvrAudioSource : MonoBehaviour {
   [Range(0.0f, 1.0f)]
   private float sourceVolume = 1.0f;
 
+  /// Volume rolloff model with respect to the distance.
+  public AudioRolloffMode rolloffMode {
+    get { return sourceRolloffMode; }
+    set {
+      sourceRolloffMode = value;
+      if (audioSource != null) {
+        audioSource.rolloffMode = sourceRolloffMode;
+        if (rolloffMode == AudioRolloffMode.Custom) {
+          // Custom rolloff is not supported, set the curve for no distance attenuation.
+          audioSource.SetCustomCurve(AudioSourceCurveType.CustomRolloff,
+                                     AnimationCurve.Linear(sourceMinDistance, 1.0f,
+                                                           sourceMaxDistance, 1.0f));
+        }
+      }
+    }
+  }
+  [SerializeField]
+  private AudioRolloffMode sourceRolloffMode = AudioRolloffMode.Logarithmic;
+
   /// MaxDistance is the distance a sound stops attenuating at.
   public float maxDistance {
     get { return sourceMaxDistance; }
     set {
       sourceMaxDistance = Mathf.Clamp(value, sourceMinDistance + GvrAudio.distanceEpsilon,
                                       GvrAudio.maxDistanceLimit);
+      if(audioSource != null) {
+        audioSource.maxDistance = sourceMaxDistance;
+      }
     }
   }
   [SerializeField]
@@ -180,10 +230,13 @@ public class GvrAudioSource : MonoBehaviour {
     get { return sourceMinDistance; }
     set {
       sourceMinDistance = Mathf.Clamp(value, 0.0f, GvrAudio.minDistanceLimit);
+      if(audioSource != null) {
+        audioSource.minDistance = sourceMinDistance;
+      }
     }
   }
   [SerializeField]
-  private float sourceMinDistance = 0.0f;
+  private float sourceMinDistance = 1.0f;
 
   /// Binaural (HRTF) rendering toggle.
   [SerializeField]
@@ -214,8 +267,7 @@ public class GvrAudioSource : MonoBehaviour {
     audioSource.hideFlags = HideFlags.HideInInspector | HideFlags.HideAndDontSave;
     audioSource.playOnAwake = false;
     audioSource.bypassReverbZones = true;
-    audioSource.dopplerLevel = 0.0f;
-    audioSource.spatialBlend = 0.0f;
+    audioSource.spatialBlend = 1.0f;
     OnValidate();
     // Route the source output to |GvrAudioMixer|.
     AudioMixer mixer = (Resources.Load("GvrAudioMixer") as AudioMixer);
@@ -249,6 +301,14 @@ public class GvrAudioSource : MonoBehaviour {
     Destroy(audioSource);
   }
 
+  void OnApplicationPause (bool pauseStatus) {
+    if (pauseStatus) {
+      Pause();
+    } else {
+      UnPause();
+    }
+  }
+
   void Update () {
     // Update occlusion state.
     if (!occlusionEnabled) {
@@ -261,9 +321,11 @@ public class GvrAudioSource : MonoBehaviour {
     if (!isPlaying && !isPaused) {
       Stop();
     } else {
-      GvrAudio.UpdateAudioSource(id, transform, bypassRoomEffects, gainDb, spread, rolloffMode,
-                                 sourceMinDistance, sourceMaxDistance, directivityAlpha,
-                                 directivitySharpness, currentOcclusion);
+      audioSource.SetSpatializerFloat((int) GvrAudio.SpatializerData.Gain,
+                                      GvrAudio.ConvertAmplitudeFromDb(gainDb));
+      audioSource.SetSpatializerFloat((int) GvrAudio.SpatializerData.MinDistance,
+                                      sourceMinDistance);
+      GvrAudio.UpdateAudioSource(id, this, currentOcclusion);
     }
   }
 
@@ -273,6 +335,15 @@ public class GvrAudioSource : MonoBehaviour {
   public void GetOutputData(float[] samples, int channel) {
     if (audioSource != null) {
       audioSource.GetOutputData(samples, channel);
+    }
+  }
+
+  /// Provides a block of the currently playing audio source's spectrum data.
+  ///
+  /// @note The array given in samples will be filled with the requested data before spatialization.
+  public void GetSpectrumData(float[] samples, int channel, FFTWindow window) {
+    if (audioSource != null) {
+      audioSource.GetSpectrumData(samples, channel, window);
     }
   }
 
@@ -356,12 +427,18 @@ public class GvrAudioSource : MonoBehaviour {
     if (id < 0) {
       id = GvrAudio.CreateAudioSource(hrtfEnabled);
       if (id >= 0) {
-        GvrAudio.UpdateAudioSource(id, transform, bypassRoomEffects, gainDb, spread, rolloffMode,
-                                   sourceMinDistance, sourceMaxDistance, directivityAlpha,
-                                   directivitySharpness, currentOcclusion);
+        GvrAudio.UpdateAudioSource(id, this, currentOcclusion);
         audioSource.spatialize = true;
-        audioSource.SetSpatializerFloat(0, (float)id);
-        audioSource.SetSpatializerFloat(1, (float)GvrAudio.SpatializerType.Source);
+        audioSource.SetSpatializerFloat((int) GvrAudio.SpatializerData.Type,
+                                        (float) GvrAudio.SpatializerType.Source);
+        audioSource.SetSpatializerFloat((int) GvrAudio.SpatializerData.Gain,
+                                        GvrAudio.ConvertAmplitudeFromDb(gainDb));
+        audioSource.SetSpatializerFloat((int) GvrAudio.SpatializerData.MinDistance,
+                                        sourceMinDistance);
+        audioSource.SetSpatializerFloat((int) GvrAudio.SpatializerData.ZeroOutput, 0.0f);
+        // Source id must be set after all the spatializer parameters, to ensure that the source is
+        // properly initialized before processing.
+        audioSource.SetSpatializerFloat((int) GvrAudio.SpatializerData.Id, (float) id);
       }
     }
     return id >= 0;
@@ -370,7 +447,9 @@ public class GvrAudioSource : MonoBehaviour {
   // Shuts down the source.
   private void ShutdownSource () {
     if (id >= 0) {
-      audioSource.SetSpatializerFloat(0, -1.0f);
+      audioSource.SetSpatializerFloat((int) GvrAudio.SpatializerData.Id, -1.0f);
+      // Ensure that the output is zeroed after shutdown.
+      audioSource.SetSpatializerFloat((int) GvrAudio.SpatializerData.ZeroOutput, 1.0f);
       audioSource.spatialize = false;
       GvrAudio.DestroyAudioSource(id);
       id = -1;
@@ -388,19 +467,32 @@ public class GvrAudioSource : MonoBehaviour {
     pitch = sourcePitch;
     priority = sourcePriority;
     volume = sourceVolume;
+    dopplerLevel = sourceDopplerLevel;
+    spread = sourceSpread;
     minDistance = sourceMinDistance;
     maxDistance = sourceMaxDistance;
+    rolloffMode = sourceRolloffMode;
   }
 
   void OnDrawGizmosSelected () {
-    Gizmos.color = new Color(0.75f, 0.75f, 1.0f, 0.5f);
-    DrawDirectivityGizmo(180);
+    // Draw listener directivity gizmo.
+    // Note that this is a very suboptimal way of finding the component, to be used in Unity Editor
+    // only, should not be used to access the component in run time.
+    GvrAudioListener listener = FindObjectOfType<GvrAudioListener>();
+    if(listener != null) {
+      Gizmos.color = GvrAudio.listenerDirectivityColor;
+      DrawDirectivityGizmo(listener.transform, listenerDirectivityAlpha,
+                           listenerDirectivitySharpness, 180);
+    }
+    // Draw source directivity gizmo.
+    Gizmos.color = GvrAudio.sourceDirectivityColor;
+    DrawDirectivityGizmo(transform, directivityAlpha, directivitySharpness, 180);
   }
 
   // Draws a 3D gizmo in the Scene View that shows the selected directivity pattern.
-  private void DrawDirectivityGizmo (int resolution) {
-    Vector2[] points =
-        GvrAudio.Generate2dPolarPattern(directivityAlpha, directivitySharpness, resolution);
+  private void DrawDirectivityGizmo (Transform target, float alpha, float sharpness,
+                                     int resolution) {
+    Vector2[] points = GvrAudio.Generate2dPolarPattern(alpha, sharpness, resolution);
     // Compute |vertices| from the polar pattern |points|.
     int numVertices = resolution + 1;
     Vector3[] vertices = new Vector3[numVertices];
@@ -434,7 +526,7 @@ public class GvrAudioSource : MonoBehaviour {
     directivityGizmoMesh.triangles = triangles;
     directivityGizmoMesh.RecalculateNormals();
     // Draw the mesh.
-    Vector3 scale = 2.0f * Mathf.Max(transform.lossyScale.x, transform.lossyScale.z) * Vector3.one;
-    Gizmos.DrawMesh(directivityGizmoMesh, transform.position, transform.rotation, scale);
+    Vector3 scale = 2.0f * Mathf.Max(target.lossyScale.x, target.lossyScale.z) * Vector3.one;
+    Gizmos.DrawMesh(directivityGizmoMesh, target.position, target.rotation, scale);
   }
 }

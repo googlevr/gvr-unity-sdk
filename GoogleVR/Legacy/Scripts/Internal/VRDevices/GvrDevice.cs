@@ -44,6 +44,10 @@ namespace Gvr.Internal {
     protected bool debugDisableNativeProjections = false;
     protected bool debugDisableNativeUILayer = false;
 
+    public override void SetDistortionCorrectionEnabled(bool enabled) {
+      EnableDistortionCorrection(enabled);
+    }
+
     public override void SetNeckModelScale(float scale) {
       SetNeckModelFactor(scale);
     }
@@ -79,6 +83,11 @@ namespace Gvr.Internal {
 
     public override void Recenter() {
       ResetHeadTracker();
+    }
+
+    public override void PostRender(RenderTexture stereoScreen) {
+      SetTextureId((int)stereoScreen.GetNativeTexturePtr());
+      GL.IssuePluginEvent(kRenderEvent);
     }
 
     public override void OnPause(bool pause) {
@@ -188,6 +197,9 @@ namespace Gvr.Internal {
 
     [DllImport(dllName)]
     private static extern void SetUnityVersion(byte[] version_str, int version_length);
+
+    [DllImport(dllName)]
+    private static extern void EnableDistortionCorrection(bool enable);
 
     [DllImport(dllName)]
     private static extern void SetNeckModelFactor(float factor);

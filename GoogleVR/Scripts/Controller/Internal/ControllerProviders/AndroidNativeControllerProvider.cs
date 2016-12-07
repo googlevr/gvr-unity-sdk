@@ -23,6 +23,9 @@ namespace Gvr.Internal {
   /// Controller Provider that uses the native GVR C API to communicate with controllers
   /// via Google VR Services on Android.
   class AndroidNativeControllerProvider : IControllerProvider {
+    // Minimum VrCore client API version that automatically handles recentering.
+    private const int MIN_VRCORE_API_VERSION_WITH_RECENTER = 8;
+
     // Note: keep structs and function signatures in sync with the C header file (gvr_controller.h).
     // GVR controller option flags.
     private const int GVR_CONTROLLER_ENABLE_ORIENTATION = 1 << 0;
@@ -49,6 +52,12 @@ namespace Gvr.Internal {
 
     // enum gvr_controller_api_status
     private const int GVR_CONTROLLER_API_OK = 0;
+    private const int GVR_CONTROLLER_API_UNSUPPORTED = 1;
+    private const int GVR_CONTROLLER_API_NOT_AUTHORIZED = 2;
+    private const int GVR_CONTROLLER_API_UNAVAILABLE = 3;
+    private const int GVR_CONTROLLER_API_SERVICE_OBSOLETE = 4;
+    private const int GVR_CONTROLLER_API_CLIENT_OBSOLETE = 5;
+    private const int GVR_CONTROLLER_API_MALFUNCTION = 6;
 
     [StructLayout(LayoutKind.Sequential)]
     private struct gvr_quat {
@@ -157,6 +166,7 @@ namespace Gvr.Internal {
     private static extern long gvr_controller_state_get_last_button_timestamp(IntPtr state);
 
     private const string UNITY_PLAYER_CLASS = "com.unity3d.player.UnityPlayer";
+    private const string VRCORE_UTILS_CLASS = "com.google.vr.vrcore.base.api.VrCoreUtils";
 
     private IntPtr api;
 
@@ -170,12 +180,15 @@ namespace Gvr.Internal {
 
     private MutablePose3D pose3d = new MutablePose3D();
 
-    internal AndroidNativeControllerProvider(bool enableGyro, bool enableAccel) {
+    private int vrCoreClientApiVersion;
+    private bool vrCoreImplementsRecenter;
+
+    internal AndroidNativeControllerProvider() {
       Debug.Log("Initializing Daydream controller API.");
 
       int options = gvr_controller_get_default_options();
-      options |= enableAccel ? GVR_CONTROLLER_ENABLE_ACCEL : 0;
-      options |= enableGyro ? GVR_CONTROLLER_ENABLE_GYRO : 0;
+      options |= GVR_CONTROLLER_ENABLE_ACCEL;
+      options |= GVR_CONTROLLER_ENABLE_GYRO;
 
       statePtr = gvr_controller_state_create();
 
@@ -216,17 +229,11 @@ namespace Gvr.Internal {
         return;
       }
 
+      vrCoreClientApiVersion = GetVrCoreClientApiVersion(activity);
 
+      // Check whether or not VrCore implements recentering.
+      vrCoreImplementsRecenter = (vrCoreClientApiVersion >= MIN_VRCORE_API_VERSION_WITH_RECENTER);
 
-      Debug.Log("Creating and initializing GVR API controller object.");
-      api = gvr_controller_create_and_init_android(IntPtr.Zero, androidContext.GetRawObject(),
-          classLoader.GetRawObject(), options, IntPtr.Zero);
-      if (IntPtr.Zero == api) {
-        Debug.LogError("Error creating/initializing Daydream controller API.");
-        error = true;
-        errorDetails = "Failed to initialize Daydream controller API.";
-        return;
-      }
       Debug.Log("GVR API successfully initialized. Now resuming it.");
       gvr_controller_resume(api);
       Debug.Log("GVR API resumed.");
@@ -235,12 +242,14 @@ namespace Gvr.Internal {
     ~AndroidNativeControllerProvider() {
       Debug.Log("Destroying GVR API structures.");
       gvr_controller_state_destroy(ref statePtr);
+      gvr_controller_destroy(ref api);
       Debug.Log("AndroidNativeControllerProvider destroyed.");
     }
 
     public void ReadState(ControllerState outState) {
       if (error) {
         outState.connectionState = GvrConnectionState.Error;
+        outState.apiStatus = GvrControllerApiStatus.Error;
         outState.errorDetails = errorDetails;
         return;
       }
@@ -248,6 +257,8 @@ namespace Gvr.Internal {
 
       outState.connectionState = ConvertConnectionState(
           gvr_controller_state_get_connection_state(statePtr));
+      outState.apiStatus = ConvertControllerApiStatus(
+          gvr_controller_state_get_api_status(statePtr));
 
       gvr_quat rawOri = gvr_controller_state_get_orientation(statePtr);
       gvr_vec3 rawAccel = gvr_controller_state_get_accel(statePtr);
@@ -294,6 +305,11 @@ namespace Gvr.Internal {
 
       outState.recentering = 0 != gvr_controller_state_get_recentering(statePtr);
       outState.recentered = 0 != gvr_controller_state_get_recentered(statePtr);
+      outState.gvrPtr = statePtr;
+
+      // If the controller was recentered, we may also need to request that the headset be
+      // recentered. We should do that only if VrCore does NOT implement recentering.
+      outState.headsetRecenterRequested = outState.recentered && !vrCoreImplementsRecenter;
     }
 
     public void OnPause() {
@@ -318,6 +334,26 @@ namespace Gvr.Internal {
           return GvrConnectionState.Scanning;
         default:
           return GvrConnectionState.Disconnected;
+      }
+    }
+
+    private GvrControllerApiStatus ConvertControllerApiStatus(int gvrControllerApiStatus) {
+      switch (gvrControllerApiStatus) {
+        case GVR_CONTROLLER_API_OK:
+          return GvrControllerApiStatus.Ok;
+        case GVR_CONTROLLER_API_UNSUPPORTED:
+          return GvrControllerApiStatus.Unsupported;
+        case GVR_CONTROLLER_API_NOT_AUTHORIZED:
+          return GvrControllerApiStatus.NotAuthorized;
+        case GVR_CONTROLLER_API_SERVICE_OBSOLETE:
+          return GvrControllerApiStatus.ApiServiceObsolete;
+        case GVR_CONTROLLER_API_CLIENT_OBSOLETE:
+          return GvrControllerApiStatus.ApiClientObsolete;
+        case GVR_CONTROLLER_API_MALFUNCTION:
+          return GvrControllerApiStatus.ApiMalfunction;
+        case GVR_CONTROLLER_API_UNAVAILABLE:
+        default:  // Fall through.
+          return GvrControllerApiStatus.Unavailable;
       }
     }
 
@@ -351,6 +387,22 @@ namespace Gvr.Internal {
         return null;
       }
       return result;
+    }
+
+    private static int GetVrCoreClientApiVersion(AndroidJavaObject activity) {
+      try {
+        AndroidJavaClass utilsClass = new AndroidJavaClass(VRCORE_UTILS_CLASS);
+        int apiVersion = utilsClass.CallStatic<int>("getVrCoreClientApiVersion", activity);
+        Debug.LogFormat("VrCore client API version: " + apiVersion);
+        return apiVersion;
+      } catch (Exception exc) {
+        // Even though a catch-all block is normally frowned upon, in this case we really
+        // need it because this method has to be robust to unpredictable circumstances:
+        // VrCore might not exist in the device, the Java layer might be broken, etc, etc.
+        // None of those should abort the app.
+        Debug.LogError("Error obtaining VrCore client API version: " + exc);
+        return 0;
+      }
     }
   }
 }

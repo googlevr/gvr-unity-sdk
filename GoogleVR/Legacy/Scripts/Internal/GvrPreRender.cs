@@ -66,7 +66,8 @@ public class GvrPreRender : MonoBehaviour {
   private void SetShaderGlobals() {
     // For any shaders that want to use these numbers for distortion correction.  But only
     // if distortion correction is needed, yet not already being handled by another method.
-    if (GvrViewer.Instance.VRModeEnabled && !GvrViewer.Instance.DistortionCorrectionEnabled) {
+   if (GvrViewer.Instance.VRModeEnabled
+        && GvrViewer.Instance.DistortionCorrection == GvrViewer.DistortionCorrectionMethod.None) {
       GvrProfile p = GvrViewer.Instance.Profile;
       // Distortion vertex shader currently setup for only 6 coefficients.
       if (p.viewer.inverse.Coef.Length > 6) {

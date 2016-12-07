@@ -79,13 +79,6 @@ public class GvrAudioRoom : MonoBehaviour {
   /// Size of the room (normalized with respect to scale of the game object).
   public Vector3 size = Vector3.one;
 
-  /// Surface materials holder.
-  private SurfaceMaterial[] surfaceMaterials = null;
-
-  void Awake () {
-    surfaceMaterials = new SurfaceMaterial[GvrAudio.numRoomSurfaces];
-  }
-
   void OnEnable () {
     GvrAudio.UpdateAudioRoom(this, GvrAudio.IsListenerInsideRoom(this));
   }
@@ -96,17 +89,6 @@ public class GvrAudioRoom : MonoBehaviour {
 
   void Update () {
     GvrAudio.UpdateAudioRoom(this, GvrAudio.IsListenerInsideRoom(this));
-  }
-
-  /// Returns a list of surface materials of the room.
-  public SurfaceMaterial[] GetSurfaceMaterials () {
-    surfaceMaterials[0] = leftWall;
-    surfaceMaterials[1] = rightWall;
-    surfaceMaterials[2] = floor;
-    surfaceMaterials[3] = ceiling;
-    surfaceMaterials[4] = backWall;
-    surfaceMaterials[5] = frontWall;
-    return surfaceMaterials;
   }
 
   void OnDrawGizmosSelected () {

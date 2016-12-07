@@ -15,6 +15,7 @@
 // The controller is not available for versions of Unity without the
 // // GVR native integration.
 #if UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
+using System;
 
 /// @cond
 namespace Gvr.Internal {

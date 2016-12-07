@@ -27,8 +27,11 @@ namespace Gvr.Internal {
     }
 
     public override void ShowSettingsDialog() { }
-    public override void OnPause(bool pause) { }
+    public override void SetDistortionCorrectionEnabled(bool enabled) { }
     public override void SetNeckModelScale(float scale) { }
+    public override void UpdateScreenData() { }
+    public override void PostRender(RenderTexture stereoScreen) { }
+
     public override bool SetDefaultDeviceProfile(System.Uri uri) {
       return false;
     }
@@ -38,11 +41,13 @@ namespace Gvr.Internal {
       this.headPose.Set(InputTracking.GetLocalPosition(VRNode.Head),
           InputTracking.GetLocalRotation(VRNode.Head));
     }
-    public override void UpdateScreenData() { }
 
     public override void Recenter() {
       InputTracking.Recenter();
     }
+
+    public override void OnPause(bool pause) { }
+    public override void OnApplicationQuit() { }
 
     protected override void ProcessEvents() { }
 

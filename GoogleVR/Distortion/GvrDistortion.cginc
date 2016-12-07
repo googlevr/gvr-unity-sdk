@@ -1,3 +1,5 @@
+// Upgrade NOTE: replaced '_World2Object' with 'unity_WorldToObject'
+
 // Copyright 2015 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -76,7 +78,7 @@ float4 undistortVertex(float4 pos) {
 // own transform in place.
 float4 undistortSurface(float4 pos) {
   float4 proj = mul(_FixProjection, undistort(pos));
-  return mul(_World2Object, proj);
+  return mul(unity_WorldToObject, proj);
 }
 
 #else

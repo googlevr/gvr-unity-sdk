@@ -23,7 +23,6 @@ public class GvrAudioListenerEditor : Editor {
   private SerializedProperty globalGainDb = null;
   private SerializedProperty occlusionMask = null;
   private SerializedProperty quality = null;
-  private SerializedProperty worldScale = null;
 
   private GUIContent globalGainLabel = new GUIContent("Global Gain (dB)",
      "Sets the global gain of the system. Can be used to adjust the overall output volume.");
@@ -32,14 +31,11 @@ public class GvrAudioListenerEditor : Editor {
   private GUIContent qualityLabel = new GUIContent("Quality",
      "Sets the quality mode in which the spatial audio will be rendered. " +
      "Higher quality modes allow for increased fidelity at the cost of greater CPU usage.");
-  private GUIContent worldScaleLabel = new GUIContent("World Scale",
-     "Sets the ratio between game units and real world units (meters).");
 
   void OnEnable () {
     globalGainDb = serializedObject.FindProperty("globalGainDb");
     occlusionMask = serializedObject.FindProperty("occlusionMask");
     quality = serializedObject.FindProperty("quality");
-    worldScale = serializedObject.FindProperty("worldScale");
   }
 
   /// @cond
@@ -53,15 +49,13 @@ public class GvrAudioListenerEditor : Editor {
     EditorGUI.EndDisabledGroup ();
 
     // Rendering quality can only be modified through the Inspector in Edit mode.
-    GUI.enabled = !EditorApplication.isPlaying;
+    EditorGUI.BeginDisabledGroup (EditorApplication.isPlaying);
     EditorGUILayout.PropertyField(quality, qualityLabel);
-    GUI.enabled = true;
+    EditorGUI.EndDisabledGroup ();
 
     EditorGUILayout.Separator();
 
     EditorGUILayout.Slider(globalGainDb, GvrAudio.minGainDb, GvrAudio.maxGainDb, globalGainLabel);
-    EditorGUILayout.Slider(worldScale, GvrAudio.minWorldScale, GvrAudio.maxWorldScale,
-                           worldScaleLabel);
 
     EditorGUILayout.Separator();
 

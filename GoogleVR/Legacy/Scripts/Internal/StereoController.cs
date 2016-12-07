@@ -56,6 +56,7 @@ using System.Linq;
 [RequireComponent(typeof(Camera))]
 [AddComponentMenu("GoogleVR/StereoController")]
 public class StereoController : MonoBehaviour {
+#if UNITY_IOS
   /// Whether to draw directly to the output window (_true_), or to an offscreen buffer
   /// first and then blit (_false_). If you wish to use Deferred Rendering or any
   /// Image Effects in stereo, turn this option off.  A common symptom that indicates
@@ -64,6 +65,7 @@ public class StereoController : MonoBehaviour {
            "to an offscreen buffer first and then blit (false).  Image " +
            " Effects and Deferred Lighting may only work if set to false.")]
   public bool directRender = true;
+#endif  // UNITY_IOS
 
   /// When enabled, UpdateStereoValues() is called every frame to keep the stereo cameras
   /// completely synchronized with both the mono camera and the device profile.  When
