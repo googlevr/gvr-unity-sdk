@@ -29,7 +29,7 @@ using Gvr.Internal;
 /// its starting properties.
 [AddComponentMenu("GoogleVR/GvrViewer")]
 public class GvrViewer : MonoBehaviour {
-  public const string GVR_SDK_VERSION = "1.1";
+  public const string GVR_SDK_VERSION = "1.20";
 
   /// The singleton instance of the GvrViewer class.
   public static GvrViewer Instance {

@@ -16,7 +16,7 @@ using UnityEngine;
 using System.Collections;
 
 [RequireComponent(typeof(Collider))]
-public class Teleport : MonoBehaviour, IGvrGazeResponder {
+public class Teleport : MonoBehaviour {
   private Vector3 startingPosition;
 
   public Material inactiveMaterial;
@@ -52,25 +52,4 @@ public class Teleport : MonoBehaviour, IGvrGazeResponder {
     float distance = 2 * Random.value + 1.5f;
     transform.localPosition = direction * distance;
   }
-
-  #region IGvrGazeResponder implementation
-
-  /// Called when the user is looking on a GameObject with this script,
-  /// as long as it is set to an appropriate layer (see GvrGaze).
-  public void OnGazeEnter() {
-    SetGazedAt(true);
-  }
-
-  /// Called when the user stops looking on the GameObject, after OnGazeEnter
-  /// was already called.
-  public void OnGazeExit() {
-    SetGazedAt(false);
-  }
-
-  /// Called when the viewer's trigger is used, between OnGazeEnter and OnPointerExit.
-  public void OnGazeTrigger() {
-    TeleportRandomly();
-  }
-
-  #endregion
 }

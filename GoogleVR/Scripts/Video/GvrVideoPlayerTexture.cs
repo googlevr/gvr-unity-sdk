@@ -25,7 +25,7 @@ using System.Collections.Generic;
 /// </summary>
 public class GvrVideoPlayerTexture : MonoBehaviour {
 
-  private const int MIN_BUFFER_SIZE = 2;
+  private const int MIN_BUFFER_SIZE = 3;
   private const int MAX_BUFFER_SIZE = 15;
 
   /// <summary>
@@ -591,8 +591,7 @@ public class GvrVideoPlayerTexture : MonoBehaviour {
   private IEnumerator CallPluginAtEndOfFrames() {
     if (processingRunning) {
       Debug.LogError("CallPluginAtEndOfFrames invoked while already running.");
-      Debug.LogError(StackTraceUtility.ExtractStackTrace());
-      return false;
+      yield break;
     }
 
     // Only run while the video is playing.

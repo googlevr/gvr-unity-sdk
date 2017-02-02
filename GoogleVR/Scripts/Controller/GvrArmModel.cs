@@ -14,7 +14,6 @@
 
 // The controller is not available for versions of Unity without the
 // GVR native integration.
-#if UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
 
 using UnityEngine;
 using System.Collections;
@@ -29,7 +28,7 @@ using UnityEngine.VR;
 /// to the GvrController.
 [RequireComponent(typeof(GvrController))]
 public class GvrArmModel : MonoBehaviour {
-
+#if UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
   private static GvrArmModel instance = null;
 
   /// Initial relative location of the shoulder (meters).
@@ -129,8 +128,12 @@ public class GvrArmModel : MonoBehaviour {
   [Range(0.0f, 0.4f)]
   public float fadeDistanceFromFace = 0.32f;
 
+  /// Controller distance from face after which the tooltip alpha increases (meters).
+  [Range(0.4f, 0.6f)]
+  public float tooltipMinDistanceFromFace = 0.45f;
+
   /// Determines if the shoulder should follow the gaze
-  public GazeBehavior followGaze = GazeBehavior.Never;
+  public GazeBehavior followGaze = GazeBehavior.DuringMotion;
 
   /// Determines if the accelerometer should be used.
   public bool useAccelerometer = false;
@@ -171,6 +174,16 @@ public class GvrArmModel : MonoBehaviour {
   /// This is to prevent the controller from intersecting face.
   public float alphaValue { get; private set; }
 
+  /// The suggested rendering alpha value of the controller tooltips.
+  /// This is to only display the tooltips when the player is looking
+  /// at the controller, and also to prevent the tooltips from intersecting the
+  /// player's face.
+  public float tooltipAlphaValue { get; private set; }
+
+  /// Event handler that occurs when the state of the ArmModel is updated.
+  public delegate void OnArmModelUpdateEvent();
+  public event OnArmModelUpdateEvent OnArmModelUpdate;
+
   void Start() {
     // Obtain the Gvr controller from the scene.
     GvrController controller = GetComponent<GvrController>();
@@ -196,7 +209,11 @@ public class GvrArmModel : MonoBehaviour {
     instance = null;
   }
 
-  void OnControllerUpdate() {
+  private void OnControllerUpdate() {
+    if (GvrController.Recentered) {
+      ResetState();
+    }
+
     UpdateHandedness();
     UpdateTorsoDirection();
     if (GvrController.State == GvrConnectionState.Connected) {
@@ -213,6 +230,11 @@ public class GvrArmModel : MonoBehaviour {
     ApplyArmModel();
     UpdateTransparency();
     UpdatePointer();
+
+    firstUpdate = false;
+    if (OnArmModelUpdate != null) {
+      OnArmModelUpdate();
+    }
   }
 
   private void UpdateHandedness() {
@@ -252,7 +274,7 @@ public class GvrArmModel : MonoBehaviour {
     gazeDirection.Normalize();
 
     // Use the gaze direction to update the forward direction.
-    if (followGaze == GazeBehavior.Always) {
+    if (followGaze == GazeBehavior.Always || firstUpdate) {
       torsoDirection = gazeDirection;
     } else if (followGaze == GazeBehavior.DuringMotion) {
       float angularVelocity = GvrController.Gyro.magnitude;
@@ -277,7 +299,6 @@ public class GvrArmModel : MonoBehaviour {
     // If no tracking history, reset the velocity.
     if (firstUpdate) {
       filteredVelocity = Vector3.zero;
-      firstUpdate = false;
     }
 
     // IMPORTANT: The accelerometer is not reliable at these low magnitudes
@@ -366,6 +387,12 @@ public class GvrArmModel : MonoBehaviour {
     } else {
       alphaValue = Mathf.Min(1.0f, alphaValue + DELTA_ALPHA * Time.deltaTime);
     }
+
+    if (distToFace < fadeDistanceFromFace || distToFace > tooltipMinDistanceFromFace) {
+      tooltipAlphaValue = Mathf.Max(0.0f, tooltipAlphaValue - DELTA_ALPHA * Time.deltaTime);
+    } else {
+      tooltipAlphaValue = Mathf.Min(1.0f, tooltipAlphaValue + DELTA_ALPHA * Time.deltaTime);
+    }
   }
 
   private void UpdatePointer() {
@@ -373,6 +400,6 @@ public class GvrArmModel : MonoBehaviour {
     pointerPosition = wristPosition + wristRotation * POINTER_OFFSET;
     pointerRotation = wristRotation * Quaternion.AngleAxis(pointerTiltAngle, Vector3.right);
   }
-}
 
 #endif  // UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
+}

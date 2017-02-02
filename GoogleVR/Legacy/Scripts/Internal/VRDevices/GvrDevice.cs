@@ -87,7 +87,11 @@ namespace Gvr.Internal {
 
     public override void PostRender(RenderTexture stereoScreen) {
       SetTextureId((int)stereoScreen.GetNativeTexturePtr());
+
+      // Disable obsolete warnings - we don't need to pass in a callback here.
+#pragma warning disable 618
       GL.IssuePluginEvent(kRenderEvent);
+#pragma warning restore 618
     }
 
     public override void OnPause(bool pause) {

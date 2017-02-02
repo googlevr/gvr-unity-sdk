@@ -44,8 +44,7 @@ public class SwitchVideos : MonoBehaviour {
           missingLibText.text = NATIVE_LIBS_MISSING_MESSAGE;
           missingLibText.enabled = true;
         }
-      }
-      catch (Exception e) {
+      } catch (Exception e) {
         Debug.LogError(e);
         missingLibText.text = NATIVE_LIBS_MISSING_MESSAGE;
         missingLibText.enabled = true;

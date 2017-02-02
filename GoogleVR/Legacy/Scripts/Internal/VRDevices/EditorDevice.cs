@@ -25,9 +25,11 @@ namespace Gvr.Internal {
     private static readonly Vector3 neckOffset = new Vector3(0, 0.075f, 0.08f);
 
     // Use mouse to emulate head in the editor.
-    private float mouseX = 0;
-    private float mouseY = 0;
-    private float mouseZ = 0;
+    // These variables must be static so that head pose is maintained between scene changes,
+    // as it is on device.
+    private static float mouseX = 0;
+    private static float mouseY = 0;
+    private static float mouseZ = 0;
 
     public override void Init() {
       Input.gyro.enabled = true;

@@ -27,6 +27,11 @@ public abstract class GvrBasePointer : MonoBehaviour, IGvrPointer {
     GvrPointerManager.OnPointerCreated(this);
   }
 
+  public bool ShouldUseExitRadiusForRaycast {
+    get;
+    set;
+  }
+
   /// Declare methods from IGvrPointer
   public abstract void OnInputModuleEnabled();
 
@@ -46,7 +51,7 @@ public abstract class GvrBasePointer : MonoBehaviour, IGvrPointer {
 
   public abstract float GetMaxPointerDistance();
 
-  public abstract void GetPointerRadius(out float innerRadius, out float outerRadius);
+  public abstract void GetPointerRadius(out float enterRadius, out float exitRadius);
 
   public virtual Transform GetPointerTransform() {
     return transform;

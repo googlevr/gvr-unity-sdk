@@ -49,6 +49,23 @@ public abstract class GvrBasePointerRaycaster : BaseRaycaster {
     }
   }
 
+  /// Returns the pointer's radius to use for the raycast.
+  public float PointerRadius {
+    get {
+      if (GvrPointerManager.Pointer == null) {
+        return 0.0f;
+      }
+
+      float enterRadius, exitRadius;
+      GvrPointerManager.Pointer.GetPointerRadius(out enterRadius, out exitRadius);
+      if (GvrPointerManager.Pointer.ShouldUseExitRadiusForRaycast) {
+        return exitRadius;
+      } else {
+        return enterRadius;
+      }
+    }
+  }
+
   protected GvrBasePointerRaycaster() {
   }
 

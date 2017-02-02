@@ -31,6 +31,15 @@ using UnityEngine;
 /// 1. Responding to movement of the users head (Cardboard gaze-based-pointer).
 /// 2. Responding to the movement of the daydream controller (Daydream 3D pointer).
 public interface IGvrPointer {
+
+  /// This is used by GvrBasePointerRaycaster to determine if the
+  /// enterRadius or the exitRadius should be used for the raycast.
+  /// It is set by GvrPointerInputModule and doesn't need to be controlled manually.
+  bool ShouldUseExitRadiusForRaycast {
+    get;
+    set;
+  }
+
   /// This is called when the 'BaseInputModule' system should be enabled.
   void OnInputModuleEnabled();
 
@@ -76,12 +85,14 @@ public interface IGvrPointer {
   /// It is used by GvrBasePointerRaycaster as the origin of the ray.
   Transform GetPointerTransform();
 
-  /// Return the radius of the pointer. This is currently
-  /// only used by GvrGaze. It is used when searching for
-  /// valid gaze targets. If a radius is 0, the GvrGaze will use a ray
-  /// to find a valid gaze target. Otherwise it will use a SphereCast.
-  /// The *innerRadius* is used for finding new targets while the *outerRadius*
-  /// is used to see if you are still nearby the object currently looked at
+  /// Return the radius of the pointer. It is used by GvrPointerPhysicsRaycaster
+  /// and GvrGaze when searching for valid pointer targets. If a radius is 0, then
+  /// a ray is used to find a valid pointer target. Otherwise it will use a SphereCast.
+  /// The *enterRadius* is used for finding new targets while the *exitRadius*
+  /// is used to see if you are still nearby the object currently pointed at
   /// to avoid a flickering effect when just at the border of the intersection.
-  void GetPointerRadius(out float innerRadius, out float outerRadius);
+  ///
+  /// NOTE: This is only works with GvrPointerPhysicsRaycaster. To use it with uGUI,
+  /// add 3D colliders to your canvas elements.
+  void GetPointerRadius(out float enterRadius, out float exitRadius);
 }

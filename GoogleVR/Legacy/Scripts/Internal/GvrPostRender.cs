@@ -130,7 +130,12 @@ public class GvrPostRender : MonoBehaviour {
     distortionMesh.uv = tex;
     distortionMesh.colors = colors;
     distortionMesh.triangles = indices;
+
+#if !UNITY_5_5_OR_NEWER
+    // Optimize() is deprecated as of Unity 5.5.0p1.
     distortionMesh.Optimize();
+#endif  // !UNITY_5_5_OR_NEWER
+
     distortionMesh.UploadMeshData(true);
   }
 

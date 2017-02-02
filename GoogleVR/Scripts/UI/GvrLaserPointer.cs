@@ -14,7 +14,6 @@
 
 // The controller is not available for versions of Unity without the
 // GVR native integration.
-#if UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
 
 using UnityEngine;
 using System.Collections;
@@ -25,7 +24,7 @@ using System.Collections;
 /// when its not directly in their field of view.
 [RequireComponent(typeof(LineRenderer))]
 public class GvrLaserPointer : GvrBasePointer {
-
+#if UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
   /// Small offset to prevent z-fighting of the reticle (meters).
   private const float Z_OFFSET_EPSILON = 0.1f;
 
@@ -83,36 +82,54 @@ public class GvrLaserPointer : GvrBasePointer {
     float alpha = GvrArmModel.Instance.alphaValue;
     lineRenderer.SetColors(Color.Lerp(Color.clear, laserColor, alpha), Color.clear);
   }
+#endif  // UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
+
+#if !UNITY_HAS_GOOGLEVR
+  protected override void Start() {
+    // Don't call base.Start(); so that that this pointer isn't activated
+    // when the editor doesn't have UNITY_HAS_GOOGLE_VR.
+  }
+#endif  // !UNITY_HAS_GOOGLEVR
 
   public override void OnInputModuleEnabled() {
+#if UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
     if (lineRenderer != null) {
       lineRenderer.enabled = true;
     }
+#endif  // UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
   }
 
   public override void OnInputModuleDisabled() {
+#if UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
     if (lineRenderer != null) {
       lineRenderer.enabled = false;
     }
+#endif  // UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
   }
 
   public override void OnPointerEnter(GameObject targetObject, Vector3 intersectionPosition,
       Ray intersectionRay, bool isInteractive) {
+#if UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
     pointerIntersection = intersectionPosition;
     pointerIntersectionRay = intersectionRay;
     isPointerIntersecting = true;
+#endif  // UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
   }
 
   public override void OnPointerHover(GameObject targetObject, Vector3 intersectionPosition,
       Ray intersectionRay, bool isInteractive) {
+#if UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
     pointerIntersection = intersectionPosition;
     pointerIntersectionRay = intersectionRay;
+#endif  // UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
   }
 
   public override void OnPointerExit(GameObject targetObject) {
+#if UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
     pointerIntersection = Vector3.zero;
     pointerIntersectionRay = new Ray();
     isPointerIntersecting = false;
+#endif  // UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
   }
 
   public override void OnPointerClickDown() {
@@ -126,13 +143,34 @@ public class GvrLaserPointer : GvrBasePointer {
   }
 
   public override float GetMaxPointerDistance() {
+#if UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
     return maxReticleDistance;
+#else
+    return 0;
+#endif  // UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
   }
 
-  public override void GetPointerRadius(out float innerRadius, out float outerRadius) {
-    innerRadius = 0.0f;
-    outerRadius = 0.0f;
+  public override void GetPointerRadius(out float enterRadius, out float exitRadius) {
+#if UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
+    if (reticle != null) {
+      float reticleScale = reticle.transform.localScale.x;
+
+      // Fixed size for enter radius to avoid flickering.
+      // This will cause some slight variability based on the distance of the object
+      // from the camera, and is optimized for the average case.
+      enterRadius = RETICLE_SIZE * 0.5f;
+
+      // Dynamic size for exit radius.
+      // Always correct because we know the intersection point of the object and can
+      // therefore use the correct radius based on the object's distance from the camera.
+      exitRadius = reticleScale;
+    } else {
+      enterRadius = 0.0f;
+      exitRadius = 0.0f;
+    }
+#else
+    enterRadius = 0.0f;
+    exitRadius = 0.0f;
+#endif  // UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
   }
 }
-
-#endif  // UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)

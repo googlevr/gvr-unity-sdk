@@ -20,8 +20,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.Events;
 
-#if UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
 public class PagedScrollRect : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler {
+#if UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
   /// Allows you to control how sensitive the paged
   /// Scroll rect is to events from the gvr controller.
   [Tooltip("The sensitivity to gvr touch events.")]
@@ -54,6 +54,12 @@ public class PagedScrollRect : MonoBehaviour, IPointerEnterHandler, IPointerExit
   [Tooltip("Determines how many extra pages are shown on each side of the scroll rect when the scroll view is not moving.")]
   public int numExtraPagesShown = 0;
 
+  /// This is used to determine if the leftmost and rightmost page
+  /// should be shown when the scroll rect is not moving.
+  /// If numExtraPagesShown is zero, then this is the previous and next page.
+  [Tooltip("Determines if the last extra page should be shown when the scroll rect is at rest.")]
+  public bool showNextPagesAtRest = false;
+
   /// A callback to indicate that the active page has changed.
   public delegate void ActivePageChangedDelegate(RectTransform activePage,int activePageIndex,RectTransform previousPage,int previousPageIndex);
 
@@ -84,6 +90,9 @@ public class PagedScrollRect : MonoBehaviour, IPointerEnterHandler, IPointerExit
   /// Lerp towards the target scroll offset to smooth the motion.
   private float targetScrollOffset;
 
+  // True is the scroll offset is overridden by an external source.
+  private bool isScrollOffsetOverridden = false;
+
   private RectTransform activePage;
   private Coroutine activeSnapCoroutine;
 
@@ -111,7 +120,7 @@ public class PagedScrollRect : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
   // Snap the scroll offset to the target scroll offset when the delta between the two
   // becomes smaller than kSnapScrollOffsetThresholdCoeff * pageProvider.GetSpacing().
-  private const float kSnapScrollOffsetThresholdCoeff = 0.02f;
+  private const float kSnapScrollOffsetThresholdCoeff = 0.002f;
 
   /// Values used for low-pass-filter to improve the accuracy of
   /// our tracked velocity.
@@ -154,7 +163,6 @@ public class PagedScrollRect : MonoBehaviour, IPointerEnterHandler, IPointerExit
         int index = PageIndexFromRealIndex(ActiveRealIndex);
         return index;
       }
-
       return -1;
     }
   }
@@ -173,7 +181,6 @@ public class PagedScrollRect : MonoBehaviour, IPointerEnterHandler, IPointerExit
         int index = visiblePageToIndex[ActivePage];
         return index;
       }
-
       return -1;
     }
   }
@@ -185,8 +192,17 @@ public class PagedScrollRect : MonoBehaviour, IPointerEnterHandler, IPointerExit
       if (pageProvider == null) {
         return -1;
       }
-
       return pageProvider.GetNumberOfPages();
+    }
+  }
+
+  /// The spacing between pages in the local coordinate system of this PagedScrollRect.
+  public float PageSpacing {
+    get {
+      if (pageProvider == null) {
+        return 0.0f;
+      }
+      return pageProvider.GetSpacing();
     }
   }
 
@@ -247,17 +263,79 @@ public class PagedScrollRect : MonoBehaviour, IPointerEnterHandler, IPointerExit
   /// <param name="index"> the index of the page to snap to.</param>
   /// <param name="immediate">If set to <c>true</c> then snapping happens instantly,
   /// otherwise it is animated.</param>
-  public void SnapToPage(int index, bool immediate = false) {
+  public void SnapToPage(int index, bool immediate = false, bool supressEvents=false) {
     if (!loop && (index < 0 || index >= PageCount)) {
       Debug.LogWarning("Attempting to snap to non-existant page: " + index);
       return;
     }
 
     if (immediate) {
-      ScrollOffset = OffsetFromIndex(index);
+      float offset = OffsetFromIndex(index);
+      targetScrollOffset = offset;
+      ScrollOffset = offset;
     } else {
       activeSnapCoroutine = StartCoroutine(SnapToPageCoroutine(index));
     }
+
+    if (!supressEvents) {
+      int currentIndex = ActiveRealIndex;
+      if (index < currentIndex) {
+        OnSwipeLeft.Invoke();
+      } else {
+        OnSwipeRight.Invoke();
+      }
+    }
+  }
+
+  /// <summary>
+  /// Snaps the scroll rect to a particular page. Only works for pages that are
+  /// currently visible.
+  /// </summary>
+  /// <param name="visiblePage"> The page to snap to.</param>
+  /// <param name="immediate">If set to <c>true</c> then snapping happens instantly,
+  /// otherwise it is animated.</param>
+  public void SnapToVisiblePage(RectTransform visiblePage, bool immediate = false) {
+    if (visiblePage == null) {
+      Debug.LogWarning("visiblePage is null, cannot snap to it.");
+      return;
+    }
+
+    if (!visiblePageToIndex.ContainsKey(visiblePage)) {
+      Debug.LogWarning(visiblePage.name + " is not a visible page, cannot snap to it.");
+      return;
+    }
+
+    int index = visiblePageToIndex[visiblePage];
+    SnapToPage(index, immediate);
+  }
+
+  /// <summary>
+  /// Explicitly set the scroll offset of the PagedScrollRect. Useful when you need to control
+  /// the scroll offset from an external source (I.E. a scroll bar). When unset, the PagedScrollRect
+  /// will snap to the closest page.
+  /// </summary>
+  /// <param name="offsetOverride"> The scroll offset to set.</param>
+  /// <param name="immediate">If set to <c>true</c> then the scroll offset is set instantly,
+  /// otherwise it is animated.</param>
+  public void SetScrollOffsetOverride(float? offsetOverride, bool immediate = false) {
+    bool newIsScrollOffsetOverridden = offsetOverride != null;
+
+    // If we didn't previously have an offset override, stop scrolling.
+    if (!isScrollOffsetOverridden && newIsScrollOffsetOverridden) {
+      StopScrolling(false);
+      StopTouchTracking();
+    }
+
+    if (newIsScrollOffsetOverridden) {
+      targetScrollOffset = offsetOverride.Value;
+      if (immediate) {
+        ScrollOffset = targetScrollOffset;
+      }
+    } else if (isScrollOffsetOverridden) {
+      SnapToPageInDirection(SnapDirection.Closest);
+    }
+
+    isScrollOffsetOverridden = newIsScrollOffsetOverridden;
   }
 
   void Start() {
@@ -284,22 +362,33 @@ public class PagedScrollRect : MonoBehaviour, IPointerEnterHandler, IPointerExit
     }
 
     // Immediately snap to the starting page.
-    SnapToPage(StartPage, true);
+    SnapToPage(StartPage, true, true);
   }
+#endif  // UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
 
   public void OnPointerEnter(PointerEventData eventData) {
+#if UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
     if (onlyScrollWhenPointing) {
       CanScroll = true;
     }
+#endif  // UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
   }
 
   public void OnPointerExit(PointerEventData eventData) {
+#if UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
     if (onlyScrollWhenPointing) {
       CanScroll = false;
     }
+#endif  // UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
   }
 
+#if UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
   void Update() {
+    if (isScrollOffsetOverridden) {
+      LerpTowardsOffset(targetScrollOffset);
+      return;
+    }
+
     if (!CanScroll) {
       return;
     }
@@ -356,20 +445,22 @@ public class PagedScrollRect : MonoBehaviour, IPointerEnterHandler, IPointerExit
     isScrolling = true;
   }
 
-  private void StopScrolling() {
+  private void StopScrolling(bool snapToPage = true) {
     if (!isScrolling) {
       return;
     }
 
-    if (overallVelocity.x > kSwipeThreshold) {
-      /// If I was swiping to the right.
-      SnapToPageInDirection(SnapDirection.Left);
-    } else if (overallVelocity.x < -kSwipeThreshold) {
-      /// If I was swiping to the left.
-      SnapToPageInDirection(SnapDirection.Right);
-    } else {
-      /// If the touch delta is not big enough, just snap to the closest page.
-      SnapToPageInDirection(SnapDirection.Closest);
+    if (snapToPage) {
+      if (overallVelocity.x > kSwipeThreshold) {
+        /// If I was swiping to the right.
+        SnapToPageInDirection(SnapDirection.Left);
+      } else if (overallVelocity.x < -kSwipeThreshold) {
+        /// If I was swiping to the left.
+        SnapToPageInDirection(SnapDirection.Right);
+      } else {
+        /// If the touch delta is not big enough, just snap to the closest page.
+        SnapToPageInDirection(SnapDirection.Closest);
+      }
     }
 
     isScrolling = false;
@@ -445,7 +536,7 @@ public class PagedScrollRect : MonoBehaviour, IPointerEnterHandler, IPointerExit
     }
 
     /// If we found a page in that direction.
-    SnapToPage(closestPageIndex);
+    SnapToPage(closestPageIndex, false, true);
   }
 
   private void OnScrolled() {
@@ -588,11 +679,12 @@ public class PagedScrollRect : MonoBehaviour, IPointerEnterHandler, IPointerExit
     float diff = Mathf.RoundToInt(indexOffset - offset);
     float absoluteDiff = Mathf.Abs(diff);
 
-    if (numExtraPagesShown > 0) {
-      return absoluteDiff <= pageProvider.GetSpacing() * numExtraPagesShown;
+    int pagesShown = 1 + numExtraPagesShown;
+    if (showNextPagesAtRest) {
+      return absoluteDiff <= pageProvider.GetSpacing() * pagesShown;
+    } else {
+      return absoluteDiff < pageProvider.GetSpacing() * pagesShown;
     }
-
-    return absoluteDiff < pageProvider.GetSpacing();
   }
 
   private bool IsPageVisible(int index) {
@@ -663,5 +755,6 @@ public class PagedScrollRect : MonoBehaviour, IPointerEnterHandler, IPointerExit
   private float GetMovingThreshold() {
     return pageProvider.GetSpacing() * kIsMovingThresholdCoeff;
   }
-}
+
 #endif  // UNITY_HAS_GOOGLEVR &&(UNITY_ANDROID || UNITY_EDITOR
+}

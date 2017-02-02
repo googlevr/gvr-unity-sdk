@@ -23,6 +23,9 @@ using UnityEngine;
 using UnityEngine.VR;
 using System;
 using System.Runtime.InteropServices;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif  // UNITY_EDITOR
 
 public static class GvrSettings {
 
@@ -82,10 +85,10 @@ public static class GvrSettings {
     // Expose a setter only for the editor emulator, for development testing purposes.
 #if UNITY_EDITOR
     get {
-      return editorEmulatorOnlyHandedness;
+      return (UserPrefsHandedness)EditorPrefs.GetInt(EMULATOR_HANDEDNESS_PREF_NAME, (int)UserPrefsHandedness.Right);
     }
     set {
-      editorEmulatorOnlyHandedness = value;
+      EditorPrefs.SetInt(EMULATOR_HANDEDNESS_PREF_NAME, (int)value);
     }
 #else
     // Running on Android.
@@ -108,8 +111,7 @@ public static class GvrSettings {
   }
 #if UNITY_EDITOR
   // This allows developers to test handedness in the editor emulator.
-  private static UserPrefsHandedness editorEmulatorOnlyHandedness =
-    UserPrefsHandedness.Right;
+  private const string EMULATOR_HANDEDNESS_PREF_NAME = "GoogleVREditorEmulatorHandedness";
 #endif  // UNITY_EDITOR
 
   private static void SetSustainedPerformanceMode(bool enabled) {

@@ -70,9 +70,6 @@ public static class GvrAudio {
   /// @note This should only be called from the main Unity thread.
   public static void Initialize (GvrAudioListener listener, Quality quality) {
     if (!initialized) {
-#if !UNITY_EDITOR && UNITY_ANDROID
-      SetApplicationState();
-#endif
       // Initialize the audio system.
       AudioConfiguration config = AudioSettings.GetConfiguration();
       sampleRate = config.sampleRate;
@@ -376,16 +373,6 @@ public static class GvrAudio {
 
   // 3D pose instance to be used in transform space conversion.
   private static MutablePose3D pose = new MutablePose3D();
-
-#if !UNITY_EDITOR && UNITY_ANDROID
-  private const string GvrAudioClass = "com.google.vr.audio.unity.GvrAudio";
-
-  private static void SetApplicationState() {
-    using (var gvrAudioClass = Gvr.Internal.BaseAndroidDevice.GetClass(GvrAudioClass)) {
-      Gvr.Internal.BaseAndroidDevice.CallStaticMethod(gvrAudioClass, "setUnityApplicationState");
-    }
-  }
-#endif
 
 #if UNITY_IOS
   private const string pluginName = "__Internal";

@@ -17,7 +17,7 @@ using System.Collections;
 
 /// Class that can fade the pages of a PagedScrollRect based on the page's offset.
 public class FadeScrollEffect : BaseScrollEffect {
-
+#if UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
   [Range(0.0f, 1.0f)]
   [Tooltip("The alpha of the page when it is one page-length away.")]
   public float minAlpha = 0.0f;
@@ -52,4 +52,5 @@ public class FadeScrollEffect : BaseScrollEffect {
 
     pageCanvasGroup.alpha = alpha;
   }
+#endif  // UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
 }

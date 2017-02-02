@@ -17,7 +17,7 @@ using System.Collections;
 
 /// Class that can scale the pages of a PagedScrollRect based on the page's offset.
 public class ScaleScrollEffect : BaseScrollEffect {
-
+#if UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
   [Range(0.0f, 1.0f)]
   [Tooltip("The scale of the page when it is one page-length away.")]
   public float minScale;
@@ -34,4 +34,5 @@ public class ScaleScrollEffect : BaseScrollEffect {
     // Update the scale.
     updateData.page.localScale = new Vector3(scale, scale, scale);
   }
+#endif  // UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
 }

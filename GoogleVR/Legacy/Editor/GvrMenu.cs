@@ -36,6 +36,11 @@ public class GvrMenu {
     Application.OpenURL("https://developers.google.com/vr/unity/release-notes#known_issues");
   }
 
+  [MenuItem("GoogleVR/Editor Settings", false, 100)]
+  private static void OpenEditorSettings() {
+    EditorWindow.GetWindow(typeof(GvrEditorSettings));
+  }
+
   [MenuItem("GoogleVR/Report Bug", false, 100)]
   private static void OpenReportBug() {
     Application.OpenURL("https://github.com/googlesamples/cardboard-unity/issues");

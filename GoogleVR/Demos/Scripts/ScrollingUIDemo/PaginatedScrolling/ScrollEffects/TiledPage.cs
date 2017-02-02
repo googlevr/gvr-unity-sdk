@@ -20,6 +20,7 @@ using System.Linq;
 
 [RequireComponent(typeof(CanvasGroup))]
 public class TiledPage : MonoBehaviour {
+#if UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
   /// Allows you to assign a custom set of tiles
   /// To animate when this page is scrolling.
   [SerializeField]
@@ -62,6 +63,18 @@ public class TiledPage : MonoBehaviour {
   /// Are considered within the same tile group
   /// For animation purposes.
   private const float kTileGroupThreshold = 5.0f;
+
+  /// Getter/Setter for tiles that ensures that the
+  /// layout cache is flushed when the tiles change.
+  public Transform[] Tiles {
+    get {
+      return tiles;
+    }
+    set {
+      tiles = value;
+      FlushLayoutCache();
+    }
+  }
 
   /// <summary>
   /// Call if the layout of tiles on this page has changed.
@@ -150,7 +163,7 @@ public class TiledPage : MonoBehaviour {
   private void UpdateTile(Transform tile, Vector3 position, bool isInteractable) {
     tile.position = position;
 
-    Tile Tile = tile.GetComponent<Tile>();
+    BaseTile Tile = tile.GetComponent<BaseTile>();
     if (Tile != null) {
       Tile.IsInteractable = isInteractable;
     }
@@ -221,13 +234,13 @@ public class TiledPage : MonoBehaviour {
   private RectTransform GetTileCell(Transform tile) {
     RectTransform cellRect;
 
-    Tile Tile = tile.GetComponent<Tile>();
+    BaseTile Tile = tile.GetComponent<BaseTile>();
     if (Tile != null) {
       cellRect = Tile.Cell;
     } else {
       cellRect = tile.parent.GetComponent<RectTransform>();
     }
-
     return cellRect;
   }
+#endif  // UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
 }

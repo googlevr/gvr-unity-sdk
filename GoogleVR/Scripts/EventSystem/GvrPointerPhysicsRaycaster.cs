@@ -41,7 +41,7 @@ public class GvrPointerPhysicsRaycaster : GvrBasePointerRaycaster {
       if (cachedEventCamera == null) {
         cachedEventCamera = GetComponent<Camera>();
       }
-      return cachedEventCamera ?? Camera.main;
+      return cachedEventCamera != null ? cachedEventCamera : Camera.main;
     }
   }
 
@@ -76,29 +76,38 @@ public class GvrPointerPhysicsRaycaster : GvrBasePointerRaycaster {
 
     Ray ray = GetRay();
     float dist = eventCamera.farClipPlane - eventCamera.nearClipPlane;
+    float radius = PointerRadius;
+    RaycastHit[] hits;
 
-    RaycastHit[] hits = Physics.RaycastAll(ray, dist, finalEventMask);
-
-    if (hits.Length > 1) {
-      System.Array.Sort(hits, (r1, r2) => r1.distance.CompareTo(r2.distance));
+    if (radius > 0.0f) {
+      hits = Physics.SphereCastAll(ray, radius, dist, finalEventMask);
+    } else {
+      hits = Physics.RaycastAll(ray, dist, finalEventMask);
     }
 
-    if (hits.Length != 0) {
-      for (int b = 0, bmax = hits.Length; b < bmax; ++b) {
-        RaycastResult result = new RaycastResult
-          {
-            gameObject = hits[b].collider.gameObject,
-            module = this,
-            distance = hits[b].distance,
-            worldPosition = hits[b].point,
-            worldNormal = hits[b].normal,
-            screenPosition = eventData.position,
-            index = resultAppendList.Count,
-            sortingLayer = 0,
-            sortingOrder = 0
-          };
-        resultAppendList.Add(result);
-      }
+    if (hits.Length == 0) {
+      return;
+    }
+
+    System.Array.Sort(hits, (r1, r2) => r1.distance.CompareTo(r2.distance));
+
+    for (int b = 0, bmax = hits.Length; b < bmax; ++b) {
+      Vector3 projection = Vector3.Project(hits[b].point - ray.origin, ray.direction);
+      Vector3 hitPosition = projection + ray.origin;
+
+      RaycastResult result = new RaycastResult {
+        gameObject = hits[b].collider.gameObject,
+        module = this,
+        distance = hits[b].distance,
+        worldPosition = hitPosition,
+        worldNormal = hits[b].normal,
+        screenPosition = eventCamera.WorldToScreenPoint(hitPosition),
+        index = resultAppendList.Count,
+        sortingLayer = 0,
+        sortingOrder = 0
+      };
+
+      resultAppendList.Add(result);
     }
   }
 }

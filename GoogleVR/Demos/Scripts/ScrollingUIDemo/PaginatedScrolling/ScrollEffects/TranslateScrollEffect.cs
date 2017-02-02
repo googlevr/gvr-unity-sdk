@@ -17,7 +17,7 @@ using System.Collections;
 
 /// Class that will translate the pages of a PagedScrollRect based on the page's offset.
 public class TranslateScrollEffect : BaseScrollEffect {
-
+#if UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
   [Tooltip("Determines the percentage of the page's offset that is applied to each axis.")]
   public Vector3 Weights = new Vector3(1.0f, 0.0f, 0.0f);
 
@@ -38,5 +38,5 @@ public class TranslateScrollEffect : BaseScrollEffect {
       (mirrorY ? absDistance : distance) * Weights.y,
       (mirrorZ ? absDistance : distance) * Weights.z);
   }
-
+#endif  // UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
 }

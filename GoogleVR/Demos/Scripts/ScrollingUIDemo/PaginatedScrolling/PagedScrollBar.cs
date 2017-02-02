@@ -16,40 +16,71 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 
+/// Extension of Unity's built-in Scrollbar that integrates with PagedScrollRect.
+/// Dragging the scrollbar will control the PagedScrollRect.
+/// The Scrollbar will also automatically update when the PagedScrollRect
+/// is scrolled directly.
+public class PagedScrollBar : Scrollbar {
 #if UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
-[RequireComponent(typeof(Scrollbar))]
-public class PagedScrollBar : MonoBehaviour {
+  public const string PAGED_SCROLL_RECT_PROP_NAME = "pagedScrollRect";
+
   [SerializeField]
   private PagedScrollRect pagedScrollRect;
 
-  private Scrollbar scrollbar;
+  private bool isDragging = false;
 
-  private const float kLerpSpeed = 12.0f;
+  private const float LERP_SPEED = 12.0f;
 
-  void Awake() {
-    scrollbar = GetComponent<Scrollbar>();
+  private bool IsDragging {
+    get {
+      return isDragging;
+    }
+    set {
+      if (isDragging == value) {
+        return;
+      }
+
+      isDragging = value;
+
+      if (!isDragging && pagedScrollRect != null) {
+        pagedScrollRect.SetScrollOffsetOverride(null);
+      }
+    }
   }
 
   void Update() {
     if (pagedScrollRect == null) {
+      Debug.LogWarning("PagedScrollRect must be set.");
       return;
     }
 
-    if (scrollbar.interactable) {
-      Debug.LogWarning("The Scrollbar associated with a PagedScrollBar must not be interactable.");
-      scrollbar.interactable = false;
+
+    // Update the size of the handle in case the PageCount has changed.
+    float desiredSize = 1.0f / pagedScrollRect.PageCount;
+    if (size != desiredSize) {
+      size = desiredSize;
     }
 
-    // Update the size of the handle in case the
-    // PageCount has changed.
-    float size = 1.0f / pagedScrollRect.PageCount;
-    scrollbar.size = size;
+    if (IsDragging) {
+      float offset = value * (pagedScrollRect.PageCount - 1) * pagedScrollRect.PageSpacing;
+      pagedScrollRect.SetScrollOffsetOverride(offset);
+    } else {
+      // Calculate the desired a value of the scrollbar.
+      float desiredValue = (float)pagedScrollRect.ActivePageIndex / (pagedScrollRect.PageCount - 1);
 
-    // Calculate the desired a value of the scrollbar.
-    float desiredValue = (float)pagedScrollRect.ActivePageIndex / (pagedScrollRect.PageCount - 1);
-
-    // Animate towards the desired value.
-    scrollbar.value = Mathf.Lerp(scrollbar.value, desiredValue, Time.deltaTime * kLerpSpeed);
+      // Animate towards the desired value.
+      value = Mathf.Lerp(value, desiredValue, Time.deltaTime * LERP_SPEED);
+    }
   }
-}
+
+  public override void OnBeginDrag(UnityEngine.EventSystems.PointerEventData eventData) {
+    base.OnBeginDrag(eventData);
+    IsDragging = true;
+  }
+
+  public override void OnPointerUp(UnityEngine.EventSystems.PointerEventData eventData) {
+    base.OnPointerUp(eventData);
+    IsDragging = false;
+  }
 #endif  // UNITY_HAS_GOOGLEVR &&(UNITY_ANDROID || UNITY_EDITOR
+}

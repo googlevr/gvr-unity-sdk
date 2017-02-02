@@ -341,7 +341,7 @@ public class GvrAudioSoundfield : MonoBehaviour {
       for (int channelSet = 0; channelSet < audioSources.Length; ++channelSet) {
         ShutdownChannelSet(audioSources[channelSet], channelSet);
       }
-      GvrAudio.DestroyAudioSource(id);
+      GvrAudio.DestroyAudioSoundfield(id);
       id = -1;
     }
   }

@@ -17,9 +17,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-#if UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
 public interface IUITransition {
+#if UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
   void TransitionIn(Transform toTransition, Action completeCallback, Action interruptCallback);
   void TransitionOut(Transform toTransition, Action completeCallback, Action interruptCallback);
-}
 #endif  // UNITY_HAS_GOOGLEVR &&(UNITY_ANDROID || UNITY_EDITOR
+}

@@ -22,9 +22,9 @@ using System.Linq;
 /// Tabs are automatically associated with this group based on
 /// the ToggleGroup. Each Tab is required to be a Toggle.
 ///
-#if UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
 [RequireComponent(typeof(ToggleGroup))]
 public class TabGroup : MonoBehaviour {
+#if UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
   /// This Tab will be the tab that starts open
   /// when the scene is initially loaded.
   [Tooltip("The tab that should start open.")]
@@ -77,5 +77,6 @@ public class TabGroup : MonoBehaviour {
   void Start() {
     startingTab.Open();
   }
-}
+
 #endif  // UNITY_HAS_GOOGLEVR &&(UNITY_ANDROID || UNITY_EDITOR
+}

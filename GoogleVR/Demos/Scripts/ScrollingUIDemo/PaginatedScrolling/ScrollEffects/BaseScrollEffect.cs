@@ -27,6 +27,7 @@ using System.Collections;
 /// FadeScrollEffect - Change the opacity of the page linearly based on the scroll offset.
 /// ScaleScrollEffect - Change the scale of the page linearly based on the scroll offset.
 public abstract class BaseScrollEffect : MonoBehaviour {
+#if UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
   public struct UpdateData {
     public RectTransform page;
     public int pageIndex;
@@ -39,4 +40,5 @@ public abstract class BaseScrollEffect : MonoBehaviour {
   }
 
   public abstract void ApplyEffect(UpdateData updateData);
+#endif  // UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
 }
