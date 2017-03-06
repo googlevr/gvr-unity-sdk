@@ -262,6 +262,21 @@ public class GvrController : MonoBehaviour {
     }
   }
 
+  // Always false in the emulator.
+  public static bool HomeButtonDown {
+    get {
+      return instance != null ? instance.controllerState.homeButtonDown : false;
+    }
+  }
+
+  // Always false in the emulator.
+  public static bool HomeButtonState {
+    get {
+      return instance != null ? instance.controllerState.homeButtonState : false;
+    }
+  }
+
+
   /// If State == GvrConnectionState.Error, this contains details about the error.
   public static string ErrorDetails {
     get {
@@ -316,6 +331,12 @@ public class GvrController : MonoBehaviour {
       GvrViewer sdk = GvrViewer.Instance;
       if (sdk) {
         sdk.Recenter();
+      } else {
+        for (int i = 0; i < Camera.allCameras.Length; i++) {
+          Camera cam = Camera.allCameras[i];
+          // Do not reset pitch, which is how it works on the device.
+          cam.transform.rotation = Quaternion.Euler(cam.transform.rotation.eulerAngles.x, 0, 0);
+        }
       }
 #else
       InputTracking.Recenter();

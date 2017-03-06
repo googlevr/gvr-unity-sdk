@@ -107,9 +107,6 @@ namespace Gvr.Internal {
 
     public override void Recenter() {
       mouseX = mouseZ = 0;  // Do not reset pitch, which is how it works on the phone.
-      if (RemoteCommunicating) {
-        //initialRotation = Quaternion.Inverse(Input.gyro.attitude);
-      }
     }
   }
 }

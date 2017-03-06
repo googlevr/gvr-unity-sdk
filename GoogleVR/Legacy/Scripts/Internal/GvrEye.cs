@@ -210,6 +210,9 @@ public class GvrEye : MonoBehaviour {
       stereoEffect = GetComponent<StereoRenderEffect>();
       if (stereoEffect == null) {
         stereoEffect = gameObject.AddComponent<StereoRenderEffect>();
+#if UNITY_5_6_OR_NEWER
+        stereoEffect.eye = eye;
+#endif  // UNITY_5_6_OR_NEWER
       }
       stereoEffect.enabled = true;
     } else if (stereoEffect != null) {

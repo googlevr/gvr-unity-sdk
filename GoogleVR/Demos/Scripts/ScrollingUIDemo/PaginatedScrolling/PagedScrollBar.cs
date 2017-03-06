@@ -65,16 +65,21 @@ public class PagedScrollBar : Scrollbar {
       float offset = value * (pagedScrollRect.PageCount - 1) * pagedScrollRect.PageSpacing;
       pagedScrollRect.SetScrollOffsetOverride(offset);
     } else {
-      // Calculate the desired a value of the scrollbar.
-      float desiredValue = (float)pagedScrollRect.ActivePageIndex / (pagedScrollRect.PageCount - 1);
+      // If the PageCount is 1 make sure we don't divide by zero by just setting the value to 0 directly.
+      if (pagedScrollRect.PageCount == 1) {
+        value = 0.0f;
+      } else {
+        // Calculate the desired a value of the scrollbar.
+        float desiredValue = (float) pagedScrollRect.ActivePageIndex / (pagedScrollRect.PageCount - 1);
 
-      // Animate towards the desired value.
-      value = Mathf.Lerp(value, desiredValue, Time.deltaTime * LERP_SPEED);
+        // Animate towards the desired value.
+        value = Mathf.Lerp(value, desiredValue, Time.deltaTime * LERP_SPEED);
+      }
     }
   }
 
-  public override void OnBeginDrag(UnityEngine.EventSystems.PointerEventData eventData) {
-    base.OnBeginDrag(eventData);
+  public override void OnPointerDown(UnityEngine.EventSystems.PointerEventData eventData) {
+    base.OnPointerDown(eventData);
     IsDragging = true;
   }
 

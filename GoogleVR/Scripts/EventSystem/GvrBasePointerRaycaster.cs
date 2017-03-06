@@ -45,7 +45,7 @@ public abstract class GvrBasePointerRaycaster : BaseRaycaster {
         return 0.0f;
       }
 
-      return GvrPointerManager.Pointer.GetMaxPointerDistance();
+      return GvrPointerManager.Pointer.MaxPointerDistance;
     }
   }
 
@@ -76,7 +76,7 @@ public abstract class GvrBasePointerRaycaster : BaseRaycaster {
       return false;
     }
 
-    if (GvrPointerManager.Pointer.GetPointerTransform() == null) {
+    if (GvrPointerManager.Pointer.PointerTransform == null) {
       return false;
     }
 
@@ -96,7 +96,7 @@ public abstract class GvrBasePointerRaycaster : BaseRaycaster {
       return lastRay;
     }
 
-    Transform pointerTransform = GvrPointerManager.Pointer.GetPointerTransform();
+    Transform pointerTransform = GvrPointerManager.Pointer.PointerTransform;
 
     switch (raycastMode) {
       case RaycastMode.Camera:

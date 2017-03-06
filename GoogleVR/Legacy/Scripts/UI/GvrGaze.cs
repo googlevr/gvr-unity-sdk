@@ -15,21 +15,20 @@
 using UnityEngine;
 using System.Linq;
 
-/// Class that can perform gaze-based selection, as a simple alternative to the
-/// more complicated path of using _GazeInputModule_ and the rest of **uGUI**.
+/// Performs gaze-based selection.
 [RequireComponent(typeof(Camera))]
 public class GvrGaze : MonoBehaviour {
-  /// The active Gaze Pointer for this camera. Must have IGvrPointer.
-  /// The IGvrPointer responds to events from this class.
+  /// The active Gaze Pointer for this camera. Must have GvrBasePointer.
+  /// The GvrBasePointer responds to events from this class.
   public GameObject PointerObject {
     get {
       return pointerObject;
     }
     set {
       if (value != null) {
-        // Retrieve the IGvrPointer component.
-        var ptr = value.GetComponents<MonoBehaviour>()
-            .Select(c => c as IGvrPointer)
+        // Retrieve the GvrBasePointer component.
+        var ptr = value.GetComponents<GvrBasePointer>()
+            .Select(c => c as GvrBasePointer)
             .Where(c => c != null)
             .FirstOrDefault();
 
@@ -54,7 +53,7 @@ public class GvrGaze : MonoBehaviour {
             pointer.OnPointerClickDown();
           }
         } else {
-          Debug.LogError("Object must have component which implements IGvrPointer.");
+          Debug.LogError("Object must have component which implements GvrBasePointer.");
         }
       } else {
         if (pointer != null) {
@@ -72,7 +71,7 @@ public class GvrGaze : MonoBehaviour {
   }
   [SerializeField][HideInInspector]
   private GameObject pointerObject;
-  private IGvrPointer pointer;
+  private GvrBasePointer pointer;
 
   // Convenient accessor to the camera component used throughout this script.
   public Camera cam { get; private set; }

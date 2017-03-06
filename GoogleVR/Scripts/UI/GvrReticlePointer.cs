@@ -18,109 +18,33 @@ using UnityEngine;
 /// The circle dilates if the object is clickable.
 [AddComponentMenu("GoogleVR/UI/GvrReticlePointer")]
 [RequireComponent(typeof(Renderer))]
-public class GvrReticlePointer : GvrBasePointer {
+public class GvrReticlePointer : MonoBehaviour {
+  private GvrReticlePointerImpl reticlePointerImpl;
+
   /// Number of segments making the reticle circle.
   public int reticleSegments = 20;
 
   /// Growth speed multiplier for the reticle/
   public float reticleGrowthSpeed = 8.0f;
 
-  // Private members
-  private Material materialComp;
+  void Awake() {
+    reticlePointerImpl = new GvrReticlePointerImpl();
+  }
 
-  // Current inner angle of the reticle (in degrees).
-  private float reticleInnerAngle = 0.0f;
-  // Current outer angle of the reticle (in degrees).
-  private float reticleOuterAngle = 0.5f;
-  // Current distance of the reticle (in meters).
-  private float reticleDistanceInMeters = 10.0f;
-
-  // Minimum inner angle of the reticle (in degrees).
-  private const float kReticleMinInnerAngle = 0.0f;
-  // Minimum outer angle of the reticle (in degrees).
-  private const float kReticleMinOuterAngle = 0.5f;
-  // Angle at which to expand the reticle when intersecting with an object
-  // (in degrees).
-  private const float kReticleGrowthAngle = 1.5f;
-
-  // Minimum distance of the reticle (in meters).
-  private const float kReticleDistanceMin = 0.45f;
-  // Maximum distance of the reticle (in meters).
-  private const float kReticleDistanceMax = 10.0f;
-
-  // Current inner and outer diameters of the reticle,
-  // before distance multiplication.
-  private float reticleInnerDiameter = 0.0f;
-  private float reticleOuterDiameter = 0.0f;
-
-  protected override void Start () {
-    base.Start();
-
+  void Start() {
+    reticlePointerImpl.OnStart();
+    reticlePointerImpl.MaterialComp = gameObject.GetComponent<Renderer>().material;
+    UpdateReticleProperties();
     CreateReticleVertices();
-
-    materialComp = gameObject.GetComponent<Renderer>().material;
   }
 
   void Update() {
-    UpdateDiameters();
+    UpdateReticleProperties();
+    reticlePointerImpl.UpdateDiameters();
   }
 
-  /// This is called when the 'BaseInputModule' system should be enabled.
-  public override void OnInputModuleEnabled() {}
-
-  /// This is called when the 'BaseInputModule' system should be disabled.
-  public override void OnInputModuleDisabled() {}
-
-  /// Called when the user is pointing at valid GameObject. This can be a 3D
-  /// or UI element.
-  ///
-  /// The targetObject is the object the user is pointing at.
-  /// The intersectionPosition is where the ray intersected with the targetObject.
-  /// The intersectionRay is the ray that was cast to determine the intersection.
-  public override void OnPointerEnter(GameObject targetObject, Vector3 intersectionPosition,
-     Ray intersectionRay, bool isInteractive) {
-    SetPointerTarget(intersectionPosition, isInteractive);
-  }
-
-  /// Called every frame the user is still pointing at a valid GameObject. This
-  /// can be a 3D or UI element.
-  ///
-  /// The targetObject is the object the user is pointing at.
-  /// The intersectionPosition is where the ray intersected with the targetObject.
-  /// The intersectionRay is the ray that was cast to determine the intersection.
-  public override void OnPointerHover(GameObject targetObject, Vector3 intersectionPosition,
-      Ray intersectionRay, bool isInteractive) {
-    SetPointerTarget(intersectionPosition, isInteractive);
-  }
-
-  /// Called when the user's look no longer intersects an object previously
-  /// intersected with a ray projected from the camera.
-  /// This is also called just before **OnInputModuleDisabled** and may have have any of
-  /// the values set as **null**.
-  public override void OnPointerExit(GameObject targetObject) {
-    reticleDistanceInMeters = kReticleDistanceMax;
-    reticleInnerAngle = kReticleMinInnerAngle;
-    reticleOuterAngle = kReticleMinOuterAngle;
-  }
-
-  /// Called when a trigger event is initiated. This is practically when
-  /// the user begins pressing the trigger.
-  public override void OnPointerClickDown() {}
-
-  /// Called when a trigger event is finished. This is practically when
-  /// the user releases the trigger.
-  public override void OnPointerClickUp() {}
-
-  public override float GetMaxPointerDistance() {
-    return kReticleDistanceMax;
-  }
-
-  public override void GetPointerRadius(out float enterRadius, out float exitRadius) {
-    float min_inner_angle_radians = Mathf.Deg2Rad * kReticleMinInnerAngle;
-    float max_inner_angle_radians = Mathf.Deg2Rad * (kReticleMinInnerAngle + kReticleGrowthAngle);
-
-    enterRadius = 2.0f * Mathf.Tan(min_inner_angle_radians);
-    exitRadius = 2.0f * Mathf.Tan(max_inner_angle_radians);
+  public void SetAsMainPointer() {
+    GvrPointerManager.Pointer = reticlePointerImpl;
   }
 
   private void CreateReticleVertices() {
@@ -172,48 +96,18 @@ public class GvrReticlePointer : GvrBasePointer {
     mesh.vertices = vertices;
     mesh.triangles = indices;
     mesh.RecalculateBounds();
+#if !UNITY_5_5_OR_NEWER
+    // Optimize() is deprecated as of Unity 5.5.0p1.
     mesh.Optimize();
+#endif  // !UNITY_5_5_OR_NEWER
   }
 
-  private void UpdateDiameters() {
-    reticleDistanceInMeters =
-      Mathf.Clamp(reticleDistanceInMeters, kReticleDistanceMin, kReticleDistanceMax);
 
-    if (reticleInnerAngle < kReticleMinInnerAngle) {
-      reticleInnerAngle = kReticleMinInnerAngle;
+  private void UpdateReticleProperties() {
+    if (reticlePointerImpl == null) {
+      return;
     }
-
-    if (reticleOuterAngle < kReticleMinOuterAngle) {
-      reticleOuterAngle = kReticleMinOuterAngle;
-    }
-
-    float inner_half_angle_radians = Mathf.Deg2Rad * reticleInnerAngle * 0.5f;
-    float outer_half_angle_radians = Mathf.Deg2Rad * reticleOuterAngle * 0.5f;
-
-    float inner_diameter = 2.0f * Mathf.Tan(inner_half_angle_radians);
-    float outer_diameter = 2.0f * Mathf.Tan(outer_half_angle_radians);
-
-    reticleInnerDiameter =
-        Mathf.Lerp(reticleInnerDiameter, inner_diameter, Time.deltaTime * reticleGrowthSpeed);
-    reticleOuterDiameter =
-        Mathf.Lerp(reticleOuterDiameter, outer_diameter, Time.deltaTime * reticleGrowthSpeed);
-
-    materialComp.SetFloat("_InnerDiameter", reticleInnerDiameter * reticleDistanceInMeters);
-    materialComp.SetFloat("_OuterDiameter", reticleOuterDiameter * reticleDistanceInMeters);
-    materialComp.SetFloat("_DistanceInMeters", reticleDistanceInMeters);
-  }
-
-  private void SetPointerTarget(Vector3 target, bool interactive) {
-    Vector3 targetLocalPosition = transform.InverseTransformPoint(target);
-
-    reticleDistanceInMeters =
-        Mathf.Clamp(targetLocalPosition.z, kReticleDistanceMin, kReticleDistanceMax);
-    if (interactive) {
-      reticleInnerAngle = kReticleMinInnerAngle + kReticleGrowthAngle;
-      reticleOuterAngle = kReticleMinOuterAngle + kReticleGrowthAngle;
-    } else {
-      reticleInnerAngle = kReticleMinInnerAngle;
-      reticleOuterAngle = kReticleMinOuterAngle;
-    }
+    reticlePointerImpl.ReticleGrowthSpeed = reticleGrowthSpeed;
+    reticlePointerImpl.PointerTransform = transform;
   }
 }

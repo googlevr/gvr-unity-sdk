@@ -26,7 +26,12 @@ public class StereoRenderEffect : MonoBehaviour {
 
   private Camera cam;
 
+#if UNITY_5_6_OR_NEWER
+  private Rect fullRect;
+  public GvrViewer.Eye eye;
+#else
   private static readonly Rect fullRect = new Rect(0, 0, 1, 1);
+#endif  // UNITY_5_6_OR_NEWER
 
   void Awake() {
     cam = GetComponent<Camera>();
@@ -34,6 +39,10 @@ public class StereoRenderEffect : MonoBehaviour {
 
   void Start() {
     material = new Material(Shader.Find("GoogleVR/UnlitTexture"));
+#if UNITY_5_6_OR_NEWER
+    fullRect = (eye == GvrViewer.Eye.Left ? new Rect (0, 0, 0.5f, 1) : new Rect (0.5f, 0, 0.5f, 1));
+#endif
+
   }
 
   void OnRenderImage(RenderTexture source, RenderTexture dest) {
