@@ -179,7 +179,12 @@ public class TiledPage : MonoBehaviour {
 
     tilesByDistanceFromLeft = new SortedDictionary<float, List<Transform>>();
 
+    // Ignore disabled tiles, otherwise this won't behave correctly when some tiles are disabled.
     foreach (Transform tile in tiles) {
+      if (!tile.gameObject.activeInHierarchy) {
+        continue;
+      }
+
       RectTransform cellRect = GetTileCell(tile);
       RectTransform tileRect = tile.GetComponent<RectTransform>();
 

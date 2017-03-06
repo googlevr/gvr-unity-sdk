@@ -36,7 +36,6 @@ public class GvrControllerVisual : MonoBehaviour {
   private MaterialPropertyBlock materialPropertyBlock;
   private int colorId;
 
-
   public GameObject touchPoint;
   public Material material_idle;
   public Material material_app;
@@ -45,7 +44,12 @@ public class GvrControllerVisual : MonoBehaviour {
   public Material touchTransparent;
   public Material touchOpaque;
 
+  /// The suggested rendering alpha value of the controller.
+  /// This is to prevent the controller from intersecting face.
+  public static float AlphaValue  { get; set; }
+
   void Awake() {
+    AlphaValue = 1.0f;
     controllerRenderer = GetComponent<Renderer>();
     touchRenderer = touchPoint.GetComponent<Renderer>();
     materialPropertyBlock = new MaterialPropertyBlock();
@@ -123,12 +127,12 @@ public class GvrControllerVisual : MonoBehaviour {
     }
 
     // Adjust transparency.
-    float alpha = GvrArmModel.Instance.alphaValue;
-    Color color = new Color(1.0f, 1.0f, 1.0f, alpha);
+    Color color = controllerRenderer.material.color;
+    color.a = AlphaValue;
     controllerRenderer.GetPropertyBlock(materialPropertyBlock);
     materialPropertyBlock.SetColor(colorId, color);
     controllerRenderer.SetPropertyBlock(materialPropertyBlock);
-    if (alpha < 1.0f) {
+    if (AlphaValue < 1.0f) {
       touchRenderer.material = touchTransparent;
       touchRenderer.GetPropertyBlock(materialPropertyBlock);
       materialPropertyBlock.SetColor(colorId, color);

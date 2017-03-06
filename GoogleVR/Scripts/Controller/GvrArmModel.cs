@@ -256,7 +256,12 @@ public class GvrArmModel : MonoBehaviour {
 
   private Vector3 GetHeadOrientation() {
 #if UNITY_EDITOR
-    return GvrViewer.Instance.HeadPose.Orientation * Vector3.forward;
+    Camera cam = Camera.main;
+    if (cam == null) {
+      // Use the first one found.
+      cam = Camera.allCameras[0];
+    }
+    return cam.transform.forward;
 #else
     return InputTracking.GetLocalRotation(VRNode.Head) * Vector3.forward;
 #endif // UNITY_EDITOR
@@ -393,6 +398,7 @@ public class GvrArmModel : MonoBehaviour {
     } else {
       tooltipAlphaValue = Mathf.Min(1.0f, tooltipAlphaValue + DELTA_ALPHA * Time.deltaTime);
     }
+    GvrControllerVisual.AlphaValue = Mathf.Max(alphaValue, GvrControllerVisual.AlphaValue);
   }
 
   private void UpdatePointer() {

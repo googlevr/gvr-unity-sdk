@@ -60,6 +60,12 @@ public class PagedScrollRect : MonoBehaviour, IPointerEnterHandler, IPointerExit
   [Tooltip("Determines if the last extra page should be shown when the scroll rect is at rest.")]
   public bool showNextPagesAtRest = false;
 
+  /// This is used to determine if the tiles will be interactable
+  /// regardless of the state of the paged scroll rect. If false,
+  /// then tiles will not be interactable if they aren't on the active page.
+  [Tooltip("Determines if the tiles should always be interactable.")]
+  public bool shouldTilesAlwaysBeInteractable = true;
+
   /// A callback to indicate that the active page has changed.
   public delegate void ActivePageChangedDelegate(RectTransform activePage,int activePageIndex,RectTransform previousPage,int previousPageIndex);
 
@@ -102,7 +108,7 @@ public class PagedScrollRect : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
   /// Touch Delta is required to be higher than
   /// the click threshold to avoid detecting clicks as swipes.
-  private const float kClickThreshold = 0.125f;
+  private const float kClickThreshold = 0.15f;
 
   /// overallVelocity must be greater than the swipe threshold
   /// to detect a swipe.
@@ -336,6 +342,21 @@ public class PagedScrollRect : MonoBehaviour, IPointerEnterHandler, IPointerExit
     }
 
     isScrollOffsetOverridden = newIsScrollOffsetOverridden;
+  }
+
+  /// Removes all pages and goes back to the starting page.
+  /// Call this function if the PageProvider changes.
+  public void Reset() {
+    foreach (KeyValuePair<RectTransform, int> pair in visiblePageToIndex) {
+      pageProvider.RemovePage(pair.Value, pair.Key);
+    }
+
+    visiblePageToIndex.Clear();
+    indexToVisiblePage.Clear();
+    scrollOffset = float.MaxValue;
+    targetScrollOffset = 0.0f;
+    SetScrollOffsetOverride(null, true);
+    ScrollOffset = targetScrollOffset;
   }
 
   void Start() {
@@ -733,7 +754,7 @@ public class PagedScrollRect : MonoBehaviour, IPointerEnterHandler, IPointerExit
     float offset = OffsetFromIndex(index);
 
     bool isActivePage = page == activePage;
-    bool isInteractable = !IsMoving && isActivePage;
+    bool isInteractable = shouldTilesAlwaysBeInteractable || isActivePage;
 
     BaseScrollEffect.UpdateData updateData = new BaseScrollEffect.UpdateData();
     updateData.page = page;

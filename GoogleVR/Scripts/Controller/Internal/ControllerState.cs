@@ -49,6 +49,10 @@ namespace Gvr.Internal {
     internal bool appButtonDown = false;
     internal bool appButtonUp = false;
 
+    // Always false for the emulator.
+    internal bool homeButtonDown = false;
+    internal bool homeButtonState = false;
+
     internal string errorDetails = "";
     internal IntPtr gvrPtr = IntPtr.Zero;
 
@@ -74,6 +78,8 @@ namespace Gvr.Internal {
       appButtonState = other.appButtonState;
       appButtonDown = other.appButtonDown;
       appButtonUp = other.appButtonUp;
+      homeButtonDown = other.homeButtonDown;
+      homeButtonState = other.homeButtonState;
       errorDetails = other.errorDetails;
       headsetRecenterRequested = other.headsetRecenterRequested;
       gvrPtr = other.gvrPtr;
@@ -89,6 +95,8 @@ namespace Gvr.Internal {
       clickButtonUp = false;
       appButtonDown = false;
       appButtonUp = false;
+      homeButtonDown = false;
+      homeButtonState = false;
       headsetRecenterRequested = false;
     }
   }

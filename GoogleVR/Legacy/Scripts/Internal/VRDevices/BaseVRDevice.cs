@@ -63,6 +63,10 @@ namespace Gvr.Internal {
 
     public virtual RenderTexture CreateStereoScreen() {
       float scale = GvrViewer.Instance.StereoScreenScale;
+#if UNITY_5_6_OR_NEWER
+      // Unity  halved the render texture size on 5.6, so we compensate here.
+      scale *= 2.0f;
+#endif  // UNITY_5_6_OR_NEWER
       int width = Mathf.RoundToInt(Screen.width * scale);
       int height = Mathf.RoundToInt(Screen.height * scale);
       if (this.RequiresNativeDistortionCorrection()) {

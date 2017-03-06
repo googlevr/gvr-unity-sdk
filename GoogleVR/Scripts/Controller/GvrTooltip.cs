@@ -67,6 +67,10 @@ public class GvrTooltip : MonoBehaviour {
   [SerializeField]
   private Text text;
 
+  [Tooltip("Determines if the tooltip is always visible regardless of the controller's location.")]
+  [SerializeField]
+  private bool alwaysVisible;
+
   private bool isOnLeft = false;
   private RectTransform rectTransform;
   private CanvasGroup canvasGroup;
@@ -81,6 +85,7 @@ public class GvrTooltip : MonoBehaviour {
   void Awake() {
     rectTransform = GetComponent<RectTransform>();
     canvasGroup = GetComponent<CanvasGroup>();
+    isOnLeft = IsTooltipOnLeft();
     RefreshTooltip();
   }
 
@@ -104,7 +109,7 @@ public class GvrTooltip : MonoBehaviour {
     CheckTooltipSide();
 
     if (canvasGroup != null && GvrArmModel.Instance != null) {
-      canvasGroup.alpha = GvrArmModel.Instance.tooltipAlphaValue;
+      canvasGroup.alpha = alwaysVisible ? 1.0f : GvrArmModel.Instance.tooltipAlphaValue;
     }
   }
 

@@ -17,7 +17,7 @@ using UnityEditor;
 
 /// A custom editor for the GvrGaze script.  It exists to add the GazePointer
 /// object selection field to the inspector with an extra layer of validation to see
-/// that it implements the IGvrPointer inteface.
+/// that it implements the GvrBasePointer abstract class.
 [CustomEditor(typeof(GvrGaze))]
 public class GvrGazeEditor : Editor {
   /// @cond

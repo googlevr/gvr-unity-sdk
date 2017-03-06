@@ -29,6 +29,7 @@ public class GvrAudioSoundfieldEditor : Editor {
   private SerializedProperty playOnAwake = null;
   private SerializedProperty priority = null;
   private SerializedProperty volume = null;
+  private SerializedProperty bypassRoomEffects = null;
   private SerializedProperty gainDb = null;
 
   private GUIContent clip0102Label = new GUIContent("Channels 1 & 2 (WY)",
@@ -50,6 +51,8 @@ public class GvrAudioSoundfieldEditor : Editor {
       "Sets the overall volume of the soundfield.");
   private GUIContent playOnAwakeLabel = new GUIContent("Play On Awake",
       "Play the sound when the scene loads.");
+  private GUIContent bypassRoomEffectsLabel = new GUIContent("Bypass Room Effects",
+    "Sets whether the room effects for the soundfield should be bypassed.");
   private GUIContent gainLabel = new GUIContent("Gain (dB)",
       "Applies a gain to the soundfield for adjustment of relative loudness.");
 
@@ -62,6 +65,7 @@ public class GvrAudioSoundfieldEditor : Editor {
     playOnAwake = serializedObject.FindProperty("playOnAwake");
     priority = serializedObject.FindProperty("soundfieldPriority");
     volume = serializedObject.FindProperty("soundfieldVolume");
+    bypassRoomEffects = serializedObject.FindProperty("bypassRoomEffects");
     gainDb = serializedObject.FindProperty("gainDb");
   }
 
@@ -84,6 +88,7 @@ public class GvrAudioSoundfieldEditor : Editor {
     EditorGUILayout.Separator();
 
     EditorGUILayout.PropertyField(mute, muteLabel);
+    EditorGUILayout.PropertyField(bypassRoomEffects, bypassRoomEffectsLabel);
     EditorGUILayout.PropertyField(playOnAwake, playOnAwakeLabel);
     EditorGUILayout.PropertyField(loop, loopLabel);
 

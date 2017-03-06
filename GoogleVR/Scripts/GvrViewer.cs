@@ -29,7 +29,7 @@ using Gvr.Internal;
 /// its starting properties.
 [AddComponentMenu("GoogleVR/GvrViewer")]
 public class GvrViewer : MonoBehaviour {
-  public const string GVR_SDK_VERSION = "1.20";
+  public const string GVR_SDK_VERSION = "1.30";
 
   /// The singleton instance of the GvrViewer class.
   public static GvrViewer Instance {
@@ -105,8 +105,12 @@ public class GvrViewer : MonoBehaviour {
 #endif  // !UNITY_HAS_GOOGLEVR || UNITY_EDITOR
     }
   }
+
+// Ignore private field is assigned but its value is never used compile warning.
+#pragma warning disable 414
   [SerializeField]
   private bool vrModeEnabled = true;
+#pragma warning restore 414
 
   /// Methods for performing lens distortion correction.
   public enum DistortionCorrectionMethod {

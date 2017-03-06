@@ -42,7 +42,7 @@ public static class GvrSettings {
     Daydream
   }
   public static ViewerPlatformType ViewerPlatform {
-    // Expose a setter only for the edtior emulator, for development testing purposes.
+    // Expose a setter only for the editor emulator, for development testing purposes.
 #if UNITY_EDITOR
     get {
       return editorEmulatorOnlyViewerPlatformType;

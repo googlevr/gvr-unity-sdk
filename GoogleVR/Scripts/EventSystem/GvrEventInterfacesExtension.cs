@@ -15,7 +15,6 @@
 using UnityEngine.EventSystems;
 
 /// Interface to implement if you wish to receive OnGvrPointerHover callbacks.
-/// Executed by GazeInputModule.cs.
 public interface IGvrPointerHoverHandler : IEventSystemHandler {
 
   /// Called when pointer is hovering over GameObject.

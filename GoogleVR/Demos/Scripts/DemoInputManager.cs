@@ -17,6 +17,14 @@ using UnityEngine.UI;
 using System;
 
 public class DemoInputManager : MonoBehaviour {
+// Build for iOS, or for a pre-native integration Unity version, for Android, and running on-device.
+#if UNITY_IOS || (!UNITY_HAS_GOOGLEVR && !UNITY_5_6_OR_NEWER && UNITY_ANDROID && !UNITY_EDITOR)
+  void Start() {
+    GameObject messageCanvas = transform.Find("MessageCanvas").gameObject;
+    messageCanvas.SetActive(false);
+  }
+#endif  // UNITY_IOS || (!UNITY_HAS_GOOGLEVR && !UNITY_5_6_OR_NEWER && UNITY_ANDROID && !UNITY_EDITOR)
+
 // Cardboard / Daydream switching does not apply to pre-native integration versions
 // of Unity, or platforms other than Android, since those are Cardboard-only.
 #if UNITY_HAS_GOOGLEVR && UNITY_ANDROID
@@ -71,6 +79,7 @@ public class DemoInputManager : MonoBehaviour {
 #endif  // UNITY_EDITOR
 
   void Start() {
+    Input.backButtonLeavesApp = true;
     if (messageCanvas == null) {
       messageCanvas = transform.Find(MESSAGE_CANVAS_NAME).gameObject;
       if (messageCanvas != null) {
@@ -119,6 +128,14 @@ public class DemoInputManager : MonoBehaviour {
     isDaydream = (gvrEmulatedPlatformType == EmulatedPlatformType.Daydream);
     SetVRInputMechanism();
 #endif  // UNITY_EDITOR
+  }
+
+  void LateUpdate() {
+    GvrViewer.Instance.UpdateState();
+    // Exit when (X) is tapped.
+    if (Input.GetKeyDown(KeyCode.Escape)) {
+      Application.Quit();
+    }
   }
 
   public static bool playerSettingsHasDaydream() {
@@ -244,9 +261,10 @@ public class DemoInputManager : MonoBehaviour {
       return;
     }
 
-    GvrBasePointer pointer = reticlePointer.GetComponent<GvrBasePointer>();
+    GvrReticlePointer pointer =
+        reticlePointer.GetComponent<GvrReticlePointer>();
     if (pointer != null) {
-      GvrPointerManager.Pointer = pointer;
+      pointer.SetAsMainPointer();
     }
   }
 
@@ -263,9 +281,10 @@ public class DemoInputManager : MonoBehaviour {
     if (!active) {
       return;
     }
-    GvrBasePointer pointer = controllerPointer.GetComponentInChildren<GvrBasePointer>(true);
+    GvrLaserPointer pointer =
+        controllerPointer.GetComponentInChildren<GvrLaserPointer>(true);
     if (pointer != null) {
-      GvrPointerManager.Pointer = pointer;
+      pointer.SetAsMainPointer();
     }
   }
 
