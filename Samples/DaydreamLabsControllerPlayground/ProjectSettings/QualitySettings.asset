@@ -72,16 +72,16 @@ QualitySettings:
     blendWeights: 2
     textureQuality: 0
     anisotropicTextures: 1
-    antiAliasing: 0
+    antiAliasing: 2
     softParticles: 0
     softVegetation: 0
     realtimeReflectionProbes: 0
     billboardsFaceCameraPosition: 0
-    vSyncCount: 0
+    vSyncCount: 2
     lodBias: 0.7
     maximumLODLevel: 0
     particleRaycastBudget: 64
-    asyncUploadTimeSlice: 2
+    asyncUploadTimeSlice: 33
     asyncUploadBufferSize: 4
     excludedTargetPlatforms: []
   - serializedVersion: 2
@@ -162,4 +162,6 @@ QualitySettings:
     asyncUploadTimeSlice: 2
     asyncUploadBufferSize: 4
     excludedTargetPlatforms: []
-  m_PerPlatformDefaultQuality: {}
+  m_PerPlatformDefaultQuality:
+    Android: 0
+    Standalone: 0

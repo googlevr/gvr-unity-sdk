@@ -18,34 +18,26 @@ using UnityEngine.Events;
 
 namespace GVR.Input {
   [Serializable]
-  public class Vector3Event : UnityEvent<Vector3> {
-  }
+  public class Vector3Event : UnityEvent<Vector3> { }
 
   [Serializable]
-  public class Vector2Event : UnityEvent<Vector2> {
-  }
+  public class Vector2Event : UnityEvent<Vector2> { }
 
   [Serializable]
-  public class FloatEvent : UnityEvent<float> {
-  }
+  public class FloatEvent : UnityEvent<float> { }
 
   [Serializable]
-  public class BoolEvent : UnityEvent<bool> {
-  }
+  public class BoolEvent : UnityEvent<bool> { }
 
   [Serializable]
-  public class ButtonEvent : UnityEvent {
-  }
+  public class ButtonEvent : UnityEvent { }
 
   [Serializable]
-  public class TouchPadEvent : UnityEvent {
-  }
+  public class TouchPadEvent : UnityEvent { }
 
   [Serializable]
-  public class TransformEvent : UnityEvent<Transform> {
-  }
+  public class TransformEvent : UnityEvent<Transform> { }
 
   [Serializable]
-  public class GameObjectEvent : UnityEvent<GameObject> {
-  }
+  public class GameObjectEvent : UnityEvent<GameObject> { }
 }

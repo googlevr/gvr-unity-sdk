@@ -1,4 +1,6 @@
-﻿// Copyright 2016 Google Inc. All rights reserved.
+﻿// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
+
+// Copyright 2016 Google Inc. All rights reserved.
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -58,7 +60,7 @@ Shader "GVR/Sky"
             {
                 v2f o;
                 
-                float4 worldPos = mul(_Object2World,v.vertex);
+                float4 worldPos = mul(unity_ObjectToWorld,v.vertex);
                 float3 viewDir = normalize(worldPos.xyz-_WorldSpaceCameraPos.xyz);
                 
                 o.uv = viewDir.y;

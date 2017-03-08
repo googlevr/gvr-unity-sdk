@@ -87,17 +87,17 @@ namespace GVR.Samples.Tennis {
           modelDirection = (ModelTip.position.x - ModelBase.position.x) / maxModelDifference;
           offsetDirection = Vector3.forward;
           break;
+      }
 
-        headTilt = Mathf.Clamp(headTilt > 180 ? headTilt - 360 : headTilt, MaxHeadTilt * -1, MaxHeadTilt);
-        float distanceScale = (Mathf.Abs(headTilt) / MaxHeadTilt) * Mathf.Abs(modelDirection);
+      headTilt = Mathf.Clamp(headTilt > 180 ? headTilt - 360 : headTilt, MaxHeadTilt * -1, MaxHeadTilt);
+      float distanceScale = (Mathf.Abs(headTilt) / MaxHeadTilt) * Mathf.Abs(modelDirection);
 
-        if (Mathf.Approximately(Mathf.Sign(headTilt), Mathf.Sign(modelDirection))) {
-          RemoteModel.transform.localPosition =
-              offsetDirection * (averageDistance - distanceScale * (averageDistance - MinDistance));
-        } else {
-          RemoteModel.transform.localPosition =
-              offsetDirection * (distanceScale * (MaxDistance - averageDistance) + averageDistance);
-        }
+      if (Mathf.Approximately(Mathf.Sign(headTilt), Mathf.Sign(modelDirection))) {
+        RemoteModel.transform.localPosition =
+            offsetDirection * (averageDistance - distanceScale * (averageDistance - MinDistance));
+      } else {
+        RemoteModel.transform.localPosition =
+            offsetDirection * (distanceScale * (MaxDistance - averageDistance) + averageDistance);
       }
     }
   }

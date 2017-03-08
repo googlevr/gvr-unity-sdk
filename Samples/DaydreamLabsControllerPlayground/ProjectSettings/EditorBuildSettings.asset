@@ -37,3 +37,5 @@ EditorBuildSettings:
     path: Assets/Samples/Pancakes/Scenes/Pancakes.unity
   - enabled: 1
     path: Assets/Samples/Maze/Scenes/Maze.unity
+  - enabled: 0
+    path: Assets/GoogleVR/DemoScenes/ControllerDemo/ControllerDemo.unity

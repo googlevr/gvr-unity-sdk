@@ -39,15 +39,17 @@ namespace GVR.GUI {
 
     void Update() {
       if (Time.realtimeSinceStartup <= StartupDelay) {
-        return;
+        return;        
       }
-      if (GvrController.State != GvrConnectionState.Connected) {
+      if (GvrController.State != GvrConnectionState.Connected) {        
         if (!displayingWarning) {
           Time.timeScale = 0.0f;
           Warning.gameObject.layer = 0;
           Menu.enabled = true;
           Menu.TriggerOpened();
           DimmingObject.gameObject.layer = 0;
+          Warning.SetActive(true);
+          DimmingObject.SetActive(true);
           displayingWarning = true;
         }
       } else {
@@ -59,6 +61,12 @@ namespace GVR.GUI {
           DimmingObject.gameObject.layer = 20;
           displayingWarning = false;
           Menu.TriggerClosed();
+        }
+        if (Warning.activeSelf) {
+          Warning.SetActive(false);
+        }
+        if (DimmingObject.activeSelf) {
+          DimmingObject.SetActive(false);
         }
       }
     }

@@ -44,7 +44,7 @@ namespace GVR.GUI {
     public bool UseAsyncLoading;
 
     [Tooltip("ScreenFade to be used for level transitions.")]
-    public ScreenFade ScreenFade;
+    private ScreenFade ScreenFade;
 
     [Tooltip("If true, the menu will tilt to look down or up at the player, if false, " +
              "it is always aligned on th Y axis.")]
@@ -88,6 +88,7 @@ namespace GVR.GUI {
       } 
       instance = this;
       instance.isMenuOpen = true;
+      ScreenFade = Camera.main.GetComponent<ScreenFade>();
     }
 
     void OnDestroy() {
@@ -126,19 +127,21 @@ namespace GVR.GUI {
     }
 
     public void TriggerOpened() {
+      ResetMenuOrientation();
       LevelSelectMenuListener[] listeners = FindObjectsOfType<LevelSelectMenuListener>();
       for (int i = 0; i < listeners.Length; i++) {
         listeners[i].OnLevelSelectMenuOpened.Invoke();
       }
       instance.isMenuOpen = true;
+      gameObject.transform.parent.parent = null;
     }
 
     public void TriggerClosed() {
+      instance.isMenuOpen = false;
       LevelSelectMenuListener[] listeners = FindObjectsOfType<LevelSelectMenuListener>();
       for (int i = 0; i < listeners.Length; i++) {
         listeners[i].OnLevelSelectMenuClosed.Invoke();
       }
-      instance.isMenuOpen = false;
     }
 
     public void Open() {
@@ -152,32 +155,23 @@ namespace GVR.GUI {
     }
 
     public void Close() {
+      if (animator == null) {
+        return;
+      }
       animator.SetBool(AnimatorOpenID, false);
       TriggerWillClose();
+      TriggerClosed();
     }
 
     void OnEnable() {
-      if (AllowTilt) {
-        position = transform.position;
-        transform.LookAt(transform.position + transform.forward, Vector3.up);
-        rotation = Quaternion.Euler(new Vector3(0.0f, transform.eulerAngles.y, 0.0f));
-      } else {
-        Vector3 d = Vector3.ProjectOnPlane(transform.parent.parent.forward, Vector3.up).normalized;
-        position = transform.parent.parent.position + (d * 3.0f);
-        transform.forward = d.normalized;
-        rotation = transform.rotation;
-      }
+      ResetMenuOrientation();
+      TriggerClosed();
     }
 
     void OnDisable() {
       transform.localPosition = originalLocalPosition;
       transform.localRotation = originalLocalRotation;
       TriggerClosed();
-    }
-
-    void Update() {
-      transform.position = position;
-      transform.rotation = rotation;
     }
 
     public void SetLefty(bool lefty) {
@@ -213,6 +207,23 @@ namespace GVR.GUI {
         yield return null;
       }
       loading = false;
+    }
+     
+    private void ResetMenuOrientation() {
+      Transform cameraTransform = Camera.main.transform;
+      if (AllowTilt) {
+        position = transform.position; 
+        transform.LookAt(transform.position + transform.forward, Vector3.up);
+        rotation = Quaternion.Euler(new Vector3(0.0f, transform.eulerAngles.y, 0.0f));
+      } else {
+        Vector3 d = Vector3.ProjectOnPlane(cameraTransform.forward, Vector3.up).normalized;
+        position = cameraTransform.position + (d * 3.0f);
+        transform.forward = d.normalized;
+        rotation = transform.rotation;
+      }
+      transform.position = position;
+      transform.rotation = rotation;
+      gameObject.transform.parent.SetParent(cameraTransform);
     }
 
     public void CreateButtons(SelectableScene[] scenes) {

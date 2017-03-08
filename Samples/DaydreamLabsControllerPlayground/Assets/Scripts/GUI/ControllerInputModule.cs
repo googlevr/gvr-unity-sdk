@@ -118,8 +118,8 @@ namespace GVR.GUI {
         if (Cursor.activeSelf) {
           Cursor.SetActive(false);
           MissCursor.SetActive(true);
-          MissCursor.transform.localPosition =
-              new Vector3(0.0f, 0.0f, MissCursor.transform.localPosition.z);
+					MissCursor.transform.position = Cursor.transform.position;
+					MissCursor.transform.rotation = Cursor.transform.rotation;
         }
         if (Line != null) {
           Line.SetPosition(0, Controller.position);

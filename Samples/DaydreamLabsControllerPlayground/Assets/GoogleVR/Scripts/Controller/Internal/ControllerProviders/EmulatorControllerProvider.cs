@@ -12,6 +12,10 @@
 // See the License for the specific language governing permissioßns and
 // limitations under the License.
 
+// The controller is not available for versions of Unity without the
+// // GVR native integration.
+#if UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
+
 using UnityEngine;
 
 /// @cond
@@ -30,8 +34,7 @@ namespace Gvr.Internal {
     private Quaternion lastRawOrientation = Quaternion.identity;
 
     /// Creates a new EmulatorControllerProvider with the specified settings.
-    internal EmulatorControllerProvider(GvrController.EmulatorConnectionMode connectionMode,
-          bool enableGyro, bool enableAccel) {
+    internal EmulatorControllerProvider(GvrController.EmulatorConnectionMode connectionMode) {
       if (connectionMode == GvrController.EmulatorConnectionMode.USB) {
         EmulatorConfig.Instance.PHONE_EVENT_MODE = EmulatorConfig.Mode.USB;
       } else if (connectionMode == GvrController.EmulatorConnectionMode.WIFI) {
@@ -43,20 +46,16 @@ namespace Gvr.Internal {
       EmulatorManager.Instance.touchEventListeners += HandleTouchEvent;
       EmulatorManager.Instance.orientationEventListeners += HandleOrientationEvent;
       EmulatorManager.Instance.buttonEventListeners += HandleButtonEvent;
-
-      if (enableGyro) {
-        EmulatorManager.Instance.gyroEventListeners += HandleGyroEvent;
-      }
-
-      if (enableAccel) {
-        EmulatorManager.Instance.accelEventListeners += HandleAccelEvent;
-      }
+      EmulatorManager.Instance.gyroEventListeners += HandleGyroEvent;
+      EmulatorManager.Instance.accelEventListeners += HandleAccelEvent;
     }
 
     public void ReadState(ControllerState outState) {
       lock (state) {
         state.connectionState = EmulatorManager.Instance.Connected ? GvrConnectionState.Connected :
             GvrConnectionState.Connecting;
+        state.apiStatus = EmulatorManager.Instance.Connected ? GvrControllerApiStatus.Ok :
+            GvrControllerApiStatus.Unavailable;
         outState.CopyFrom(state);
       }
       state.ClearTransientState();
@@ -163,8 +162,11 @@ namespace Gvr.Internal {
         state.orientation = Quaternion.identity;
         state.recentering = false;
         state.recentered = true;
+        state.headsetRecenterRequested = true;
       }
     }
   }
 }
 /// @endcond
+
+#endif  // UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)

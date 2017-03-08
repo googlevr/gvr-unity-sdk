@@ -21,28 +21,29 @@ using System.Collections;
 public class GvrAudioRoom : MonoBehaviour {
   /// Material type that determines the acoustic properties of a room surface.
   public enum SurfaceMaterial {
-    Transparent = 0,
-    AcousticCeilingTiles = 1,
-    BrickBare = 2,
-    BrickPainted = 3,
-    ConcreteBlockCoarse = 4,
-    ConcreteBlockPainted = 5,
-    CurtainHeavy = 6,
-    FiberglassInsulation = 7,
-    GlassThin = 8,
-    GlassThick = 9,
-    Grass = 10,
-    LinoleumOnConcrete = 11,
-    Marble = 12,
-    ParquetOnConcrete = 13,
-    PlasterRough = 14,
-    PlasterSmooth = 15,
-    PlywoodPanel = 16,
-    PolishedConcreteOrTile = 17,
-    Sheetrock = 18,
-    WaterOrIceSurface = 19,
-    WoodCeiling = 20,
-    WoodPanel = 21
+    Transparent = 0,              ///< Transparent
+    AcousticCeilingTiles = 1,     ///< Acoustic ceiling tiles
+    BrickBare = 2,                ///< Brick, bare
+    BrickPainted = 3,             ///< Brick, painted
+    ConcreteBlockCoarse = 4,      ///< Concrete block, coarse
+    ConcreteBlockPainted = 5,     ///< Concrete block, painted
+    CurtainHeavy = 6,             ///< Curtain, heavy
+    FiberglassInsulation = 7,     ///< Fiberglass insulation
+    GlassThin = 8,                ///< Glass, thin
+    GlassThick = 9,               ///< Glass, thick
+    Grass = 10,                   ///< Grass
+    LinoleumOnConcrete = 11,      ///< Linoleum on concrete
+    Marble = 12,                  ///< Marble
+    Metal = 13,                   ///< Galvanized sheet metal
+    ParquetOnConcrete = 14,       ///< Parquet on concrete
+    PlasterRough = 15,            ///< Plaster, rough
+    PlasterSmooth = 16,           ///< Plaster, smooth
+    PlywoodPanel = 17,            ///< Plywood panel
+    PolishedConcreteOrTile = 18,  ///< Polished concrete or tile
+    Sheetrock = 19,               ///< Sheetrock
+    WaterOrIceSurface = 20,       ///< Water or ice surface
+    WoodCeiling = 21,             ///< Wood ceiling
+    WoodPanel = 22                ///< Wood panel
   }
 
   /// Room surface material in negative x direction.
@@ -78,57 +79,16 @@ public class GvrAudioRoom : MonoBehaviour {
   /// Size of the room (normalized with respect to scale of the game object).
   public Vector3 size = Vector3.one;
 
-  /// Unique room id.
-  private int id = -1;
-
-  /// Surface materials holder.
-  private SurfaceMaterial[] surfaceMaterials = null;
-
-  void Awake () {
-    surfaceMaterials = new SurfaceMaterial[GvrAudio.numRoomSurfaces];
-  }
-
   void OnEnable () {
-    InitializeRoom();
-  }
-
-  void Start () {
-    InitializeRoom();
+    GvrAudio.UpdateAudioRoom(this, GvrAudio.IsListenerInsideRoom(this));
   }
 
   void OnDisable () {
-    ShutdownRoom();
+    GvrAudio.UpdateAudioRoom(this, false);
   }
 
   void Update () {
-    GvrAudio.UpdateAudioRoom(id, transform, GetSurfaceMaterials(), reflectivity, reverbGainDb,
-                             reverbBrightness, reverbTime, size);
-  }
-
-  /// Returns a list of surface materials of the room.
-  public SurfaceMaterial[] GetSurfaceMaterials () {
-    surfaceMaterials[0] = leftWall;
-    surfaceMaterials[1] = rightWall;
-    surfaceMaterials[2] = floor;
-    surfaceMaterials[3] = ceiling;
-    surfaceMaterials[4] = backWall;
-    surfaceMaterials[5] = frontWall;
-    return surfaceMaterials;
-  }
-
-  private void InitializeRoom () {
-    if (id < 0) {
-      id = GvrAudio.CreateAudioRoom();
-      GvrAudio.UpdateAudioRoom(id, transform, GetSurfaceMaterials(), reflectivity, reverbGainDb,
-                               reverbBrightness, reverbTime, size);
-    }
-  }
-
-  private void ShutdownRoom () {
-    if (id >= 0) {
-      GvrAudio.DestroyAudioRoom(id);
-      id = -1;
-    }
+    GvrAudio.UpdateAudioRoom(this, GvrAudio.IsListenerInsideRoom(this));
   }
 
   void OnDrawGizmosSelected () {

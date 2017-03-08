@@ -16,9 +16,10 @@ using UnityEngine;
 
 namespace GVR.Input {
   /// <summary>
-  /// Provides controller app button input through UnityEvents
+  /// Provides controller app button input through UnityEvents.
   /// </summary>
   public class AppButtonInput : MonoBehaviour {
+#if UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
     public ButtonEvent OnAppUp;
     public ButtonEvent OnAppDown;
 
@@ -29,5 +30,7 @@ namespace GVR.Input {
       if (GvrController.AppButtonDown)
         OnAppDown.Invoke();
     }
+
+#endif  // UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
   }
 }

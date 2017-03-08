@@ -52,6 +52,9 @@ namespace GVR.GUI {
     }
 
     public void SetSceneData(SelectableScene sd) {
+      if (Button == null) {
+        return;
+      }
       sceneData = sd;
       Text t = Button.GetComponentInChildren<Text>();
       if (t != null) {

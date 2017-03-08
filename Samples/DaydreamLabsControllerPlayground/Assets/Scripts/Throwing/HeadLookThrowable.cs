@@ -39,8 +39,8 @@ namespace GVR.Throwing {
     [Tooltip("Thrown speed")]
     public float Speed = 5f;
 
-    [Tooltip("Reference to the Head gameobject to get gaze direction.")]
-    public Transform Head;
+    [Tooltip("Reference to the Camera Transform to get gaze direction.")]
+    public Transform cameraTransform;
 
     void Update() {
       if (!_thrown) {
@@ -72,8 +72,7 @@ namespace GVR.Throwing {
       _thrown = true;
       _transformTarget = null;
       _thrownPosition = transform.position;
-      float distance = MaxDistance > 0f ? MaxDistance : 999f;
-      _targetDirection = Head.TransformDirection(Vector3.forward * distance);
+      _targetDirection = Camera.main.transform.forward;
       if (AimAssistEnabled) {
         DoAimAssist();
       }

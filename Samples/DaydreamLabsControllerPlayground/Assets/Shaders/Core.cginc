@@ -1,3 +1,5 @@
+// Upgrade NOTE: replaced '_Object2World' with 'unity_ObjectToWorld'
+
 // Copyright 2016 Google Inc. All rights reserved.
 // 
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -51,8 +53,8 @@ float4 texSampler##_ST
 #else
 	#define LIGHTMAP_TEXCOORDS v.texcoord1
 #endif
-#define WORLD_POSITION mul(_Object2World,v.vertex)
-#define WORLD_NORMAL normalize(mul(_Object2World,float4(v.normal,0.0)).xyz)
+#define WORLD_POSITION mul(unity_ObjectToWorld,v.vertex)
+#define WORLD_NORMAL normalize(mul(unity_ObjectToWorld,float4(v.normal,0.0)).xyz)
 #define WORLD_VIEW(worldVert) (worldVert.xyz - _WorldSpaceCameraPos)
 #define MVP_VERTEX undistortVertex(v.vertex)
 

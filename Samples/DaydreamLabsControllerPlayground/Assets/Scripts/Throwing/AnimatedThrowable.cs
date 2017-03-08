@@ -14,6 +14,7 @@
 
 using GVR.Input;
 using UnityEngine;
+using UnityEngine.VR;
 
 namespace GVR.Throwing {
   /// <summary>
@@ -32,6 +33,9 @@ namespace GVR.Throwing {
     [Tooltip("Used to flip the object visually so it looks right regardless of hand choice")]
     public VisualHandFlip Visual;
 
+    [Tooltip("Reference to the Camera Transform to get gaze direction.")]
+    private Transform cameraTransform;
+
     void OnEnable() {
       Animator.enabled = false;
     }
@@ -43,6 +47,7 @@ namespace GVR.Throwing {
       if (ThrowEffect == null) {
         Debug.LogError("No trail renderer attached");
       }
+      cameraTransform = Camera.main.transform;
     }
 
     /// <summary>
@@ -53,9 +58,9 @@ namespace GVR.Throwing {
     /// </param>
     /// <param name="isRightHanded">True: object thrown right handed</param>
     public override void Throw(Transform thrower, bool isRightHanded) {
-      transform.rotation = Quaternion.AngleAxis(GvrViewer.Instance.HeadPose.Orientation.eulerAngles.y, Vector3.up);
+      Quaternion orientation = cameraTransform.rotation;
+      transform.rotation = Quaternion.AngleAxis(orientation.eulerAngles.y, Vector3.up);
       transform.position = thrower.position;
-      //  GvrViewer.Instance.HeadPose.Orientation+;
       base.Throw(thrower, isRightHanded);
       ThrowEffect.enabled = true;
       Animator.enabled = true;

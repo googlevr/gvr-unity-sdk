@@ -66,5 +66,31 @@ namespace GVR.Input {
         }
       }
     }
+
+    // Gyro emulation.
+    void CheckSlashTriggersGyro() {
+      Vector3 gyro = GvrController.Gyro;
+      float Xmag = Mathf.Abs(gyro.x);
+      float Ymag = Mathf.Abs(gyro.y);
+      if (Xmag > SlashThreshold || Ymag > SlashThreshold) {
+        currentCooldown = SlashCooldown;
+        if (Xmag > Ymag) {
+          //If X is the greatest Magnitude.
+          if (gyro.x < 0) {
+            OnUpSlash.Invoke();
+          } else {
+            OnDownSlash.Invoke();
+          }
+        } else {
+          //If Z is the greatest Magnitude.
+          if (gyro.y > 0) {
+            OnRightSlash.Invoke();
+          } else {
+            OnLeftSlash.Invoke();
+          }
+        }
+      }
+    }
+
   }
 }

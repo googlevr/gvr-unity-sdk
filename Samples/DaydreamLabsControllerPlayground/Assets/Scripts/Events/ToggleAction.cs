@@ -22,6 +22,9 @@ namespace GVR.Events {
   /// order to do some lightweight state tracking.
   /// </summary>
   public class ToggleAction : MonoBehaviour {
+    private float lastUsage;
+    private bool on;
+
     [Tooltip("Event to raise when this is toggled on.")]
     public UnityEvent OnToggleOn;
 
@@ -38,9 +41,6 @@ namespace GVR.Events {
              "will be ignored.")]
     public float Cooldown;
 
-    private float lastUsage;
-    private bool on;
-
     void Start() {
       on = InitialState;
       if (RaiseEventForInitialState) {
@@ -48,26 +48,28 @@ namespace GVR.Events {
       }
     }
 
+    public void Toggle() {
+      if (Time.time - lastUsage < Cooldown) {
+        return;
+      }
+      lastUsage = Time.time;
+      on = !on;
+      RaiseToggleEvent(on);
+    }
+
+    public void Set(bool on) {
+      if (this.on == on) {
+        return;
+      }
+      this.on = on;
+      RaiseToggleEvent(on);
+    }
+
     private void RaiseToggleEvent(bool on) {
       if (on) {
         OnToggleOn.Invoke();
       } else {
         OnToggleOff.Invoke();
-      }
-    }
-
-    public void Toggle() {
-      if (Time.time - lastUsage >= Cooldown) {
-        lastUsage = Time.time;
-        on = !on;
-        RaiseToggleEvent(on);
-      }
-    }
-
-    public void Set(bool on) {
-      if (this.on != on) {
-        this.on = on;
-        RaiseToggleEvent(on);
       }
     }
   }

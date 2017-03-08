@@ -19,13 +19,11 @@ namespace GVR.Events {
   /// Sets the position of the transform to a position specifed in a list.
   /// </summary>
   public class PositionSwapper : MonoBehaviour {
-    public Vector3[] Positions = new Vector3[0];
-
     private int currentIndex = -1;
 
-    public void SetConstraint(int index) {
+    public Vector3[] Positions = new Vector3[0];
 
-    }
+    public void SetConstraint(int index) { }
 
     public void SetPosition(int index) {
       currentIndex = index % Positions.Length;

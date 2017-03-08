@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissioßns and
 // limitations under the License.
 
-#if UNITY_ANDROID
+#if UNITY_HAS_GOOGLEVR && UNITY_ANDROID
 using UnityEngine;
 
 using System;
@@ -23,15 +23,17 @@ namespace Gvr.Internal {
   /// Controller Provider that uses the native GVR C API to communicate with controllers
   /// via Google VR Services on Android.
   class AndroidNativeControllerProvider : IControllerProvider {
+    // Minimum VrCore client API version that automatically handles recentering.
+    private const int MIN_VRCORE_API_VERSION_WITH_RECENTER = 8;
+
     // Note: keep structs and function signatures in sync with the C header file (gvr_controller.h).
-    [StructLayout(LayoutKind.Sequential)]
-    private struct gvr_controller_api_options {
-      internal byte enable_orientation;
-      internal byte enable_touch;
-      internal byte enable_gyro;
-      internal byte enable_accel;
-      internal byte enable_gestures;
-    };
+    // GVR controller option flags.
+    private const int GVR_CONTROLLER_ENABLE_ORIENTATION = 1 << 0;
+    private const int GVR_CONTROLLER_ENABLE_TOUCH = 1 << 1;
+    private const int GVR_CONTROLLER_ENABLE_GYRO = 1 << 2;
+    private const int GVR_CONTROLLER_ENABLE_ACCEL = 1 << 3;
+    private const int GVR_CONTROLLER_ENABLE_GESTURES = 1 << 4;
+    private const int GVR_CONTROLLER_ENABLE_POSE_PREDICTION = 1 << 5;
 
     // enum gvr_controller_button:
     private const int GVR_CONTROLLER_BUTTON_NONE = 0;
@@ -50,6 +52,12 @@ namespace Gvr.Internal {
 
     // enum gvr_controller_api_status
     private const int GVR_CONTROLLER_API_OK = 0;
+    private const int GVR_CONTROLLER_API_UNSUPPORTED = 1;
+    private const int GVR_CONTROLLER_API_NOT_AUTHORIZED = 2;
+    private const int GVR_CONTROLLER_API_UNAVAILABLE = 3;
+    private const int GVR_CONTROLLER_API_SERVICE_OBSOLETE = 4;
+    private const int GVR_CONTROLLER_API_CLIENT_OBSOLETE = 5;
+    private const int GVR_CONTROLLER_API_MALFUNCTION = 6;
 
     [StructLayout(LayoutKind.Sequential)]
     private struct gvr_quat {
@@ -72,42 +80,15 @@ namespace Gvr.Internal {
       internal float y;
     }
 
-    [StructLayout(LayoutKind.Sequential)]
-    private struct gvr_controller_state {
-      internal int api_status;
-      internal int connection_state;
-      internal gvr_quat orientation;
-      internal gvr_vec3 gyro;
-      internal gvr_vec3 accel;
-      internal byte is_touching;
-      internal gvr_vec2 touch_pos;
-      internal byte touch_down;
-      internal byte touch_up;
-      internal byte recentered;
-      internal byte recentering;
-      [MarshalAs(UnmanagedType.ByValArray, SizeConst=GVR_CONTROLLER_BUTTON_COUNT)]
-      internal byte[] button_state;
-      [MarshalAs(UnmanagedType.ByValArray, SizeConst=GVR_CONTROLLER_BUTTON_COUNT)]
-      internal byte[] button_down;
-      [MarshalAs(UnmanagedType.ByValArray, SizeConst=GVR_CONTROLLER_BUTTON_COUNT)]
-      internal byte[] button_up;
-      internal long last_orientation_timestamp;
-      internal long last_gyro_timestamp;
-      internal long last_accel_timestamp;
-      internal long last_touch_timestamp;
-      internal long last_button_timestamp;
-    }
-
-    private const string dllName = "gvrunity";
+    private const string dllName = "gvr";
 
     [DllImport(dllName)]
-    private static extern void gvr_controller_init_default_options(
-        ref gvr_controller_api_options options);
+    private static extern int gvr_controller_get_default_options();
 
     [DllImport(dllName)]
     private static extern IntPtr gvr_controller_create_and_init_android(
         IntPtr jniEnv, IntPtr androidContext, IntPtr classLoader,
-        ref gvr_controller_api_options options, IntPtr context);
+        int options, IntPtr context);
 
     [DllImport(dllName)]
     private static extern void gvr_controller_destroy(ref IntPtr api);
@@ -119,14 +100,75 @@ namespace Gvr.Internal {
     private static extern void gvr_controller_resume(IntPtr api);
 
     [DllImport(dllName)]
-    private static extern void gvr_controller_read_state(
-        IntPtr api, ref gvr_controller_state out_state);
+    private static extern IntPtr gvr_controller_state_create();
+
+    [DllImport(dllName)]
+    private static extern void gvr_controller_state_destroy(ref IntPtr state);
+
+    [DllImport(dllName)]
+    private static extern void gvr_controller_state_update(IntPtr api, int flags, IntPtr out_state);
+
+    [DllImport(dllName)]
+    private static extern int gvr_controller_state_get_api_status(IntPtr state);
+
+    [DllImport(dllName)]
+    private static extern int gvr_controller_state_get_connection_state(IntPtr state);
+
+    [DllImport(dllName)]
+    private static extern gvr_quat gvr_controller_state_get_orientation(IntPtr state);
+
+    [DllImport(dllName)]
+    private static extern gvr_vec3 gvr_controller_state_get_gyro(IntPtr state);
+
+    [DllImport(dllName)]
+    private static extern gvr_vec3 gvr_controller_state_get_accel(IntPtr state);
+
+    [DllImport(dllName)]
+    private static extern byte gvr_controller_state_is_touching(IntPtr state);
+
+    [DllImport(dllName)]
+    private static extern gvr_vec2 gvr_controller_state_get_touch_pos(IntPtr state);
+
+    [DllImport(dllName)]
+    private static extern byte gvr_controller_state_get_touch_down(IntPtr state);
+
+    [DllImport(dllName)]
+    private static extern byte gvr_controller_state_get_touch_up(IntPtr state);
+
+    [DllImport(dllName)]
+    private static extern byte gvr_controller_state_get_recentered(IntPtr state);
+
+    [DllImport(dllName)]
+    private static extern byte gvr_controller_state_get_recentering(IntPtr state);
+
+    [DllImport(dllName)]
+    private static extern byte gvr_controller_state_get_button_state(IntPtr state, int button);
+
+    [DllImport(dllName)]
+    private static extern byte gvr_controller_state_get_button_down(IntPtr state, int button);
+
+    [DllImport(dllName)]
+    private static extern byte gvr_controller_state_get_button_up(IntPtr state, int button);
+
+    [DllImport(dllName)]
+    private static extern long gvr_controller_state_get_last_orientation_timestamp(IntPtr state);
+
+    [DllImport(dllName)]
+    private static extern long gvr_controller_state_get_last_gyro_timestamp(IntPtr state);
+
+    [DllImport(dllName)]
+    private static extern long gvr_controller_state_get_last_accel_timestamp(IntPtr state);
+
+    [DllImport(dllName)]
+    private static extern long gvr_controller_state_get_last_touch_timestamp(IntPtr state);
+
+    [DllImport(dllName)]
+    private static extern long gvr_controller_state_get_last_button_timestamp(IntPtr state);
 
     private const string UNITY_PLAYER_CLASS = "com.unity3d.player.UnityPlayer";
+    private const string VRCORE_UTILS_CLASS = "com.google.vr.vrcore.base.api.VrCoreUtils";
 
     private IntPtr api;
-
-    private gvr_controller_api_options options;
 
     private AndroidJavaObject androidContext;
     private AndroidJavaObject classLoader;
@@ -134,15 +176,21 @@ namespace Gvr.Internal {
     private bool error;
     private String errorDetails;
 
-    private gvr_controller_state state = new gvr_controller_state();
+    private IntPtr statePtr;
 
-    internal AndroidNativeControllerProvider(bool enableGyro, bool enableAccel) {
-      Debug.Log("Initializing GVR Controller API.");
+    private MutablePose3D pose3d = new MutablePose3D();
 
-      options = new gvr_controller_api_options();
-      gvr_controller_init_default_options(ref options);
-      options.enable_accel = enableAccel ? (byte) 1 : (byte) 0;
-      options.enable_gyro = enableGyro ? (byte) 1 : (byte) 0;
+    private int vrCoreClientApiVersion;
+    private bool vrCoreImplementsRecenter;
+
+    internal AndroidNativeControllerProvider() {
+      Debug.Log("Initializing Daydream controller API.");
+
+      int options = gvr_controller_get_default_options();
+      options |= GVR_CONTROLLER_ENABLE_ACCEL;
+      options |= GVR_CONTROLLER_ENABLE_GYRO;
+
+      statePtr = gvr_controller_state_create();
 
       // Get a hold of the activity, context and class loader.
       AndroidJavaObject activity = GetActivity();
@@ -164,60 +212,104 @@ namespace Gvr.Internal {
         return;
       }
 
-      Debug.Log("Creating and initializing GVR API controller object.");
-      api = gvr_controller_create_and_init_android(IntPtr.Zero, androidContext.GetRawObject(),
-          classLoader.GetRawObject(), ref options, IntPtr.Zero);
+      // Use IntPtr instead of GetRawObject() so that Unity can shut down gracefully on
+      // Application.Quit(). Note that GetRawObject() is not pinned by the receiver so it's not
+      // cleaned up appropriately on shutdown, which is a known bug in Unity.
+      IntPtr androidContextPtr = AndroidJNI.NewLocalRef(androidContext.GetRawObject());
+      IntPtr classLoaderPtr = AndroidJNI.NewLocalRef(classLoader.GetRawObject());
+      Debug.Log ("Creating and initializing GVR API controller object.");
+      api = gvr_controller_create_and_init_android (IntPtr.Zero, androidContextPtr, classLoaderPtr,
+          options, IntPtr.Zero);
+      AndroidJNI.DeleteLocalRef(androidContextPtr);
+      AndroidJNI.DeleteLocalRef(classLoaderPtr);
       if (IntPtr.Zero == api) {
-        Debug.LogError("Error creating/initializing GVR Controller API.");
+        Debug.LogError("Error creating/initializing Daydream controller API.");
         error = true;
-        errorDetails = "Failed to initialize GVR Controller API.";
+        errorDetails = "Failed to initialize Daydream controller API.";
         return;
       }
+
+      vrCoreClientApiVersion = GetVrCoreClientApiVersion(activity);
+
+      // Check whether or not VrCore implements recentering.
+      vrCoreImplementsRecenter = (vrCoreClientApiVersion >= MIN_VRCORE_API_VERSION_WITH_RECENTER);
+
       Debug.Log("GVR API successfully initialized. Now resuming it.");
       gvr_controller_resume(api);
       Debug.Log("GVR API resumed.");
     }
 
+    ~AndroidNativeControllerProvider() {
+      Debug.Log("Destroying GVR API structures.");
+      gvr_controller_state_destroy(ref statePtr);
+      gvr_controller_destroy(ref api);
+      Debug.Log("AndroidNativeControllerProvider destroyed.");
+    }
+
     public void ReadState(ControllerState outState) {
       if (error) {
         outState.connectionState = GvrConnectionState.Error;
+        outState.apiStatus = GvrControllerApiStatus.Error;
         outState.errorDetails = errorDetails;
         return;
       }
-      gvr_controller_read_state(api, ref state);
+      gvr_controller_state_update(api, 0, statePtr);
 
-      outState.connectionState = ConvertConnectionState(state.connection_state);
+      outState.connectionState = ConvertConnectionState(
+          gvr_controller_state_get_connection_state(statePtr));
+      outState.apiStatus = ConvertControllerApiStatus(
+          gvr_controller_state_get_api_status(statePtr));
 
-      // Note: for accelerometer, gyro and orientation, we have to convert from the space used by
-      // the GVR API to Unity space. They are different.
-      //    GVR API:   X = right, Y = up, Z = back, right-handed.
-      //    Unity:     X = right, Y = up, Z = forward, left-handed
-      //
-      // So for orientation and gyro, we must invert the signs of X, Y, and Z due to chiral
-      // conversion, and then must flip Z because of the difference in the Z axis direction.
-      // So, in the end, the conversion is: -x, -y, z.
-      //
-      // For the accelerometer, there is no chirality conversion because it doesn't express
-      // a rotation. But we still need to flip Z.
-      outState.accel = new Vector3(state.accel.x, state.accel.y, -state.accel.z);
-      outState.gyro = new Vector3(-state.gyro.x, -state.gyro.y, state.gyro.z);
-      outState.orientation = new Quaternion(
-          -state.orientation.x, -state.orientation.y, state.orientation.z, state.orientation.w);
+      gvr_quat rawOri = gvr_controller_state_get_orientation(statePtr);
+      gvr_vec3 rawAccel = gvr_controller_state_get_accel(statePtr);
+      gvr_vec3 rawGyro = gvr_controller_state_get_gyro(statePtr);
 
-      outState.isTouching = 0 != state.is_touching;
-      outState.touchPos = new Vector2(state.touch_pos.x, state.touch_pos.y);
-      outState.touchDown = 0 != state.touch_down;
-      outState.touchUp = 0 != state.touch_up;
+      // Convert GVR API orientation (right-handed) into Unity axis system (left-handed).
+      pose3d.Set(Vector3.zero, new Quaternion(rawOri.x, rawOri.y, rawOri.z, rawOri.w));
+      pose3d.SetRightHanded(pose3d.Matrix);
+      outState.orientation = pose3d.Orientation;
 
-      outState.appButtonDown = 0 != state.button_down[GVR_CONTROLLER_BUTTON_APP];
-      outState.appButtonState = 0 != state.button_state[GVR_CONTROLLER_BUTTON_APP];
-      outState.appButtonUp = 0 != state.button_up[GVR_CONTROLLER_BUTTON_APP];
-      outState.clickButtonDown = 0 != state.button_down[GVR_CONTROLLER_BUTTON_CLICK];
-      outState.clickButtonState = 0 != state.button_state[GVR_CONTROLLER_BUTTON_CLICK];
-      outState.clickButtonUp = 0 != state.button_up[GVR_CONTROLLER_BUTTON_CLICK];
+      // For accelerometer, we have to flip Z because the GVR API has Z pointing backwards
+      // and Unity has Z pointing forward.
+      outState.accel = new Vector3(rawAccel.x, rawAccel.y, -rawAccel.z);
 
-      outState.recentering = 0 != state.recentering;
-      outState.recentered = 0 != state.recentered;
+      // Gyro in GVR represents a right-handed angular velocity about each axis (positive means
+      // clockwise when sighting along axis). Since Unity uses a left-handed system, we flip the
+      // signs to adjust the sign of the rotational velocity (so that positive means
+      // counter-clockwise). In addition, since in Unity the Z axis points forward while GVR
+      // has Z pointing backwards, we flip the Z axis sign again. So the result is that
+      // we should use -X, -Y, +Z:
+      outState.gyro = new Vector3(-rawGyro.x, -rawGyro.y, rawGyro.z);
+
+      outState.isTouching = 0 != gvr_controller_state_is_touching(statePtr);
+
+      gvr_vec2 touchPos = gvr_controller_state_get_touch_pos(statePtr);
+      outState.touchPos = new Vector2(touchPos.x, touchPos.y);
+
+      outState.touchDown = 0 != gvr_controller_state_get_touch_down(statePtr);
+      outState.touchUp = 0 != gvr_controller_state_get_touch_up(statePtr);
+
+      outState.appButtonDown =
+        0 != gvr_controller_state_get_button_down(statePtr, GVR_CONTROLLER_BUTTON_APP);
+      outState.appButtonState =
+        0 != gvr_controller_state_get_button_state(statePtr, GVR_CONTROLLER_BUTTON_APP);
+      outState.appButtonUp =
+        0 != gvr_controller_state_get_button_up(statePtr, GVR_CONTROLLER_BUTTON_APP);
+
+      outState.clickButtonDown =
+        0 != gvr_controller_state_get_button_down(statePtr, GVR_CONTROLLER_BUTTON_CLICK);
+      outState.clickButtonState =
+        0 != gvr_controller_state_get_button_state(statePtr, GVR_CONTROLLER_BUTTON_CLICK);
+      outState.clickButtonUp =
+        0 != gvr_controller_state_get_button_up(statePtr, GVR_CONTROLLER_BUTTON_CLICK);
+
+      outState.recentering = 0 != gvr_controller_state_get_recentering(statePtr);
+      outState.recentered = 0 != gvr_controller_state_get_recentered(statePtr);
+      outState.gvrPtr = statePtr;
+
+      // If the controller was recentered, we may also need to request that the headset be
+      // recentered. We should do that only if VrCore does NOT implement recentering.
+      outState.headsetRecenterRequested = outState.recentered && !vrCoreImplementsRecenter;
     }
 
     public void OnPause() {
@@ -242,6 +334,26 @@ namespace Gvr.Internal {
           return GvrConnectionState.Scanning;
         default:
           return GvrConnectionState.Disconnected;
+      }
+    }
+
+    private GvrControllerApiStatus ConvertControllerApiStatus(int gvrControllerApiStatus) {
+      switch (gvrControllerApiStatus) {
+        case GVR_CONTROLLER_API_OK:
+          return GvrControllerApiStatus.Ok;
+        case GVR_CONTROLLER_API_UNSUPPORTED:
+          return GvrControllerApiStatus.Unsupported;
+        case GVR_CONTROLLER_API_NOT_AUTHORIZED:
+          return GvrControllerApiStatus.NotAuthorized;
+        case GVR_CONTROLLER_API_SERVICE_OBSOLETE:
+          return GvrControllerApiStatus.ApiServiceObsolete;
+        case GVR_CONTROLLER_API_CLIENT_OBSOLETE:
+          return GvrControllerApiStatus.ApiClientObsolete;
+        case GVR_CONTROLLER_API_MALFUNCTION:
+          return GvrControllerApiStatus.ApiMalfunction;
+        case GVR_CONTROLLER_API_UNAVAILABLE:
+        default:  // Fall through.
+          return GvrControllerApiStatus.Unavailable;
       }
     }
 
@@ -276,8 +388,24 @@ namespace Gvr.Internal {
       }
       return result;
     }
+
+    private static int GetVrCoreClientApiVersion(AndroidJavaObject activity) {
+      try {
+        AndroidJavaClass utilsClass = new AndroidJavaClass(VRCORE_UTILS_CLASS);
+        int apiVersion = utilsClass.CallStatic<int>("getVrCoreClientApiVersion", activity);
+        Debug.LogFormat("VrCore client API version: " + apiVersion);
+        return apiVersion;
+      } catch (Exception exc) {
+        // Even though a catch-all block is normally frowned upon, in this case we really
+        // need it because this method has to be robust to unpredictable circumstances:
+        // VrCore might not exist in the device, the Java layer might be broken, etc, etc.
+        // None of those should abort the app.
+        Debug.LogError("Error obtaining VrCore client API version: " + exc);
+        return 0;
+      }
+    }
   }
 }
 /// @endcond
 
-#endif
+#endif  // UNITY_HAS_GOOGLEVR && UNITY_ANDROID

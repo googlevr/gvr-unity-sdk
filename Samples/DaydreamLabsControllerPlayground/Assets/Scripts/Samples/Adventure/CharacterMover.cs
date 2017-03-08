@@ -40,7 +40,7 @@ namespace GVR.Samples.Adventure {
         }
       }
     }
-#endif
+#endif  // UNITY_EDITOR
 
     #region -- Inspector Variables ----------------------------------------
 

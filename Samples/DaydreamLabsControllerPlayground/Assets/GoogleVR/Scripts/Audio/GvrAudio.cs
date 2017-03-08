@@ -15,6 +15,7 @@
 using UnityEngine;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 
@@ -24,9 +25,27 @@ using System.Runtime.InteropServices;
 public static class GvrAudio {
   /// Audio system rendering quality.
   public enum Quality {
-    Stereo = 0,  /// Stereo-only rendering
-    Low = 1,  /// Low quality binaural rendering (first-order HRTF)
-    High = 2  /// High quality binaural rendering (third-order HRTF)
+    Stereo = 0,  ///< Stereo-only rendering
+    Low = 1,  ///< Low quality binaural rendering (first-order HRTF)
+    High = 2  ///< High quality binaural rendering (third-order HRTF)
+  }
+
+  /// Native audio spatializer effect data.
+  public enum SpatializerData {
+    Id = 0,  /// ID.
+    Type = 1,  /// Spatializer type.
+    NumChannels = 2,  /// Number of input channels.
+    ChannelSet = 3,  /// Soundfield channel set.
+    Gain = 4,  /// Gain.
+    DistanceAttenuation = 5,  /// Computed distance attenuation.
+    MinDistance = 6,  /// Minimum distance for distance-based attenuation.
+    ZeroOutput = 7,  /// Should zero out the output buffer?
+  }
+
+  /// Native audio spatializer type.
+  public enum SpatializerType {
+    Source = 0,  /// 3D sound object.
+    Soundfield = 1  /// First-order ambisonic soundfield.
   }
 
   /// System sampling rate.
@@ -83,24 +102,34 @@ public static class GvrAudio {
       sampleRate = -1;
       numChannels = -1;
       framesPerBuffer = -1;
+      listenerTransform = null;
     }
   }
 
   /// Updates the audio listener.
   /// @note This should only be called from the main Unity thread.
-  public static void UpdateAudioListener (float globalGainDb, LayerMask occlusionMask,
-                                          float worldScale) {
+  public static void UpdateAudioListener (float globalGainDb, LayerMask occlusionMask) {
     if (initialized) {
       occlusionMaskValue = occlusionMask.value;
-      worldScaleInverse = 1.0f / worldScale;
-      float globalGain = ConvertAmplitudeFromDb(globalGainDb);
-      Vector3 position = listenerTransform.position;
-      Quaternion rotation = listenerTransform.rotation;
-      ConvertAudioTransformFromUnity(ref position, ref rotation);
-      // Pass listener properties to the system.
-      SetListenerGain(globalGain);
-      SetListenerTransform(position.x, position.y, position.z, rotation.x, rotation.y, rotation.z,
-                           rotation.w);
+      SetListenerGain(ConvertAmplitudeFromDb(globalGainDb));
+    }
+  }
+
+  /// Creates a new first-order ambisonic soundfield with a unique id.
+  /// @note This should only be called from the main Unity thread.
+  public static int CreateAudioSoundfield () {
+    int soundfieldId = -1;
+    if (initialized) {
+      soundfieldId = CreateSoundfield(numFoaChannels);
+    }
+    return soundfieldId;
+  }
+
+  /// Destroys the soundfield with given |id|.
+  /// @note This should only be called from the main Unity thread.
+  public static void DestroyAudioSoundfield (int id) {
+    if (initialized) {
+      DestroySoundfield(id);
     }
   }
 
@@ -122,70 +151,43 @@ public static class GvrAudio {
     }
   }
 
-  /// Updates the audio source with given |id| and its properties.
+  /// Updates the audio |source| with given |id| and its properties.
   /// @note This should only be called from the main Unity thread.
-  public static void UpdateAudioSource (int id, Transform transform, bool bypassRoomEffects,
-                                        float gainDb, float spread, AudioRolloffMode rolloffMode,
-                                        float minDistance, float maxDistance, float alpha,
-                                        float sharpness, float occlusion) {
+  public static void UpdateAudioSource (int id, GvrAudioSource source, float currentOcclusion) {
     if (initialized) {
-      float gain = ConvertAmplitudeFromDb(gainDb);
-      Vector3 position = transform.position;
-      Quaternion rotation = transform.rotation;
-      ConvertAudioTransformFromUnity(ref position, ref rotation);
-      float spreadRad = Mathf.Deg2Rad * spread;
-      // Pass the source properties to the audio system.
-      SetSourceBypassRoomEffects(id, bypassRoomEffects);
-      SetSourceDirectivity(id, alpha, sharpness);
-      SetSourceGain(id, gain);
-      SetSourceOcclusionIntensity(id, occlusion);
-      if (rolloffMode != AudioRolloffMode.Custom) {
-        float maxDistanceScaled = worldScaleInverse * maxDistance;
-        float minDistanceScaled = worldScaleInverse * minDistance;
-        SetSourceDistanceAttenuationMethod(id, rolloffMode, minDistanceScaled, maxDistanceScaled);
-      }
-      SetSourceSpread(id, spreadRad);
-      SetSourceTransform(id, position.x, position.y, position.z, rotation.x, rotation.y, rotation.z,
-                         rotation.w);
-    }
-  }
-
-  /// Creates a new room with a unique id.
-  /// @note This should only be called from the main Unity thread.
-  public static int CreateAudioRoom () {
-    int roomId = -1;
-    if (initialized) {
-      roomId = CreateRoom();
-    }
-    return roomId;
-  }
-
-  /// Destroys the room with given |id|.
-  /// @note This should only be called from the main Unity thread.
-  public static void DestroyAudioRoom (int id) {
-    if (initialized) {
-      DestroyRoom(id);
+      SetSourceBypassRoomEffects(id, source.bypassRoomEffects);
+      SetSourceDirectivity(id, source.directivityAlpha, source.directivitySharpness);
+      SetSourceListenerDirectivity(id, source.listenerDirectivityAlpha,
+                                   source.listenerDirectivitySharpness);
+      SetSourceOcclusionIntensity(id, currentOcclusion);
     }
   }
 
   /// Updates the room effects of the environment with given |room| properties.
   /// @note This should only be called from the main Unity thread.
-  public static void UpdateAudioRoom (int id, Transform transform,
-                                      GvrAudioRoom.SurfaceMaterial[] materials, float reflectivity,
-                                      float reverbGainDb, float reverbBrightness, float reverbTime,
-                                      Vector3 size) {
-    if (initialized) {
-      // Update room transform.
-      Vector3 position = transform.position;
-      Quaternion rotation = transform.rotation;
-      Vector3 scale = Vector3.Scale(size, transform.lossyScale);
-      scale = worldScaleInverse * new Vector3(Mathf.Abs(scale.x), Mathf.Abs(scale.y),
-                                              Mathf.Abs(scale.z));
-      ConvertAudioTransformFromUnity(ref position, ref rotation);
-      float reverbGain = ConvertAmplitudeFromDb(reverbGainDb);
-      SetRoomProperties(id, position.x, position.y, position.z, rotation.x, rotation.y, rotation.z,
-                        rotation.w, scale.x, scale.y, scale.z, materials, reflectivity, reverbGain,
-                        reverbBrightness, reverbTime);
+  public static void UpdateAudioRoom(GvrAudioRoom room, bool roomEnabled) {
+    // Update the enabled rooms list.
+    if (roomEnabled) {
+      if (!enabledRooms.Contains(room)) {
+        enabledRooms.Add(room);
+      }
+    } else {
+      enabledRooms.Remove(room);
+    }
+    // Update the current room effects to be applied.
+    if(initialized) {
+      if (enabledRooms.Count > 0) {
+        GvrAudioRoom currentRoom = enabledRooms[enabledRooms.Count - 1];
+        RoomProperties roomProperties = GetRoomProperties(currentRoom);
+        // Pass the room properties into a pointer.
+        IntPtr roomPropertiesPtr = Marshal.AllocHGlobal(Marshal.SizeOf(roomProperties));
+        Marshal.StructureToPtr(roomProperties, roomPropertiesPtr, false);
+        SetRoomProperties(roomPropertiesPtr);
+        Marshal.FreeHGlobal(roomPropertiesPtr);
+      } else {
+        // Set the room properties to null, which will effectively disable the room effects.
+        SetRoomProperties(IntPtr.Zero);
+      }
     }
   }
 
@@ -207,6 +209,11 @@ public static class GvrAudio {
     return occlusion;
   }
 
+  /// Converts given |db| value to its amplitude equivalent where 'dB = 20 * log10(amplitude)'.
+  public static float ConvertAmplitudeFromDb (float db) {
+    return Mathf.Pow(10.0f, 0.05f * db);
+  }
+
   /// Generates a set of points to draw a 2D polar pattern.
   public static Vector2[] Generate2dPolarPattern (float alpha, float order, int resolution) {
     Vector2[] points = new Vector2[resolution];
@@ -219,6 +226,25 @@ public static class GvrAudio {
     }
     return points;
   }
+
+  /// Returns whether the listener is currently inside the given |room| boundaries.
+  public static bool IsListenerInsideRoom(GvrAudioRoom room) {
+    bool isInside = false;
+    if(initialized) {
+      Vector3 relativePosition = listenerTransform.position - room.transform.position;
+      Quaternion rotationInverse = Quaternion.Inverse(room.transform.rotation);
+
+      bounds.size = Vector3.Scale(room.transform.lossyScale, room.size);
+      isInside = bounds.Contains(rotationInverse * relativePosition);
+    }
+    return isInside;
+  }
+
+  /// Listener directivity GUI color.
+  public static readonly Color listenerDirectivityColor = 0.65f * Color.magenta;
+
+  /// Source directivity GUI color.
+  public static readonly Color sourceDirectivityColor = 0.65f * Color.blue;
 
   /// Minimum distance threshold between |minDistance| and |maxDistance|.
   public const float distanceEpsilon = 0.01f;
@@ -235,12 +261,6 @@ public static class GvrAudio {
   /// Minimum allowed gain value in decibels.
   public const float minGainDb = -24.0f;
 
-  /// Maximum allowed real world scale with respect to Unity.
-  public const float maxWorldScale = 1000.0f;
-
-  /// Minimum allowed real world scale with respect to Unity.
-  public const float minWorldScale = 0.001f;
-
   /// Maximum allowed reverb brightness modifier value.
   public const float maxReverbBrightness = 1.0f;
 
@@ -256,21 +276,94 @@ public static class GvrAudio {
   /// Source occlusion detection rate in seconds.
   public const float occlusionDetectionInterval = 0.2f;
 
-  /// Number of surfaces in a room.
-  public const int numRoomSurfaces = 6;
+  // Number of first-order ambisonic input channels.
+  public const int numFoaChannels = 4;
 
-  /// Converts given |db| value to its amplitude equivalent where 'dB = 20 * log10(amplitude)'.
-  private static float ConvertAmplitudeFromDb (float db) {
-    return Mathf.Pow(10.0f, 0.05f * db);
-  }
+  [StructLayout(LayoutKind.Sequential)]
+  private struct RoomProperties {
+    // Center position of the room in world space.
+    public float positionX;
+    public float positionY;
+    public float positionZ;
+
+    // Rotation (quaternion) of the room in world space.
+    public float rotationX;
+    public float rotationY;
+    public float rotationZ;
+    public float rotationW;
+
+    // Size of the shoebox room in world space.
+    public float dimensionsX;
+    public float dimensionsY;
+    public float dimensionsZ;
+
+    // Material name of each surface of the shoebox room.
+    public GvrAudioRoom.SurfaceMaterial materialLeft;
+    public GvrAudioRoom.SurfaceMaterial materialRight;
+    public GvrAudioRoom.SurfaceMaterial materialBottom;
+    public GvrAudioRoom.SurfaceMaterial materialTop;
+    public GvrAudioRoom.SurfaceMaterial materialFront;
+    public GvrAudioRoom.SurfaceMaterial materialBack;
+
+    // User defined uniform scaling factor for reflectivity. This parameter has no effect when set
+    // to 1.0f.
+    public float reflectionScalar;
+
+    // User defined reverb tail gain multiplier. This parameter has no effect when set to 0.0f.
+    public float reverbGain;
+
+    // Parameter which allows the reverberation time across all frequency bands to be increased or
+    // decreased. This parameter has no effect when set to 1.0f.
+    public float reverbTime;
+
+    // Parameter which allows the ratio of high frequncy reverb components to low frequency reverb
+    // components to be adjusted. This parameter has no effect when set to 0.0f.
+    public float reverbBrightness;
+  };
 
   // Converts given |position| and |rotation| from Unity space to audio space.
   private static void ConvertAudioTransformFromUnity (ref Vector3 position,
                                                       ref Quaternion rotation) {
     pose.SetRightHanded(Matrix4x4.TRS(position, rotation, Vector3.one));
-    position = pose.Position * worldScaleInverse;
+    position = pose.Position;
     rotation = pose.Orientation;
   }
+
+  // Returns room properties of the given |room|.
+  private static RoomProperties GetRoomProperties(GvrAudioRoom room) {
+    RoomProperties roomProperties;
+    Vector3 position = room.transform.position;
+    Quaternion rotation = room.transform.rotation;
+    Vector3 scale = Vector3.Scale(room.transform.lossyScale, room.size);
+    ConvertAudioTransformFromUnity(ref position, ref rotation);
+    roomProperties.positionX = position.x;
+    roomProperties.positionY = position.y;
+    roomProperties.positionZ = position.z;
+    roomProperties.rotationX = rotation.x;
+    roomProperties.rotationY = rotation.y;
+    roomProperties.rotationZ = rotation.z;
+    roomProperties.rotationW = rotation.w;
+    roomProperties.dimensionsX = scale.x;
+    roomProperties.dimensionsY = scale.y;
+    roomProperties.dimensionsZ = scale.z;
+    roomProperties.materialLeft = room.leftWall;
+    roomProperties.materialRight = room.rightWall;
+    roomProperties.materialBottom = room.floor;
+    roomProperties.materialTop = room.ceiling;
+    roomProperties.materialFront = room.frontWall;
+    roomProperties.materialBack = room.backWall;
+    roomProperties.reverbGain = ConvertAmplitudeFromDb(room.reverbGainDb);
+    roomProperties.reverbTime = room.reverbTime;
+    roomProperties.reverbBrightness = room.reverbBrightness;
+    roomProperties.reflectionScalar = room.reflectivity;
+    return roomProperties;
+  }
+
+  // Boundaries instance to be used in room detection logic.
+  private static Bounds bounds = new Bounds(Vector3.zero, Vector3.zero);
+
+  // Container to store the currently active rooms in the scene.
+  private static List<GvrAudioRoom> enabledRooms = new List<GvrAudioRoom>();
 
   // Denotes whether the system is initialized properly.
   private static bool initialized = false;
@@ -283,9 +376,6 @@ public static class GvrAudio {
 
   // 3D pose instance to be used in transform space conversion.
   private static MutablePose3D pose = new MutablePose3D();
-
-  // Inverted world scale.
-  private static float worldScaleInverse = 1.0f;
 
 #if !UNITY_EDITOR && UNITY_ANDROID
   private const string GvrAudioClass = "com.google.vr.audio.unity.GvrAudio";
@@ -303,12 +393,16 @@ public static class GvrAudio {
   private const string pluginName = "audioplugingvrunity";
 #endif
 
+  // Listener handlers.
   [DllImport(pluginName)]
   private static extern void SetListenerGain (float gain);
 
+  // Soundfield handlers.
   [DllImport(pluginName)]
-  private static extern void SetListenerTransform (float px, float py, float pz, float qx, float qy,
-                                                   float qz, float qw);
+  private static extern int CreateSoundfield (int numChannels);
+
+  [DllImport(pluginName)]
+  private static extern void DestroySoundfield (int soundfieldId);
 
   // Source handlers.
   [DllImport(pluginName)]
@@ -324,38 +418,14 @@ public static class GvrAudio {
   private static extern void SetSourceDirectivity (int sourceId, float alpha, float order);
 
   [DllImport(pluginName)]
-  private static extern void SetSourceDistanceAttenuationMethod (int sourceId,
-                                                                 AudioRolloffMode rolloffMode,
-                                                                 float minDistance,
-                                                                 float maxDistance);
-
-  [DllImport(pluginName)]
-  private static extern void SetSourceGain (int sourceId, float gain);
+  private static extern void SetSourceListenerDirectivity (int sourceId, float alpha, float order);
 
   [DllImport(pluginName)]
   private static extern void SetSourceOcclusionIntensity (int sourceId, float intensity);
 
-  [DllImport(pluginName)]
-  private static extern void SetSourceSpread (int sourceId, float spreadRad);
-
-  [DllImport(pluginName)]
-  private static extern void SetSourceTransform (int sourceId, float px, float py, float pz,
-                                                 float qx, float qy, float qz, float qw);
-
   // Room handlers.
   [DllImport(pluginName)]
-  private static extern int CreateRoom ();
-
-  [DllImport(pluginName)]
-  private static extern void DestroyRoom (int roomId);
-
-  [DllImport(pluginName)]
-  private static extern void SetRoomProperties (int roomId, float px, float py, float pz, float qx,
-                                                float qy, float qz, float qw, float dx, float dy,
-                                                float dz,
-                                                GvrAudioRoom.SurfaceMaterial[] materialNames,
-                                                float reflectionScalar, float reverbGain,
-                                                float reverbBrightness, float reverbTime);
+  private static extern void SetRoomProperties (IntPtr roomProperties);
 
   // System handlers.
   [DllImport(pluginName)]
