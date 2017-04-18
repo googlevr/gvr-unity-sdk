@@ -109,9 +109,6 @@ public class Tab : MonoBehaviour {
     //  in case SetOpen was called directly.
     toggle.isOn = open;
 
-    // Toggle shouldn't be interactble when it is on.
-    toggle.interactable = !open;
-
     EventTrigger eventTrigger = GetComponent<EventTrigger>();
     if (eventTrigger != null) {
       eventTrigger.enabled = !open;

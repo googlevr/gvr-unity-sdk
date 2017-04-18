@@ -30,11 +30,27 @@ public abstract class BaseTile : MonoBehaviour, IPointerEnterHandler, IPointerEx
   protected bool isInteractable = true;
   protected bool isHovering = false;
 
+  // Ratio between meters (Unity Units) to the parent canvas that
+  // this tile is part of.
+  private float? metersToCanvasScale;
+
   /// Returns the tile's outer container's rect transform.
   public RectTransform Cell {
     get {
       return originalParent ? originalParent.GetComponent<RectTransform>() : null;
     }
+  }
+
+  public virtual void Reset() {
+    OnPointerExit(null);
+
+    transform.SetParent(originalParent, true);
+    transform.localRotation = originalRotation;
+    transform.localPosition = originalPosition;
+    transform.localScale = originalScale;
+
+    page = null;
+    metersToCanvasScale = null;
   }
 
   protected virtual void Awake() {
@@ -45,12 +61,7 @@ public abstract class BaseTile : MonoBehaviour, IPointerEnterHandler, IPointerEx
   }
 
   protected virtual void OnEnable() {
-    OnPointerExit(null);
-
-    transform.SetParent(originalParent, true);
-    transform.localRotation = originalRotation;
-    transform.localPosition = originalPosition;
-    transform.localScale = originalScale;
+    Reset();
   }
 #endif  // UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
 
@@ -86,7 +97,11 @@ public abstract class BaseTile : MonoBehaviour, IPointerEnterHandler, IPointerEx
   }
 
   protected float GetMetersToCanvasScale() {
-    return GvrUIHelpers.GetMetersToCanvasScale(transform);
+    if (metersToCanvasScale == null) {
+      metersToCanvasScale = GvrUIHelpers.GetMetersToCanvasScale(transform);
+    }
+
+    return metersToCanvasScale.Value;
   }
 
   private void SetEventTriggersInteractable(bool interactable) {

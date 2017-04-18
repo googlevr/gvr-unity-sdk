@@ -28,7 +28,6 @@ using UnityEditor;
 #endif  // UNITY_EDITOR
 
 public static class GvrSettings {
-
   private const string PACKAGE_UNITY_PLAYER = "com.unity3d.player.UnityPlayer";
   private const string METHOD_CURRENT_ACTIVITY = "currentActivity";
   private const string METHOD_GET_WINDOW = "getWindow";

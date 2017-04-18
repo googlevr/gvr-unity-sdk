@@ -79,7 +79,7 @@ public static class GvrAudio {
         Debug.LogError("Only 'Stereo' speaker mode is supported by GVR Audio.");
         return;
       }
-      Initialize(quality, sampleRate, numChannels, framesPerBuffer);
+      Initialize((int) quality, sampleRate, numChannels, framesPerBuffer);
       listenerTransform = listener.transform;
 
       initialized = true;
@@ -413,7 +413,7 @@ public static class GvrAudio {
 
   // System handlers.
   [DllImport(pluginName)]
-  private static extern void Initialize (Quality quality, int sampleRate, int numChannels,
+  private static extern void Initialize (int quality, int sampleRate, int numChannels,
                                          int framesPerBuffer);
 
   [DllImport(pluginName)]

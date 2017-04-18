@@ -56,9 +56,8 @@ namespace Gvr.Internal {
     internal string errorDetails = "";
     internal IntPtr gvrPtr = IntPtr.Zero;
 
-    // Indicates whether or not a headset recenter was requested.
-    // This is up to the ControllerProvider implementation to decide.
-    internal bool headsetRecenterRequested = false;
+    internal bool isCharging = false;
+    internal GvrControllerBatteryLevel batteryLevel = GvrControllerBatteryLevel.Unknown;
 
     public void CopyFrom(ControllerState other) {
       connectionState = other.connectionState;
@@ -81,8 +80,9 @@ namespace Gvr.Internal {
       homeButtonDown = other.homeButtonDown;
       homeButtonState = other.homeButtonState;
       errorDetails = other.errorDetails;
-      headsetRecenterRequested = other.headsetRecenterRequested;
       gvrPtr = other.gvrPtr;
+      isCharging = other.isCharging;
+      batteryLevel = other.batteryLevel;
     }
 
     /// Resets the transient state (the state variables that represent events, and which are true
@@ -97,7 +97,6 @@ namespace Gvr.Internal {
       appButtonUp = false;
       homeButtonDown = false;
       homeButtonState = false;
-      headsetRecenterRequested = false;
     }
   }
 }

@@ -1,4 +1,4 @@
-// Copyright 2016 Google Inc. All rights reserved.
+// Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 // GVR native integration.
 
 using UnityEngine;
-using System.Collections;
 
 /// This laser pointer visual should be attached to the controller object.
 /// The laser visual is important to help users locate their cursor
@@ -67,6 +66,19 @@ public class GvrLaserPointer : MonoBehaviour {
 
   public void SetAsMainPointer() {
     GvrPointerManager.Pointer = laserPointerImpl;
+  }
+
+  public Vector3 LineStartPoint {
+    get {
+      return laserPointerImpl != null ? laserPointerImpl.PointerTransform.position : Vector3.zero;
+    }
+  }
+
+  public Vector3 LineEndPoint {
+    get { return laserPointerImpl != null ? laserPointerImpl.LineEndPoint : Vector3.zero; } }
+
+  public LineRenderer LineRenderer {
+    get { return laserPointerImpl != null ? laserPointerImpl.LaserLineRenderer : null; }
   }
 
   private void UpdateLaserPointerProperties() {

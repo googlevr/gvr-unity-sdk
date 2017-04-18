@@ -61,5 +61,13 @@ public class GvrRecenterOnlyController : MonoBehaviour {
     recenteringOffset = Quaternion.Euler(0, cam.transform.rotation.eulerAngles.y, 0);
   }
 
+  void OnDisable() {
+    recenteringOffset = Quaternion.identity;
+    if (cam != null && pointer != null) {
+      pointer.transform.rotation = recenteringOffset;
+      cam.transform.parent.rotation = recenteringOffset;
+    }
+  }
+
 #endif  // UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
 }

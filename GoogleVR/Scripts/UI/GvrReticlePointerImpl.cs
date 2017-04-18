@@ -1,4 +1,4 @@
-// Copyright 2015 Google Inc. All rights reserved.
+// Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -54,12 +54,10 @@ public class GvrReticlePointerImpl : GvrBasePointer {
 
   public float ReticleOuterDiameter { get; private set; }
 
-  public override float MaxPointerDistance {
-    get {
-      return RETICLE_DISTANCE_MAX;
-    }
-  }
+  private Vector3 targetPoint = Vector3.zero;
+  public override Vector3 LineEndPoint { get { return targetPoint; } }
 
+  public override float MaxPointerDistance { get { return RETICLE_DISTANCE_MAX; } }
 
   public GvrReticlePointerImpl() {
     ReticleGrowthSpeed = 8.0f;
@@ -161,6 +159,7 @@ public class GvrReticlePointerImpl : GvrBasePointer {
       Debug.LogWarning("Cannot operate on a null pointer transform");
       return false;
     }
+    targetPoint = target;
     Vector3 targetLocalPosition = base.PointerTransform.InverseTransformPoint(target);
 
     ReticleDistanceInMeters =

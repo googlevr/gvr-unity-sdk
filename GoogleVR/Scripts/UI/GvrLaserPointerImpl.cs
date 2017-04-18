@@ -1,4 +1,4 @@
-// Copyright 2016 Google Inc. All rights reserved.
+// Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,7 +16,6 @@
 // GVR native integration.
 
 using UnityEngine;
-using System.Collections;
 
 /// Implementation of GvrBasePointer for a laser pointer visual.
 /// This script should be attached to the controller object.
@@ -26,8 +25,14 @@ public class GvrLaserPointerImpl : GvrBasePointer {
   /// Small offset to prevent z-fighting of the reticle (meters).
   private const float Z_OFFSET_EPSILON = 0.1f;
 
-  /// Size of the reticle in meters as seen from 1 meter.
-  private const float RETICLE_SIZE = 0.01f;
+  /// Final size of the reticle in meters when it is 1 meter from the camera.
+  /// The reticle will be scaled based on the size of the mesh so that it's size
+  /// matches this size.
+  private const float RETICLE_SIZE_METERS = 0.1f;
+
+  /// The percentage of the reticle mesh that shows the reticle.
+  /// The rest of the reticle mesh is transparent.
+  private const float RETICLE_VISUAL_RATIO = 0.1f;
 
   public Camera MainCamera { private get; set; }
 
@@ -35,11 +40,31 @@ public class GvrLaserPointerImpl : GvrBasePointer {
 
   public LineRenderer LaserLineRenderer { get; set; }
 
-  public GameObject Reticle { get; set; }
-
   public float MaxLaserDistance { private get; set; }
 
   public float MaxReticleDistance { private get; set; }
+
+  private GameObject reticle;
+  public GameObject Reticle {
+    get {
+      return reticle;
+    }
+    set {
+      reticle = value;
+      reticleMeshSizeMeters = 0.0f;
+      reticleMeshSizeRatio = 0.0f;
+
+      if (reticle != null) {
+        MeshFilter meshFilter = reticle.GetComponent<MeshFilter>();
+        if (meshFilter.mesh != null) {
+          reticleMeshSizeMeters = meshFilter.mesh.bounds.size.x;
+          if (reticleMeshSizeMeters != 0.0f) {
+            reticleMeshSizeRatio = 1.0f / reticleMeshSizeMeters;
+          }
+        }
+      }
+    }
+  }
 
   // Properties exposed for testing purposes.
   public Vector3 PointerIntersection { get; private set; }
@@ -47,6 +72,16 @@ public class GvrLaserPointerImpl : GvrBasePointer {
   public bool IsPointerIntersecting { get; private set; }
 
   public Ray PointerIntersectionRay { get; private set; }
+
+  // The size of the reticle's mesh in meters.
+  private float reticleMeshSizeMeters;
+
+  // The ratio of the reticleMeshSizeMeters to 1 meter.
+  // If reticleMeshSizeMeters is 10, then reticleMeshSizeRatio is 0.1.
+  private float reticleMeshSizeRatio;
+
+  private Vector3 lineEndPoint = Vector3.zero;
+  public override Vector3 LineEndPoint { get { return lineEndPoint; } }
 
   public override float MaxPointerDistance {
     get {
@@ -129,12 +164,12 @@ public class GvrLaserPointerImpl : GvrBasePointer {
       // Fixed size for enter radius to avoid flickering.
       // This will cause some slight variability based on the distance of the object
       // from the camera, and is optimized for the average case.
-      enterRadius = RETICLE_SIZE * 0.5f;
+      enterRadius = RETICLE_SIZE_METERS * 0.5f * RETICLE_VISUAL_RATIO;
 
       // Dynamic size for exit radius.
       // Always correct because we know the intersection point of the object and can
       // therefore use the correct radius based on the object's distance from the camera.
-      exitRadius = reticleScale;
+      exitRadius = reticleScale * reticleMeshSizeMeters * RETICLE_VISUAL_RATIO;
     } else {
       enterRadius = 0.0f;
       exitRadius = 0.0f;
@@ -160,7 +195,7 @@ public class GvrLaserPointerImpl : GvrBasePointer {
 
       float reticleDistanceFromCamera =
         (Reticle.transform.position - MainCamera.transform.position).magnitude;
-      float scale = RETICLE_SIZE * reticleDistanceFromCamera;
+      float scale = RETICLE_SIZE_METERS * reticleMeshSizeRatio * reticleDistanceFromCamera;
       Reticle.transform.localScale = new Vector3(scale, scale, scale);
     }
 
@@ -170,7 +205,6 @@ public class GvrLaserPointerImpl : GvrBasePointer {
     }
 
     // Set the line renderer positions.
-    Vector3 lineEndPoint;
     if (IsPointerIntersecting) {
       Vector3 laserDiff = PointerIntersection - base.PointerTransform.position;
       float intersectionDistance = laserDiff.magnitude;
@@ -180,10 +214,11 @@ public class GvrLaserPointerImpl : GvrBasePointer {
     } else {
       lineEndPoint = base.PointerTransform.position + (base.PointerTransform.forward * MaxLaserDistance);
     }
-    LaserLineRenderer.SetPositions(new Vector3[] {base.PointerTransform.position, lineEndPoint});
+    LaserLineRenderer.SetPosition(0,base.PointerTransform.position);
+    LaserLineRenderer.SetPosition(1,lineEndPoint);
 
     // Adjust transparency
-    float alpha = GvrControllerVisual.AlphaValue;
+    float alpha = GvrArmModel.Instance.preferredAlpha;
     LaserLineRenderer.SetColors(Color.Lerp(Color.clear, LaserColor, alpha), Color.clear);
   }
 #endif  // UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)

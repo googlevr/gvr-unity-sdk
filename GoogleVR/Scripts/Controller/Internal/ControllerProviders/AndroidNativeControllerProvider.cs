@@ -9,7 +9,7 @@
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissioßns and
+// See the License for the specific language governing permissions and
 // limitations under the License.
 
 using UnityEngine;
@@ -22,10 +22,9 @@ namespace Gvr.Internal {
   /// Controller Provider that uses the native GVR C API to communicate with controllers
   /// via Google VR Services on Android.
   class AndroidNativeControllerProvider : IControllerProvider {
-#if UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
-    // Minimum VrCore client API version that automatically handles recentering.
-    private const int MIN_VRCORE_API_VERSION_WITH_RECENTER = 8;
-
+#if !UNITY_HAS_GOOGLEVR || (!UNITY_ANDROID && !UNITY_EDITOR)
+    public void Dispose() { }
+#else
     // Note: keep structs and function signatures in sync with the C header file (gvr_controller.h).
     // GVR controller option flags.
     private const int GVR_CONTROLLER_ENABLE_ORIENTATION = 1 << 0;
@@ -165,7 +164,15 @@ namespace Gvr.Internal {
     [DllImport(dllName)]
     private static extern long gvr_controller_state_get_last_button_timestamp(IntPtr state);
 
-    private const string UNITY_PLAYER_CLASS = "com.unity3d.player.UnityPlayer";
+    [DllImport(dllName)]
+    private static extern byte gvr_controller_state_get_battery_charging(IntPtr state);
+
+    [DllImport(dllName)]
+    private static extern int gvr_controller_state_get_battery_level(IntPtr state);
+
+    [DllImport(dllName)]
+    private static extern long gvr_controller_state_get_last_battery_timestamp(IntPtr state);
+
     private const string VRCORE_UTILS_CLASS = "com.google.vr.vrcore.base.api.VrCoreUtils";
 
     private IntPtr api;
@@ -180,9 +187,6 @@ namespace Gvr.Internal {
 
     private MutablePose3D pose3d = new MutablePose3D();
 
-    private int vrCoreClientApiVersion;
-    private bool vrCoreImplementsRecenter = false;
-
     internal AndroidNativeControllerProvider() {
 #if !UNITY_EDITOR
       Debug.Log("Initializing Daydream controller API.");
@@ -193,7 +197,7 @@ namespace Gvr.Internal {
 
       statePtr = gvr_controller_state_create();
       // Get a hold of the activity, context and class loader.
-      AndroidJavaObject activity = GvrActivityHelper.GetActivity(UNITY_PLAYER_CLASS);
+      AndroidJavaObject activity = GvrActivityHelper.GetActivity();
       if (activity == null) {
         error = true;
         errorDetails = "Failed to get Activity from Unity Player.";
@@ -228,11 +232,6 @@ namespace Gvr.Internal {
         errorDetails = "Failed to initialize Daydream controller API.";
         return;
       }
-
-      vrCoreClientApiVersion = GetVrCoreClientApiVersion(activity);
-
-      // Check whether or not VrCore implements recentering.
-      vrCoreImplementsRecenter = (vrCoreClientApiVersion >= MIN_VRCORE_API_VERSION_WITH_RECENTER);
 
       Debug.Log("GVR API successfully initialized. Now resuming it.");
       gvr_controller_resume(api);
@@ -313,9 +312,13 @@ namespace Gvr.Internal {
       outState.recentered = 0 != gvr_controller_state_get_recentered(statePtr);
       outState.gvrPtr = statePtr;
 
-      // If the controller was recentered, we may also need to request that the headset be
-      // recentered. We should do that only if VrCore does NOT implement recentering.
-      outState.headsetRecenterRequested = outState.recentered && !vrCoreImplementsRecenter;
+      // Update battery information.
+      try {
+        outState.isCharging = 0 != gvr_controller_state_get_battery_charging(statePtr);
+        outState.batteryLevel = (GvrControllerBatteryLevel)gvr_controller_state_get_battery_level(statePtr);
+      } catch (EntryPointNotFoundException) {
+        // Older VrCore version. Does not support battery indicator.
+      }
    }
 
     public void OnPause() {
@@ -387,7 +390,7 @@ namespace Gvr.Internal {
         return 0;
       }
     }
-#endif  // UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
+#endif  // !UNITY_HAS_GOOGLEVR || (!UNITY_ANDROID && !UNITY_EDITOR)
   }
 }
 /// @endcond

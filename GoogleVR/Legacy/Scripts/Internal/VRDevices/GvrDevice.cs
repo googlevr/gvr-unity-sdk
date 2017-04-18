@@ -182,7 +182,7 @@ namespace Gvr.Internal {
       }
     }
 
-#if UNITY_IOS
+#if UNITY_IOS && !UNITY_HAS_GOOGLEVR
     private const string dllName = "__Internal";
 #elif UNITY_HAS_GOOGLEVR
     private const string dllName = "gvr";

@@ -76,10 +76,11 @@ public class MaskedTile : BaseTile {
 
     // Create game object for masked image.
     maskedImageObject = new GameObject(OBJ_NAME_MASKED_IMAGE);
-    maskedImageObject.transform.SetParent(transform); // Set as child of this game object.
+    RectTransform maskedTransform = maskedImageObject.AddComponent<RectTransform>();
+    maskedTransform.SetParent(transform); // Set as child of this game object.
 
     // Create maskedImage as component of child game object and initialize to base image.
-    maskedImage = maskedImageObject.AddComponent<Image> ();
+    maskedImage = maskedImageObject.AddComponent<Image>();
     maskedImage.sprite = image.sprite;
     maskedImage.color = image.color;
     maskedImage.material = image.material;

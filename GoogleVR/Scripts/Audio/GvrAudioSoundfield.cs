@@ -197,6 +197,8 @@ public class GvrAudioSoundfield : MonoBehaviour {
     for (int channelSet = 0; channelSet < audioSources.Length; ++channelSet) {
       GameObject channelSetObject = new GameObject("Channel Set " + channelSet);
       channelSetObject.transform.parent = gameObject.transform;
+      channelSetObject.transform.localPosition = Vector3.zero;
+      channelSetObject.transform.localRotation = Quaternion.identity;
       channelSetObject.hideFlags = HideFlags.HideAndDontSave;
       audioSources[channelSet] = channelSetObject.AddComponent<AudioSource>();
       audioSources[channelSet].enabled = false;
@@ -204,6 +206,9 @@ public class GvrAudioSoundfield : MonoBehaviour {
       audioSources[channelSet].bypassReverbZones = true;
       audioSources[channelSet].dopplerLevel = 0.0f;
       audioSources[channelSet].spatialBlend = 0.0f;
+#if UNITY_5_5_OR_NEWER
+      audioSources[channelSet].spatializePostEffects = true;
+#endif  // UNITY_5_5_OR_NEWER
       audioSources[channelSet].outputAudioMixerGroup = mixer.FindMatchingGroups("Master")[0];
     }
     OnValidate();

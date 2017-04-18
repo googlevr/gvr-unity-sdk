@@ -49,7 +49,16 @@ public class FloatTile : BaseTile {
   [Range(1.0f, 10.0f)]
   [Tooltip("Speed used for lerping the rotation/scale/position of the tile.")]
   public float interpolationSpeed = 8.0f;
+
+  public override void Reset() {
+    base.Reset();
+
+    Transform myTransform = transform;
+    myTransform.SetParent(originalParent, true);
+    myTransform.SetAsLastSibling();
+  }
 #endif  // UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)
+
 
   public override void OnPointerEnter(PointerEventData eventData) {
 #if UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_EDITOR)

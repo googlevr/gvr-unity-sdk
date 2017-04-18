@@ -11,14 +11,14 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-#if UNITY_HAS_GOOGLEVR && UNITY_ANDROID
+#if UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_IOS)
 
 using UnityEngine;
 using UnityEngine.VR;
 
 /// @cond
 namespace Gvr.Internal {
-  public class UnityVRDevice : GvrDevice {
+  public class UnityVRDevice : BaseVRDevice {
 
     public override void Init() { }
 
@@ -49,12 +49,9 @@ namespace Gvr.Internal {
     public override void OnPause(bool pause) { }
     public override void OnApplicationQuit() { }
 
-    protected override void ProcessEvents() { }
-
     private void SetApplicationState() { }
-
   }
 }
 /// @endcond
 
-#endif  // UNITY_HAS_GOOGLEVR && UNITY_ANDROID
+#endif  // UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_IOS)

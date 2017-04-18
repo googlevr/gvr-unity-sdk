@@ -18,23 +18,27 @@ using System.Runtime.InteropServices;
 
 // Simple static class to abstract out several jni calls that need to be shared
 // between different classes.
-public static class GvrActivityHelper
-{
+public static class GvrActivityHelper {
+    private const string UNITY_PLAYER_CLASS = "com.unity3d.player.UnityPlayer";
+
 #if UNITY_ANDROID && !UNITY_EDITOR
-  public static AndroidJavaObject GetActivity(string javaClass) {
-    AndroidJavaClass jc = new AndroidJavaClass(javaClass);
+  /// Returns the Android Activity used by the Unity device player. The caller is
+  /// responsible for memory-managing the returned AndroidJavaObject.
+  public static AndroidJavaObject GetActivity() {
+    AndroidJavaClass jc = new AndroidJavaClass(UNITY_PLAYER_CLASS);
     if (jc == null) {
-      Debug.LogErrorFormat("Failed to get Unity Player class, {0}", javaClass);
+      Debug.LogErrorFormat("Failed to get class {0}", UNITY_PLAYER_CLASS);
       return null;
     }
     AndroidJavaObject activity = jc.GetStatic<AndroidJavaObject>("currentActivity");
     if (activity == null) {
-      Debug.LogError("Failed to obtain Android Activity from Unity Player class.");
+      Debug.LogError("Failed to obtain current Android activity.");
       return null;
     }
     return activity;
   }
 
+  /// Returns the application context of the current Android Activity.
   public static AndroidJavaObject GetApplicationContext(AndroidJavaObject activity) {
     AndroidJavaObject context = activity.Call<AndroidJavaObject>("getApplicationContext");
     if (context == null) {

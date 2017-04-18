@@ -16,8 +16,8 @@
 // GVR native integration.
 
 using UnityEngine;
-using System.Collections;
 using UnityEngine.VR;
+using System.Collections;
 
 /// The GvrArmModel is a standard interface to interact with a scene with the controller.
 /// It is responsible for:
@@ -120,17 +120,24 @@ public class GvrArmModel : MonoBehaviour {
   [Range(0.0f, 0.2f)]
   public float addedElbowDepth = 0.0f;
 
-  /// Downward tilt of the laser pointer relative to the controller (degrees).
+  /// The Downward tilt or pitch of the laser pointer relative to the controller (degrees).
   [Range(0.0f, 30.0f)]
   public float pointerTiltAngle = 15.0f;
 
-  /// Controller distance from the face after which the alpha value decreases (meters).
+  /// Controller distance from the face after which the controller disappears (meters).
   [Range(0.0f, 0.4f)]
   public float fadeDistanceFromFace = 0.32f;
 
-  /// Controller distance from face after which the tooltip alpha increases (meters).
+  /// Controller distance from face after which the tooltips appear (meters).
   [Range(0.4f, 0.6f)]
   public float tooltipMinDistanceFromFace = 0.45f;
+
+  /// When the angle (degrees) between the controller and the head is larger than
+  /// this value, the tooltips disappear.
+  /// If the value is 180, then the tooltips are always shown.
+  /// If the value is 90, the tooltips are only shown when they are facing the camera.
+  [Range(0, 180)]
+  public int tooltipMaxAngleFromCamera = 80;
 
   /// Determines if the shoulder should follow the gaze
   public GazeBehavior followGaze = GazeBehavior.DuringMotion;
@@ -171,8 +178,10 @@ public class GvrArmModel : MonoBehaviour {
   public Quaternion shoulderRotation { get; private set; }
 
   /// The suggested rendering alpha value of the controller.
-  /// This is to prevent the controller from intersecting face.
-  public float alphaValue { get; private set; }
+  /// This is to prevent the controller from intersecting the face.
+  /// The range is always 0 - 1 but can be scaled by individual
+  /// objects when using the GvrBaseControllerVisual script.
+  public float preferredAlpha { get; private set; }
 
   /// The suggested rendering alpha value of the controller tooltips.
   /// This is to only display the tooltips when the player is looking
@@ -196,7 +205,6 @@ public class GvrArmModel : MonoBehaviour {
     // Reset other relevant state.
     firstUpdate = true;
     elbowOffset = Vector3.zero;
-    alphaValue = 1.0f;
     zeroAccel.Set(0, GRAVITY_FORCE, 0);
   }
 
@@ -386,19 +394,23 @@ public class GvrArmModel : MonoBehaviour {
 
   private void UpdateTransparency() {
     // Determine how vertical the controller is pointing.
+    float animationDelta = DELTA_ALPHA * Time.deltaTime;
     float distToFace = Vector3.Distance(wristPosition, Vector3.zero);
     if (distToFace < fadeDistanceFromFace) {
-      alphaValue = Mathf.Max(0.0f, alphaValue - DELTA_ALPHA * Time.deltaTime);
+      preferredAlpha = Mathf.Max(0.0f, preferredAlpha - animationDelta);
     } else {
-      alphaValue = Mathf.Min(1.0f, alphaValue + DELTA_ALPHA * Time.deltaTime);
+      preferredAlpha = Mathf.Min(1.0f, preferredAlpha + animationDelta);
     }
 
-    if (distToFace < fadeDistanceFromFace || distToFace > tooltipMinDistanceFromFace) {
-      tooltipAlphaValue = Mathf.Max(0.0f, tooltipAlphaValue - DELTA_ALPHA * Time.deltaTime);
+    float dot = Vector3.Dot(wristRotation * Vector3.up, -wristPosition.normalized);
+    float minDot = (tooltipMaxAngleFromCamera - 90.0f) / -90.0f;
+    if (distToFace < fadeDistanceFromFace
+        || distToFace > tooltipMinDistanceFromFace
+        || dot < minDot) {
+      tooltipAlphaValue = Mathf.Max(0.0f, tooltipAlphaValue - animationDelta);
     } else {
-      tooltipAlphaValue = Mathf.Min(1.0f, tooltipAlphaValue + DELTA_ALPHA * Time.deltaTime);
+      tooltipAlphaValue = Mathf.Min(1.0f, tooltipAlphaValue + animationDelta);
     }
-    GvrControllerVisual.AlphaValue = Mathf.Max(alphaValue, GvrControllerVisual.AlphaValue);
   }
 
   private void UpdatePointer() {

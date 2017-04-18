@@ -1,4 +1,4 @@
-﻿// Copyright 2016 Google Inc. All rights reserved.
+﻿// Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -13,8 +13,6 @@
 // limitations under the License.
 
 using UnityEngine;
-using UnityEngine.EventSystems;
-using System.Collections;
 
 /// This abstract class should be implemented for pointer based input, and used with
 /// the GvrPointerInputModule script.
@@ -42,6 +40,10 @@ public abstract class GvrBasePointer {
   /// Returns the transform that represents this pointer.
   /// It is used by GvrBasePointerRaycaster as the origin of the ray.
   public Transform PointerTransform { get; set; }
+
+  /// Returns the point that represents the reticle position
+  /// It is used by the keyboard as the end of the ray.
+  public abstract Vector3 LineEndPoint { get; }
 
   /// Returns the max distance this pointer will be rendered at from the camera.
   /// This is used by GvrBasePointerRaycaster to calculate the ray when using
