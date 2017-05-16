@@ -27,6 +27,7 @@ public class GvrAudioSourceEditor : Editor {
   private SerializedProperty pitch = null;
   private SerializedProperty playOnAwake = null;
   private SerializedProperty priority = null;
+  private SerializedProperty spatialBlend = null;
   private SerializedProperty volume = null;
   private SerializedProperty dopplerLevel = null;
   private SerializedProperty spread = null;
@@ -54,6 +55,10 @@ public class GvrAudioSourceEditor : Editor {
   private GUIContent priorityLabel = new GUIContent("Priority",
       "Sets the priority of the source. Note that a sound with a larger priority value will more " +
       "likely be stolen by sounds with smaller priority values.");
+  private GUIContent spatialBlendLabel = new GUIContent("Spatial Blend",
+      "Sets how much this source is treated as a 3D source. Setting this value to 0 will ignore " +
+      "distance attenuation and doppler effects. However, it does not affect panning the sound " +
+      "around the listener.");
   private GUIContent volumeLabel = new GUIContent("Volume",
       "Sets the overall volume of the sound.");
   private GUIContent dopplerLevelLabel = new GUIContent("Doppler Level",
@@ -108,6 +113,7 @@ public class GvrAudioSourceEditor : Editor {
     pitch = serializedObject.FindProperty("sourcePitch");
     playOnAwake = serializedObject.FindProperty("playOnAwake");
     priority = serializedObject.FindProperty("sourcePriority");
+    spatialBlend = serializedObject.FindProperty("sourceSpatialBlend");
     volume = serializedObject.FindProperty("sourceVolume");
     dopplerLevel = serializedObject.FindProperty("sourceDopplerLevel");
     spread = serializedObject.FindProperty("sourceSpread");
@@ -155,6 +161,10 @@ public class GvrAudioSourceEditor : Editor {
     EditorGUILayout.Separator();
 
     EditorGUILayout.PropertyField(pitch, pitchLabel);
+
+    EditorGUILayout.Separator();
+
+    EditorGUILayout.PropertyField(spatialBlend, spatialBlendLabel);
 
     EditorGUILayout.Separator();
 

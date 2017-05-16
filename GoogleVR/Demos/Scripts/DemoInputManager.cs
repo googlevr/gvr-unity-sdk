@@ -81,7 +81,6 @@ public class DemoInputManager : MonoBehaviour {
 #endif  // UNITY_EDITOR
 
   void Start() {
-    Input.backButtonLeavesApp = true;
     if (messageCanvas == null) {
       messageCanvas = transform.Find(MESSAGE_CANVAS_NAME).gameObject;
       if (messageCanvas != null) {
@@ -142,14 +141,6 @@ public class DemoInputManager : MonoBehaviour {
     viewerPlatform = GvrSettings.ViewerPlatform;
     SetVRInputMechanism();
 #endif  // UNITY_EDITOR
-  }
-
-  void LateUpdate() {
-    GvrViewer.Instance.UpdateState();
-    // Exit when (X) is tapped.
-    if (Input.GetKeyDown(KeyCode.Escape)) {
-      Application.Quit();
-    }
   }
 
   public bool IsCurrentlyDaydream() {

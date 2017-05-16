@@ -28,7 +28,12 @@ public class GvrAudioSoundfieldEditor : Editor {
   private SerializedProperty pitch = null;
   private SerializedProperty playOnAwake = null;
   private SerializedProperty priority = null;
+  private SerializedProperty spatialBlend = null;
   private SerializedProperty volume = null;
+  private SerializedProperty dopplerLevel = null;
+  private SerializedProperty rolloffMode = null;
+  private SerializedProperty maxDistance = null;
+  private SerializedProperty minDistance = null;
   private SerializedProperty bypassRoomEffects = null;
   private SerializedProperty gainDb = null;
 
@@ -47,8 +52,22 @@ public class GvrAudioSoundfieldEditor : Editor {
   private GUIContent priorityLabel = new GUIContent("Priority",
       "Sets the priority of the soundfield. Note that a sound with a larger priority value will " +
       "more likely be stolen by sounds with smaller priority values.");
+  private GUIContent spatialBlendLabel = new GUIContent("Spatial Blend",
+      "Sets how much this soundfield is treated as a 3D source. Setting this value to 0 will " +
+      "ignore distance attenuation and doppler effects. However, it does not affect panning the " +
+      "sound around the listener.");
   private GUIContent volumeLabel = new GUIContent("Volume",
       "Sets the overall volume of the soundfield.");
+  private GUIContent dopplerLevelLabel = new GUIContent("Doppler Level",
+      "Specifies how much the pitch is changed based on the relative velocity between the " +
+      "soundfield and the listener.");
+  private GUIContent rolloffModeLabel = new GUIContent("Volume Rolloff",
+      "Which type of rolloff curve to use.");
+  private GUIContent maxDistanceLabel = new GUIContent("Max Distance",
+      "Max distance is the distance a sound stops attenuating at.");
+  private GUIContent minDistanceLabel = new GUIContent("Min Distance",
+      "Within the min distance, the volume will stay at the loudest possible. " +
+      "Outside this min distance it will begin to attenuate.");
   private GUIContent playOnAwakeLabel = new GUIContent("Play On Awake",
       "Play the sound when the scene loads.");
   private GUIContent bypassRoomEffectsLabel = new GUIContent("Bypass Room Effects",
@@ -64,7 +83,12 @@ public class GvrAudioSoundfieldEditor : Editor {
     pitch = serializedObject.FindProperty("soundfieldPitch");
     playOnAwake = serializedObject.FindProperty("playOnAwake");
     priority = serializedObject.FindProperty("soundfieldPriority");
+    spatialBlend = serializedObject.FindProperty("soundfieldSpatialBlend");
     volume = serializedObject.FindProperty("soundfieldVolume");
+    dopplerLevel = serializedObject.FindProperty("soundfieldDopplerLevel");
+    rolloffMode = serializedObject.FindProperty("soundfieldRolloffMode");
+    maxDistance = serializedObject.FindProperty("soundfieldMaxDistance");
+    minDistance = serializedObject.FindProperty("soundfieldMinDistance");
     bypassRoomEffects = serializedObject.FindProperty("bypassRoomEffects");
     gainDb = serializedObject.FindProperty("gainDb");
   }
@@ -106,7 +130,26 @@ public class GvrAudioSoundfieldEditor : Editor {
 
     EditorGUILayout.Separator();
 
+    EditorGUILayout.PropertyField(spatialBlend, spatialBlendLabel);
+
+    EditorGUILayout.Separator();
+
     EditorGUILayout.Slider(gainDb, GvrAudio.minGainDb, GvrAudio.maxGainDb, gainLabel);
+
+    EditorGUILayout.Separator();
+
+    EditorGUILayout.PropertyField(dopplerLevel, dopplerLevelLabel);
+    EditorGUILayout.PropertyField(rolloffMode, rolloffModeLabel);
+    ++EditorGUI.indentLevel;
+    EditorGUILayout.PropertyField(minDistance, minDistanceLabel);
+    EditorGUILayout.PropertyField(maxDistance, maxDistanceLabel);
+    --EditorGUI.indentLevel;
+    if (rolloffMode.enumValueIndex == (int)AudioRolloffMode.Custom) {
+      EditorGUILayout.HelpBox("Custom rolloff mode is not supported, no distance attenuation " +
+                              "will be applied.", MessageType.Warning);
+    }
+
+    EditorGUILayout.Separator();
 
     serializedObject.ApplyModifiedProperties();
   }

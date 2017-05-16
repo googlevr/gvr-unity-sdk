@@ -349,12 +349,8 @@ public class GvrController : MonoBehaviour {
       controllerProvider = ControllerProviderFactory.CreateControllerProvider(this);
     }
 
-    // Keep screen on here, in case there isn't a GvrViewerMain prefab in the scene.
-    // This ensures the behaviour for:
-    //   (a) Cardboard apps on pre-integration Unity versions - they must have GvrViewerMain in a scene.
-    //   (b) Daydream apps - these must be on GVR-integrated Unity versions, and must have GvrControllerMain.
-    // Cardboard-only apps on the native integration are likely to have GvrViewerMain in their scene; otherwise,
-    // the line below can be added to any script of the developer's choice.
+    // Keep screen on here, since GvrController must be in any GVR scene in order to enable
+    // controller capabilities.
     Screen.sleepTimeout = SleepTimeout.NeverSleep;
   }
 
@@ -368,15 +364,10 @@ public class GvrController : MonoBehaviour {
 #if UNITY_EDITOR
     // If a headset recenter was requested, do it now.
     if (controllerState.recentered) {
-      GvrViewer sdk = GvrViewer.Instance;
-      if (sdk) {
-        sdk.Recenter();
-      } else {
-        for (int i = 0; i < Camera.allCameras.Length; i++) {
-          Camera cam = Camera.allCameras[i];
-          // Do not reset pitch, which is how it works on the device.
-          cam.transform.rotation = Quaternion.Euler(cam.transform.rotation.eulerAngles.x, 0, 0);
-        }
+      for (int i = 0; i < Camera.allCameras.Length; i++) {
+        Camera cam = Camera.allCameras[i];
+        // Do not reset pitch, which is how it works on the device.
+        cam.transform.localRotation = Quaternion.Euler(cam.transform.localRotation.eulerAngles.x, 0, 0);
       }
     }
 #endif  // UNITY_EDITOR

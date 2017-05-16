@@ -18,7 +18,7 @@ using UnityEngine;
 /// Provides and logs versioning information for the GVR Unity SDK.
 /// </summary>
 public class GvrUnitySdkVersion {
-  public const string GVR_SDK_VERSION = "1.40";
+  public const string GVR_SDK_VERSION = "1.50.0";
 
 // Only log GVR SDK version when the current build platform is Android or iOS.
 #if UNITY_ANDROID || UNITY_IOS

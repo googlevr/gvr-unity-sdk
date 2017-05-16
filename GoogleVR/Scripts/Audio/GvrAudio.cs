@@ -195,10 +195,11 @@ public static class GvrAudio {
     if (initialized) {
       Vector3 listenerPosition = listenerTransform.position;
       Vector3 sourceFromListener = sourceTransform.position - listenerPosition;
-      RaycastHit[] hits = Physics.RaycastAll(listenerPosition, sourceFromListener,
-                                             sourceFromListener.magnitude, occlusionMaskValue);
-      foreach (RaycastHit hit in hits) {
-        if (hit.transform != listenerTransform && hit.transform != sourceTransform) {
+      int numHits = Physics.RaycastNonAlloc(listenerPosition, sourceFromListener, occlusionHits,
+                                            sourceFromListener.magnitude, occlusionMaskValue);
+      for (int i = 0; i < numHits; ++i) {
+        if (occlusionHits[i].transform != listenerTransform &&
+            occlusionHits[i].transform != sourceTransform) {
           occlusion += 1.0f;
         }
       }
@@ -269,6 +270,9 @@ public static class GvrAudio {
 
   /// Maximum allowed reflectivity multiplier of a room surface material.
   public const float maxReflectivity = 2.0f;
+
+  /// Maximum allowed number of raycast hits for occlusion computation per source.
+  public const int maxNumOcclusionHits = 12;
 
   /// Source occlusion detection rate in seconds.
   public const float occlusionDetectionInterval = 0.2f;
@@ -367,6 +371,9 @@ public static class GvrAudio {
 
   // Listener transform.
   private static Transform listenerTransform = null;
+
+  // Pre-allocated raycast hit list for occlusion computation.
+  private static RaycastHit[] occlusionHits = new RaycastHit[maxNumOcclusionHits];
 
   // Occlusion layer mask.
   private static int occlusionMaskValue = -1;
