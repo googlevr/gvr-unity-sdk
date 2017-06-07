@@ -31,9 +31,23 @@ public class GvrCardboardHelpers {
     Debug.Log("Use GvrEditorEmulator for in-editor recentering");
   }
 
+  /// Set the Cardboard viewer params.
+  /// Example URI for 2015 Cardboard Viewer V2:
+  /// http://google.com/cardboard/cfg?p=CgZHb29nbGUSEkNhcmRib2FyZCBJL08gMjAxNR0rGBU9JQHegj0qEAAASEIAAEhCAABIQgAASEJYADUpXA89OggeZnc-Ej6aPlAAYAM
+  public static void SetViewerProfile(String viewerProfileUri) {
 #if (UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR
-  [DllImport("gvr")]
+    gvr_set_default_viewer_profile(VRDevice.GetNativePtr(), viewerProfileUri);
+#endif  // (UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR
+    Debug.Log("Unavailable for non-Android and non-iOS builds");
+  }
+
+#if (UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR
+  [DllImport(GvrActivityHelper.GVR_DLL_NAME)]
   private static extern void gvr_reset_tracking(IntPtr gvr_context);
+
+  [DllImport(GvrActivityHelper.GVR_DLL_NAME)]
+  private static extern void gvr_set_default_viewer_profile(IntPtr gvr_context,
+      [MarshalAs(UnmanagedType.LPStr)] string viewer_profile_uri);
 #endif  // (UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR
 
 }

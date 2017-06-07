@@ -65,6 +65,7 @@ public class GvrVideoPlayerTexture : MonoBehaviour {
 
   private bool processingRunning;
   private bool exitProcessing;
+  private bool playOnResume;
 
   /// <summary>List of callbacks to invoke when the video is ready.</summary>
   private List<Action<int>> onEventCallbacks;
@@ -374,9 +375,12 @@ public class GvrVideoPlayerTexture : MonoBehaviour {
   void OnApplicationPause(bool bPause) {
     if (videoPlayerPtr != IntPtr.Zero) {
       if (bPause) {
+        playOnResume = !IsPaused;
         PauseVideo(videoPlayerPtr);
       } else {
-        PlayVideo(videoPlayerPtr);
+        if (playOnResume) {
+          PlayVideo(videoPlayerPtr);
+        }
       }
     }
   }

@@ -1,4 +1,4 @@
-﻿// Copyright 2016 Google Inc. All rights reserved.
+﻿// Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,8 +19,6 @@ using UnityEngine;
 /// </summary>
 public static class GvrIntent {
 
-  private const string PACKAGE_UNITY_PLAYER = "com.unity3d.player.UnityPlayer";
-  private const string METHOD_CURRENT_ACTIVITY = "currentActivity";
   private const string METHOD_GET_INTENT = "getIntent";
   private const string METHOD_HASH_CODE = "hashCode";
   private const string METHOD_INTENT_GET_DATA_STRING = "getDataString";
@@ -76,9 +74,7 @@ public static class GvrIntent {
   private static AndroidJavaObject GetIntent() {
     AndroidJavaObject androidActivity = null;
     try {
-      using (AndroidJavaObject unityPlayer = new AndroidJavaClass(PACKAGE_UNITY_PLAYER)) {
-        androidActivity = unityPlayer.GetStatic<AndroidJavaObject>(METHOD_CURRENT_ACTIVITY);
-      }
+      androidActivity = GvrActivityHelper.GetActivity();
     } catch (AndroidJavaException e) {
       Debug.LogError("Exception while connecting to the Activity: " + e);
       return null;

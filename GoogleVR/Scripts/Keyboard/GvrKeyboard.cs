@@ -181,8 +181,8 @@ public class GvrKeyboard : MonoBehaviour {
       return;
     }
 #if UNITY_HAS_GOOGLEVR
-    Camera camera = Camera.main;
-    if (camera) {
+    Camera camera = Camera.current;
+    if (camera && camera == Camera.main) {
       // Get current eye.
       Camera.StereoscopicEye camEye = isRight ? Camera.StereoscopicEye.Right : Camera.StereoscopicEye.Left;
 

@@ -79,7 +79,7 @@ namespace Gvr.Internal {
       internal float y;
     }
 
-    private const string dllName = "gvr";
+    private const string dllName = GvrActivityHelper.GVR_DLL_NAME;
 
     [DllImport(dllName)]
     private static extern int gvr_controller_get_default_options();

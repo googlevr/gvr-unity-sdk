@@ -13,7 +13,7 @@ Please note, we do not accept pull requests.
 
 ## Migration to Unity 5.6
 __The GVR Unity SDK will no longer support Unity versions older than 5.6 as of 1.50.__ Please upgrade to 5.6 via the following steps:
-1. Update the GVR Unity SDK to 1.40.
+1. Update the GVR Unity SDK to 1.60.
 2. Migrate to Unity 5.6.0f3. The SDK will import or remove all the necessary libraries.
 3. Update to GVR Unity SDK 1.50 when it becomes available.
 
@@ -29,11 +29,11 @@ As of Unity 5.6.0f3, the generated Cocoapod can be updated to the latest GVR iOS
 * Run the following commands
   * ``pod deintegrate``
   * ``pod cache clean --all``
-* Change the number in the Podfile from 1.20 to 1.40
+* Change the number in the Podfile from 1.20 to 1.60
 * Open the project in XCode, and delete the Pods directory and Pods.xcodeproj if they exist.
 * In the XCode project settings, change the deployment target to 8.0.
 * Quit XCode
 * In Terminal, do ``pod update``
-  * "Installing GVRSDK (1.40.0)" should appear in the console.
+  * "Installing GVRSDK (1.60.0)" should appear in the console.
 * ``pod install``
 

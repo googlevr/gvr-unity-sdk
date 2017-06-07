@@ -88,11 +88,7 @@ public class GvrPointerGraphicRaycaster : GvrBasePointerRaycaster {
       return;
     }
 
-    if (eventCamera == null) {
-      return;
-    }
-
-    if (!IsPointerAvailable()) {
+    if (!IsPointerAvailable() || eventCamera == null) {
       return;
     }
 

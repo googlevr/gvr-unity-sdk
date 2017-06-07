@@ -19,11 +19,18 @@ using System;
 public class KeyboardDelegateExample : GvrKeyboardDelegateBase {
 
   public Text KeyboardText;
+  public Canvas UpdateCanvas;
 
   public override event EventHandler KeyboardHidden;
   public override event EventHandler KeyboardShown;
 
   private const string DD_KEYBOARD_NOT_INSTALLED_MSG = "Please update the Daydream Keyboard app from the Play Store.";
+
+  void Awake() {
+    if (UpdateCanvas != null) {
+      UpdateCanvas.gameObject.SetActive(false);
+    }
+  }
 
   public override void OnKeyboardShow() {
     Debug.Log("Calling Keyboard Show Delegate!");
@@ -70,7 +77,19 @@ public class KeyboardDelegateExample : GvrKeyboardDelegateBase {
         if (KeyboardText != null) {
           KeyboardText.text = DD_KEYBOARD_NOT_INSTALLED_MSG;
         }
+        if (UpdateCanvas != null) {
+          UpdateCanvas.gameObject.SetActive(true);
+        }
         break;
+    }
+  }
+
+  public void LaunchPlayStore() {
+    if (UpdateCanvas != null) {
+      UpdateCanvas.gameObject.SetActive(false);
+#if UNITY_ANDROID || UNITY_EDITOR
+      GvrKeyboardIntent.Instance.LaunchPlayStore();
+#endif
     }
   }
 }

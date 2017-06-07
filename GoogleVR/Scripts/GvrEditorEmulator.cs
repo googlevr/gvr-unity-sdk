@@ -20,11 +20,12 @@ using Gvr.Internal;
 
 /// Provides mouse-controlled head tracking emulation in the Unity editor.
 public class GvrEditorEmulator : MonoBehaviour {
-  // Simulated neck model.  Vector from the neck pivot point to the point between the eyes.
-  private static readonly Vector3 m_neckOffset = new Vector3(0, 0.075f, 0.08f);
-
   private const string AXIS_MOUSE_X = "Mouse X";
   private const string AXIS_MOUSE_Y = "Mouse Y";
+
+#if UNITY_EDITOR && UNITY_HAS_GOOGLEVR && (UNITY_ANDROID || UNITY_IOS)
+  // Simulated neck model.  Vector from the neck pivot point to the point between the eyes.
+  private static readonly Vector3 m_neckOffset = new Vector3(0, 0.075f, 0.08f);
 
   // Use mouse to emulate head in the editor.
   // These variables must be static so that head pose is maintained between scene changes,
@@ -34,6 +35,7 @@ public class GvrEditorEmulator : MonoBehaviour {
   private static float m_mouseZ = 0;
 
   private bool m_isRecenterOnlyController = false;
+#endif
 
   [Tooltip("Camera to track")]
   public Camera m_camera;

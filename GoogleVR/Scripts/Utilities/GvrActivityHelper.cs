@@ -13,21 +13,20 @@
 // limitations under the License.
 
 using UnityEngine;
-using System;
-using System.Runtime.InteropServices;
 
 // Simple static class to abstract out several jni calls that need to be shared
 // between different classes.
 public static class GvrActivityHelper {
-    private const string UNITY_PLAYER_CLASS = "com.unity3d.player.UnityPlayer";
+  public const string GVR_DLL_NAME = "gvr";
+  public const string PACKAGE_UNITY_PLAYER = "com.unity3d.player.UnityPlayer";
 
 #if UNITY_ANDROID && !UNITY_EDITOR
   /// Returns the Android Activity used by the Unity device player. The caller is
   /// responsible for memory-managing the returned AndroidJavaObject.
   public static AndroidJavaObject GetActivity() {
-    AndroidJavaClass jc = new AndroidJavaClass(UNITY_PLAYER_CLASS);
+    AndroidJavaClass jc = new AndroidJavaClass(PACKAGE_UNITY_PLAYER);
     if (jc == null) {
-      Debug.LogErrorFormat("Failed to get class {0}", UNITY_PLAYER_CLASS);
+      Debug.LogErrorFormat("Failed to get class {0}", PACKAGE_UNITY_PLAYER);
       return null;
     }
     AndroidJavaObject activity = jc.GetStatic<AndroidJavaObject>("currentActivity");

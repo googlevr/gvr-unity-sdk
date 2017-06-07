@@ -1,4 +1,4 @@
-// Copyright 2016 Google Inc. All rights reserved.
+// Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -43,8 +43,6 @@ public class DemoInputManager : MonoBehaviour {
   private const string FIELD_SDK_INT = "SDK_INT";
   private const string PACKAGE_BUILD_VERSION = "android.os.Build$VERSION";
   private const string PACKAGE_DAYDREAM_API_CLASS = "com.google.vr.ndk.base.DaydreamApi";
-  private const string PACKAGE_UNITY_PLAYER = "com.unity3d.player.UnityPlayer";
-  private const string METHOD_CURRENT_ACTIVITY = "currentActivity";
   private const string METHOD_IS_DAYDREAM_READY = "isDaydreamReadyPlatform";
 
   private bool isDaydream = false;
@@ -102,8 +100,8 @@ public class DemoInputManager : MonoBehaviour {
     string vrDeviceName = UnityEngine.VR.VRSettings.loadedDeviceName;
     if (vrDeviceName != CARDBOARD_DEVICE_NAME &&
         vrDeviceName != DAYDREAM_DEVICE_NAME) {
-      Debug.Log(string.Format("Loaded device was {0} must be one of {1} or {2}",
-            vrDeviceName, DAYDREAM_DEVICE_NAME, CARDBOARD_DEVICE_NAME));
+      Debug.LogErrorFormat("Loaded device was '{0}', must be one of '{1}' or '{2}'",
+            vrDeviceName, DAYDREAM_DEVICE_NAME, CARDBOARD_DEVICE_NAME);
       return;
     }
 
@@ -188,9 +186,7 @@ public class DemoInputManager : MonoBehaviour {
     // API level > 24, check whether the device is Daydream-ready..
     AndroidJavaObject androidActivity = null;
     try {
-      using (AndroidJavaObject unityPlayer = new AndroidJavaClass(PACKAGE_UNITY_PLAYER)) {
-        androidActivity = unityPlayer.GetStatic<AndroidJavaObject>(METHOD_CURRENT_ACTIVITY);
-      }
+      androidActivity = GvrActivityHelper.GetActivity();
     } catch (AndroidJavaException e) {
       Debug.LogError("Exception while connecting to the Activity: " + e);
       return false;

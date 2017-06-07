@@ -28,12 +28,6 @@ namespace Gvr.Internal {
     /// provider if the platform is not supported.
     static internal IControllerProvider CreateControllerProvider(GvrController owner) {
 #if UNITY_EDITOR || UNITY_STANDALONE
-      // SystemInfo.graphicsDeviceID is zero for Unity 5.3.3.
-      if (SystemInfo.graphicsDeviceID == 0) {
-        // Running headless.  Use the dummy provider.
-        Debug.Log("No controller support when running headless.");
-        return new DummyControllerProvider();
-      }
       // Use the Controller Emulator.
       return new EmulatorControllerProvider(owner.emulatorConnectionMode);
 #elif UNITY_ANDROID
