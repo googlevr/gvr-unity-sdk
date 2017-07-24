@@ -1,0 +1,416 @@
+﻿// Copyright 2017 Google Inc. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+using UnityEngine;
+using UnityEngine.EventSystems;
+
+/// This abstract class should be implemented for pointer based input, and used with
+/// the GvrPointerInputModule script.
+///
+/// It provides methods called on pointer interaction with in-game objects and UI,
+/// trigger events, and 'BaseInputModule' class state changes.
+///
+/// To have the methods called, an instance of this (implemented) class must be
+/// registered with the **GvrPointerManager** script in 'Start' by calling
+/// GvrPointerInputModule.OnPointerCreated.
+///
+/// This abstract class should be implemented by pointers doing 1 of 2 things:
+/// 1. Responding to movement of the users head (Cardboard gaze-based-pointer).
+/// 2. Responding to the movement of the daydream controller (Daydream 3D pointer).
+public abstract class GvrBasePointer : MonoBehaviour {
+  public enum RaycastMode {
+    /// Default method for casting ray.
+    ///
+    /// Casts a ray from the camera through the target of the pointer.
+    /// This is ideal for reticles that are always rendered on top.
+    /// The object that is selected will always be the object that appears
+    /// underneath the reticle from the perspective of the camera.
+    /// This also prevents the reticle from appearing to "jump" when it starts/stops hitting an object.
+    ///
+    /// Recommended for reticles that are always rendered on top such as the GvrReticlePointer
+    /// prefab which is used for cardboard apps.
+    ///
+    /// Note: This will prevent the user from pointing around an object to hit something that is out of sight.
+    /// This isn't a problem in a typical use case.
+    ///
+    /// When used with the standard daydream controller,
+    /// the hit detection will not account for the laser correctly for objects that are closer to the
+    /// camera than the end of the laser.
+    /// In that case, it is recommended to do one of the following things:
+    ///
+    /// 1. Hide the laser.
+    /// 2. Use a full-length laser pointer in Direct mode.
+    /// 3. Use the experimental Hybrid raycast mode.
+    Camera,
+    /// Cast a ray directly from the pointer origin.
+    ///
+    /// Recommended for full-length laser pointers.
+    Direct,
+    /// Experimental method for casting ray.
+    ///
+    /// Combines the Camera and Direct raycast modes.
+    /// Uses a Direct ray up until the CameraRayIntersectionDistance, and then switches to use
+    /// a Camera ray starting from the point where the two rays intersect.
+    ///
+    /// Recommended for the standard daydream controller (short laser with a distant reticle).
+    /// Like Camera mode, this prevents the reticle appearing jumpy. Additionally, it still allows
+    /// the user to target objects that are close to them by using the laser as a visual reference.
+    ///
+    /// Note: If using this mode with GvrControllerPointer, it is recommended to turn off the flag
+    /// "allowRotation" in GvrLaserVisual.
+    HybridExperimental,
+  }
+
+  /// Represents a ray segment for a series of intersecting rays.
+  /// This is useful for Hybrid raycast mode, which uses two sequential rays.
+  public struct PointerRay {
+    /// The ray for this segment of the pointer.
+    public Ray ray;
+
+    /// The distance along the pointer from the origin of the first ray to this ray.
+    public float distanceFromStart;
+
+    /// Distance that this ray extends to.
+    public float distance;
+  }
+
+  /// Determines which raycast mode to use for this raycaster.
+  public RaycastMode raycastMode = RaycastMode.Camera;
+
+  /// Determines the eventCamera for _GvrPointerPhysicsRaycaster_ and _GvrPointerGraphicRaycaster_.
+  /// Additionaly, this is used to control what camera to use when calculating the Camera ray for
+  /// the Hybrid and Camera raycast modes.
+  [Tooltip("Optional: Use a camera other than Camera.main.")]
+  public Camera overridePointerCamera;
+
+  /// Convenience function to access what the pointer is currently hitting.
+  public RaycastResult CurrentRaycastResult {
+    get {
+      return GvrPointerInputModule.CurrentRaycastResult;
+    }
+  }
+
+  [System.Obsolete("Replaced by CurrentRaycastResult.worldPosition")]
+  public Vector3 PointerIntersection {
+    get {
+      RaycastResult raycastResult = CurrentRaycastResult;
+      return raycastResult.worldPosition;
+    }
+  }
+
+  [System.Obsolete("Replaced by CurrentRaycastResult.gameObject != null")]
+  public bool IsPointerIntersecting {
+    get {
+      RaycastResult raycastResult = CurrentRaycastResult;
+      return raycastResult.gameObject != null;
+    }
+  }
+
+  /// This is used to determine if the enterRadius or the exitRadius should be used for the raycast.
+  /// It is set by GvrPointerInputModule and doesn't need to be controlled manually.
+  public bool ShouldUseExitRadiusForRaycast { get; set; }
+
+  /// If ShouldUseExitRadiusForRaycast is true, returns the exitRadius.
+  /// Otherwise, returns the enterRadius.
+  public float CurrentPointerRadius {
+    get {
+      float enterRadius, exitRadius;
+      GetPointerRadius(out enterRadius, out exitRadius);
+      if (ShouldUseExitRadiusForRaycast) {
+        return exitRadius;
+      } else {
+        return enterRadius;
+      }
+    }
+  }
+
+  /// Returns the transform that represents this pointer.
+  /// It is used by GvrBasePointerRaycaster as the origin of the ray.
+  public virtual Transform PointerTransform {
+    get {
+      return transform;
+    }
+  }
+
+  /// If true, the trigger was just pressed. This is an event flag:
+  /// it will be true for only one frame after the event happens.
+  /// Defaults to GvrControllerInput.ClickButtonDown, can be overridden to change the trigger.
+  public virtual bool TriggerDown {
+    get {
+      bool isTriggerDown = Input.GetMouseButtonDown(0);
+      return isTriggerDown || GvrControllerInput.ClickButtonDown;
+    }
+  }
+
+  /// If true, the trigger is currently being pressed. This is not
+  /// an event: it represents the trigger's state (it remains true while the trigger is being
+  /// pressed).
+  /// Defaults to GvrControllerInput.ClickButton, can be overridden to change the trigger.
+  public virtual bool Triggering {
+    get {
+      bool isTriggering = Input.GetMouseButton(0);
+      return isTriggering || GvrControllerInput.ClickButton;
+    }
+  }
+
+  /// If true, the trigger was just released. This is an event flag:
+  /// it will be true for only one frame after the event happens.
+  /// Defaults to GvrControllerInput.ClickButtonUp, can be overridden to change the trigger.
+  public virtual bool TriggerUp {
+    get {
+      bool isTriggerDown = Input.GetMouseButtonUp(0);
+      return isTriggerDown || GvrControllerInput.ClickButtonUp;
+    }
+  }
+
+  /// If true, the user just started touching the touchpad. This is an event flag (it is true
+  /// for only one frame after the event happens, then reverts to false).
+  /// Used by _GvrPointerScrollInput_ to generate OnScroll events using Unity's Event System.
+  /// Defaults to GvrControllerInput.TouchDown, can be overridden to change the input source.
+  public virtual bool TouchDown {
+    get {
+      return GvrControllerInput.TouchDown;
+    }
+  }
+
+  /// If true, the user is currently touching the touchpad.
+  /// Used by _GvrPointerScrollInput_ to generate OnScroll events using Unity's Event System.
+  /// Defaults to GvrControllerInput.IsTouching, can be overridden to change the input source.
+  public virtual bool IsTouching {
+    get {
+      return GvrControllerInput.IsTouching;
+    }
+  }
+
+  /// If true, the user just stopped touching the touchpad. This is an event flag (it is true
+  /// for only one frame after the event happens, then reverts to false).
+  /// Used by _GvrPointerScrollInput_ to generate OnScroll events using Unity's Event System.
+  /// Defaults to GvrControllerInput.TouchUp, can be overridden to change the input source.
+  public virtual bool TouchUp {
+    get {
+      return GvrControllerInput.TouchUp;
+    }
+  }
+
+  /// Position of the current touch, if touching the touchpad.
+  /// If not touching, this is the position of the last touch (when the finger left the touchpad).
+  /// The X and Y range is from 0 to 1.
+  /// (0, 0) is the top left of the touchpad and (1, 1) is the bottom right of the touchpad.
+  /// Used by _GvrPointerScrollInput_ to generate OnScroll events using Unity's Event System.
+  /// Defaults to GvrControllerInput.TouchPos, can be overridden to change the input source.
+  public virtual Vector2 TouchPos {
+    get {
+      return GvrControllerInput.TouchPos;
+    }
+  }
+
+  /// Returns the end point of the pointer when it is MaxPointerDistance away from the origin.
+  public virtual Vector3 MaxPointerEndPoint {
+    get {
+      Transform pointerTransform = PointerTransform;
+      if (pointerTransform == null) {
+        return Vector3.zero;
+      }
+
+      Vector3 maxEndPoint = GetPointAlongPointer(MaxPointerDistance);
+      return maxEndPoint;
+    }
+  }
+
+  /// If true, the pointer will be used for generating input events by _GvrPointerInputModule_.
+  public virtual bool IsAvailable {
+    get {
+      Transform pointerTransform = PointerTransform;
+      if (pointerTransform == null) {
+        return false;
+      }
+
+      if (!enabled) {
+        return false;
+      }
+
+      return pointerTransform.gameObject.activeInHierarchy;
+    }
+  }
+
+  /// When using the Camera raycast mode, this is used to calculate
+  /// where the ray from the pointer will intersect with the ray from the camera.
+  public virtual float CameraRayIntersectionDistance {
+    get {
+      return MaxPointerDistance;
+    }
+  }
+
+  public Camera PointerCamera {
+    get {
+      if (overridePointerCamera != null) {
+        return overridePointerCamera;
+      }
+
+      return Camera.main;
+    }
+  }
+
+  /// Returns the max distance from the pointer that raycast hits will be detected.
+  public abstract float MaxPointerDistance { get; }
+
+  /// Called when the pointer is facing a valid GameObject. This can be a 3D
+  /// or UI element.
+  ///
+  /// **raycastResult** is the hit detection result for the object being pointed at.
+  /// **isInteractive** is true if the object being pointed at is interactive.
+  public abstract void OnPointerEnter(RaycastResult raycastResult, bool isInteractive);
+
+  /// Called every frame the user is still pointing at a valid GameObject. This
+  /// can be a 3D or UI element.
+  ///
+  /// **raycastResult** is the hit detection result for the object being pointed at.
+  /// **isInteractive** is true if the object being pointed at is interactive.
+  public abstract void OnPointerHover(RaycastResult raycastResultResult, bool isInteractive);
+
+  /// Called when the pointer no longer faces an object previously
+  /// intersected with a ray projected from the camera.
+  /// This is also called just before **OnInputModuleDisabled**
+  /// previousObject will be null in this case.
+  ///
+  /// **previousObject** is the object that was being pointed at the previous frame.
+  public abstract void OnPointerExit(GameObject previousObject);
+
+  /// Called when a click is initiated.
+  public abstract void OnPointerClickDown();
+
+  /// Called when click is finished.
+  public abstract void OnPointerClickUp();
+
+  /// Return the radius of the pointer. It is used by GvrPointerPhysicsRaycaster when
+  /// searching for valid pointer targets. If a radius is 0, then a ray is used to find
+  /// a valid pointer target. Otherwise it will use a SphereCast.
+  /// The *enterRadius* is used for finding new targets while the *exitRadius*
+  /// is used to see if you are still nearby the object currently pointed at
+  /// to avoid a flickering effect when just at the border of the intersection.
+  ///
+  /// NOTE: This is only works with GvrPointerPhysicsRaycaster. To use it with uGUI,
+  /// add 3D colliders to your canvas elements.
+  public abstract void GetPointerRadius(out float enterRadius, out float exitRadius);
+
+  /// Returns a point in worldspace a specified distance along the pointer.
+  /// What this point will be is different depending on the raycastMode.
+  ///
+  /// Due to the the differences in raycast modes, it is recommended to use this function
+  /// instead of attempting to calculate a point projected out from the pointer yourself.
+  public Vector3 GetPointAlongPointer(float distance) {
+    PointerRay pointerRay = GetRayForDistance(distance);
+    return pointerRay.ray.GetPoint(distance - pointerRay.distanceFromStart);
+  }
+
+  /// Returns the ray used for projecting points out of the pointer for the given distance.
+  /// In Hybrid raycast mode, the ray will be different depending upon the distance.
+  /// In Camera or Direct raycast mode, the ray will always be the same.
+  public PointerRay GetRayForDistance(float distance) {
+    PointerRay result = new PointerRay();
+
+    if (raycastMode == RaycastMode.HybridExperimental) {
+      float directDistance = CameraRayIntersectionDistance;
+      if (distance < directDistance) {
+        result = CalculateHybridRay(this, RaycastMode.Direct);
+      } else {
+        result = CalculateHybridRay(this, RaycastMode.Camera);
+      }
+    } else {
+      result = CalculateRay(this, raycastMode);
+    }
+
+    return result;
+  }
+
+  /// Calculates the ray for a given Raycast mode.
+  /// Will throw an exception if the raycast mode Hybrid is passed in.
+  /// If you need to calculate the ray for the direct or camera segment of the Hybrid raycast,
+  /// use CalculateHybridRay instead.
+  public static PointerRay CalculateRay(GvrBasePointer pointer, RaycastMode mode) {
+    PointerRay result = new PointerRay();
+
+    if (pointer == null || !pointer.IsAvailable) {
+      Debug.LogError("Cannot calculate ray when the pointer isn't available.");
+      return result;
+    }
+
+    Transform pointerTransform = pointer.PointerTransform;
+
+    if (pointerTransform == null) {
+      Debug.LogError("Cannot calculate ray when pointerTransform is null.");
+      return result;
+    }
+
+    result.distance = pointer.MaxPointerDistance;
+
+    switch (mode) {
+      case RaycastMode.Camera:
+        Camera camera = pointer.PointerCamera;
+        if (camera == null) {
+          Debug.LogError("Cannot calculate ray because pointer.PointerCamera is null." +
+            "To fix this, either tag a Camera as \"MainCamera\" or set overridePointerCamera.");
+          return result;
+        }
+
+        Vector3 rayPointerStart = pointerTransform.position;
+        Vector3 rayPointerEnd = rayPointerStart +
+          (pointerTransform.forward * pointer.CameraRayIntersectionDistance);
+
+        Vector3 cameraLocation = camera.transform.position;
+        Vector3 finalRayDirection = rayPointerEnd - cameraLocation;
+        finalRayDirection.Normalize();
+
+        Vector3 finalRayStart = cameraLocation + (finalRayDirection * camera.nearClipPlane);
+
+        result.ray = new Ray(finalRayStart, finalRayDirection);
+        break;
+      case RaycastMode.Direct:
+        result.ray = new Ray(pointerTransform.position, pointerTransform.forward);
+        break;
+      default:
+        throw new UnityException("Invalid RaycastMode " + mode + " passed into CalculateRay.");
+    }
+
+    return result;
+  }
+
+  /// Calculates the ray for the segment of the Hybrid raycast determined by the raycast mode
+  /// passed in. Throws an exception if Hybrid is passed in.
+  public static PointerRay CalculateHybridRay(GvrBasePointer pointer, RaycastMode hybridMode) {
+    PointerRay result;
+
+    switch (hybridMode) {
+      case RaycastMode.Direct:
+        result = CalculateRay(pointer, hybridMode);
+        result.distance = pointer.CameraRayIntersectionDistance;
+        break;
+      case RaycastMode.Camera:
+        result = CalculateRay(pointer, hybridMode);
+        PointerRay directRay = CalculateHybridRay(pointer, RaycastMode.Direct);
+        result.ray.origin = directRay.ray.GetPoint(directRay.distance);
+        result.distanceFromStart = directRay.distance;
+        result.distance = pointer.MaxPointerDistance - directRay.distance;
+        break;
+      default:
+        throw new UnityException("Invalid RaycastMode " + hybridMode + " passed into CalculateHybridRay.");
+    }
+
+    return result;
+  }
+
+  protected virtual void Start() {
+    GvrPointerInputModule.OnPointerCreated(this);
+  }
+}
