@@ -51,7 +51,7 @@ public class GvrPointerGraphicRaycaster : GvrBasePointerRaycaster {
         return null;
       }
 
-      if (pointer.raycastMode == GvrBasePointer.RaycastMode.HybridExperimental) {
+      if (pointer.raycastMode == GvrBasePointer.RaycastMode.Hybrid) {
         return GetCameraForRaycastMode(pointer, CurrentRaycastModeForHybrid);
       } else {
         return GetCameraForRaycastMode(pointer, pointer.raycastMode);
@@ -90,7 +90,7 @@ public class GvrPointerGraphicRaycaster : GvrBasePointerRaycaster {
     float hitDistance = float.MaxValue;
 
     if (blockingObjects != BlockingObjects.None) {
-      float dist = eventCamera.farClipPlane - eventCamera.nearClipPlane;
+      float dist = pointerRay.distance;
 
       if (blockingObjects == BlockingObjects.ThreeD || blockingObjects == BlockingObjects.All) {
         RaycastHit hit;
@@ -179,7 +179,7 @@ public class GvrPointerGraphicRaycaster : GvrBasePointerRaycaster {
         }
 
         if (cachedPointerEventCamera == null) {
-          Debug.LogError("GvrPointerGraphicRaycaster requires GvrPointer to have a Camera when in Direct mode.");
+          cachedPointerEventCamera = AddDummyCameraToPointer(pointer);
           return null;
         }
 
@@ -188,6 +188,13 @@ public class GvrPointerGraphicRaycaster : GvrBasePointerRaycaster {
       default:
         return pointer.PointerCamera;
     }
+  }
+
+  private Camera AddDummyCameraToPointer(GvrBasePointer pointer) {
+    Camera camera = pointer.PointerTransform.gameObject.AddComponent<Camera>();
+    camera.enabled = false;
+    camera.nearClipPlane = 0.01f; // Minimum Near Clip Plane.
+    return camera;
   }
 
   /// Perform a raycast into the screen and collect all graphics underneath it.

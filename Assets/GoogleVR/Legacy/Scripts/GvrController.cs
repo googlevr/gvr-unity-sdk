@@ -72,12 +72,6 @@ public class GvrController : GvrControllerInput {
     }
   }
 
-  public new static bool Recentering {
-    get {
-      return GvrControllerInput.Recentering;
-    }
-  }
-
   public new static bool Recentered {
     get {
       return GvrControllerInput.Recentered;
@@ -145,14 +139,12 @@ public class GvrController : GvrControllerInput {
     }
   }
 
-  /// If true, the user is currently touching the controller's touchpad.
   public new static bool IsCharging {
     get {
       return GvrControllerInput.IsCharging;
     }
   }
 
-  /// If true, the user is currently touching the controller's touchpad.
   public new static GvrControllerBatteryLevel BatteryLevel {
     get {
       return GvrControllerInput.BatteryLevel;

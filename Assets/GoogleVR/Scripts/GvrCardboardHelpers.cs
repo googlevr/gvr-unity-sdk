@@ -18,15 +18,19 @@ using UnityEngine.VR;
 using System;
 using System.Runtime.InteropServices;
 
-// General GVR helpers.
+// General Cardboard helper methods.
 public class GvrCardboardHelpers {
-  /// Manual recenter for Cardboard.
-  /// Do not use for controller-based Daydream recenter - Google VR Services will take care
-  /// of that, no C# implementation behaviour is needed.
-  /// Apply the recenteringOffset to the Camera or its parent at runtime.
+  /// Manual recenter for Cardboard apps. After recentering the camera's orientation will be given
+  /// in the new recentered coordinate system.
+  /// Do not use for Daydream apps as controller based recentering is handled automatically by
+  /// Google VR Services, see `GvrControllerInput.Rencentered` for details.
   public static void Recenter() {
 #if (UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR
-    gvr_reset_tracking(VRDevice.GetNativePtr());
+    IntPtr gvrContextPtr = GvrSettings.GetValidGvrNativePtrOrLogError();
+    if (gvrContextPtr == IntPtr.Zero) {
+      return;
+    }
+    gvr_reset_tracking(gvrContextPtr);
 #endif  // (UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR
     Debug.Log("Use GvrEditorEmulator for in-editor recentering");
   }
@@ -36,7 +40,11 @@ public class GvrCardboardHelpers {
   /// http://google.com/cardboard/cfg?p=CgZHb29nbGUSEkNhcmRib2FyZCBJL08gMjAxNR0rGBU9JQHegj0qEAAASEIAAEhCAABIQgAASEJYADUpXA89OggeZnc-Ej6aPlAAYAM
   public static void SetViewerProfile(String viewerProfileUri) {
 #if (UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR
-    gvr_set_default_viewer_profile(VRDevice.GetNativePtr(), viewerProfileUri);
+    IntPtr gvrContextPtr = GvrSettings.GetValidGvrNativePtrOrLogError();
+    if (gvrContextPtr == IntPtr.Zero) {
+      return;
+    }
+    gvr_set_default_viewer_profile(gvrContextPtr, viewerProfileUri);
 #endif  // (UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR
     Debug.Log("Unavailable for non-Android and non-iOS builds");
   }

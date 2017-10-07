@@ -12,19 +12,16 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// This script only works in Unity 5.6 or newer since older versions of Unity
-// don't have IPreprocessBuild and IPostprocessBuild.
-#if UNITY_5_6_OR_NEWER && (UNITY_ANDROID || UNITY_IOS)
+// Only invoke custom build processor when building for Android or iOS.
+#if UNITY_ANDROID || UNITY_IOS
 using UnityEngine;
 using UnityEngine.VR;
 using UnityEditor;
 using UnityEditor.Build;
 using System.Linq;
 
-// Notifes users if they build for Android or iOS without Cardboard or Daydream enabled.
+// Notifies users if they build for Android or iOS without Cardboard or Daydream enabled.
 class GvrBuildProcessor : IPreprocessBuild {
-  private const string VR_SDK_DAYDREAM = "daydream";
-  private const string VR_SDK_CARDBOARD = "cardboard";
   private const string VR_SETTINGS_NOT_ENABLED_ERROR_MESSAGE_FORMAT =
     "On {0} 'Player Settings > Virtual Reality Supported' setting must be checked.\n" +
     "Please fix this setting and rebuild your app.";
@@ -73,12 +70,12 @@ class GvrBuildProcessor : IPreprocessBuild {
 
   // 'Player Settings > Virtual Reality SDKs' includes 'Daydream'?
   private bool IsDaydreamSDKIncluded() {
-    return VRSettings.supportedDevices.Contains(VR_SDK_DAYDREAM);
+    return VRSettings.supportedDevices.Contains(GvrSettings.VR_SDK_DAYDREAM);
   }
 
   // 'Player Settings > Virtual Reality SDKs' includes 'Cardboard'?
   private bool IsCardboardSDKIncluded() {
-    return VRSettings.supportedDevices.Contains(VR_SDK_CARDBOARD);
+    return VRSettings.supportedDevices.Contains(GvrSettings.VR_SDK_CARDBOARD);
   }
 }
-#endif  // UNITY_5_6_OR_NEWER && (UNITY_ANDROID || UNITY_IOS)
+#endif  // UNITY_ANDROID || UNITY_IOS

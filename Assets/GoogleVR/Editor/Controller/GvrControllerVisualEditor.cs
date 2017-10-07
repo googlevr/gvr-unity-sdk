@@ -27,6 +27,7 @@ public class GvrControllerVisualEditor : Editor {
   private SerializedProperty systemButtonColor;
   private SerializedProperty readControllerState;
   private SerializedProperty displayState;
+  private SerializedProperty maximumAlpha;
 
   private GUIStyle displayStateHeaderStyle;
   private GUIContent displayStateHeaderContent;
@@ -42,6 +43,7 @@ public class GvrControllerVisualEditor : Editor {
   private const string SYSTEM_BUTTON_COLOR_PROP_NAME = "systemButtonColor";
   private const string READ_CONTROLLER_STATE_PROP_NAME = "readControllerState";
   private const string DISPLAY_STATE_PROP_NAME = "displayState";
+  private const string MAXIMUM_ALPHA_PROP_NAME = "maximumAlpha";
 
   void OnEnable() {
     attachmentPrefabs = serializedObject.FindProperty(ATTACHMENT_PREFABS_PROP_NAME);
@@ -50,10 +52,17 @@ public class GvrControllerVisualEditor : Editor {
     systemButtonColor = serializedObject.FindProperty(SYSTEM_BUTTON_COLOR_PROP_NAME);
     readControllerState = serializedObject.FindProperty(READ_CONTROLLER_STATE_PROP_NAME);
     displayState = serializedObject.FindProperty(DISPLAY_STATE_PROP_NAME);
+    maximumAlpha = serializedObject.FindProperty(MAXIMUM_ALPHA_PROP_NAME);
   }
 
   public override void OnInspectorGUI() {
     serializedObject.Update();
+
+    // Add clickable script field, as would have been provided by DrawDefaultInspector()
+    MonoScript script = MonoScript.FromMonoBehaviour (target as MonoBehaviour);
+    EditorGUI.BeginDisabledGroup (true);
+    EditorGUILayout.ObjectField ("Script", script, typeof(MonoScript), false);
+    EditorGUI.EndDisabledGroup ();
 
     CreateStylesAndContent();
 
@@ -109,6 +118,8 @@ public class GvrControllerVisualEditor : Editor {
     if (!allowEditDisplayState) {
       GUI.enabled = true;
     }
+
+    EditorGUILayout.PropertyField(maximumAlpha);
 
     serializedObject.ApplyModifiedProperties();
   }

@@ -16,33 +16,24 @@ using UnityEngine;
 using System.Collections;
 
 /// Represents an object tracked by controller input.
+///
+/// Updates the position and rotation of an object to approximate the controller by using
+/// a _GvrBaseArmModel_ and propagates the _GvrBaseArmModel_ to all _IGvrArmModelReceivers_
+/// underneath this object.
+///
 /// Manages the active status of the tracked controller based on controller connection status.
-///
-/// Provides access to the laser and the controller visual.
-/// Allows for enabling and disabling the laser/controller independently without
-/// causing conflicts with enabling/disabling based on the controller connection status.
-///
-/// Propogates a _GvrBaseArmModel_ to all _IGvrArmModelReceivers_ underneath this object
-/// so that they can follow the pose from the arm model.
 public class GvrTrackedController : MonoBehaviour {
-  /// Reference to the object that represents the Laser.
-  public GvrLaserVisual laserVisual;
-
-  /// Reference to the object that represents the Controller.
-  public GvrControllerVisual controllerVisual;
-
   [SerializeField]
+  [Tooltip("Arm model used to control the pose (position and rotation) of the object, " +
+    "and to propagate to children that implement IGvrArmModelReceiver.")]
   private GvrBaseArmModel armModel;
 
   [SerializeField]
-  private bool isLaserVisualEnabled = true;
+  [Tooltip("Is the object's active status determined by the controller connection status.")]
+  private bool isDeactivatedWhenDisconnected = true;
 
-  [SerializeField]
-  private bool isControllerVisualEnabled = true;
-
-  [SerializeField]
-  private bool isVisibleWhenDisconnected = false;
-
+  /// Arm model used to control the pose (position and rotation) of the object, and to propagate to
+  /// children that implement IGvrArmModelReceiver.
   public GvrBaseArmModel ArmModel {
     get {
       return armModel;
@@ -57,31 +48,21 @@ public class GvrTrackedController : MonoBehaviour {
     }
   }
 
-  public bool IsLaserVisualEnabled {
+  /// Is the object's active status determined by the controller connection status.
+  public bool IsDeactivatedWhenDisconnected {
     get {
-      return isLaserVisualEnabled;
+      return isDeactivatedWhenDisconnected;
     }
     set {
-      if (isLaserVisualEnabled == value) {
+      if (isDeactivatedWhenDisconnected == value) {
         return;
       }
 
-      isLaserVisualEnabled = value;
-      RefreshActiveStatus();
-    }
-  }
+      isDeactivatedWhenDisconnected = value;
 
-  public bool IsControllerVisualEnabled {
-    get {
-      return isControllerVisualEnabled;
-    }
-    set {
-      if (isControllerVisualEnabled == value) {
-        return;
+      if (isDeactivatedWhenDisconnected) {
+        OnControllerStateChanged(GvrControllerInput.State, GvrControllerInput.State);
       }
-
-      isControllerVisualEnabled = value;
-      RefreshActiveStatus();
     }
   }
 
@@ -95,29 +76,57 @@ public class GvrTrackedController : MonoBehaviour {
     }
   }
 
+  void Awake() {
+    if (isDeactivatedWhenDisconnected) {
+      GvrControllerInput.OnStateChanged += OnControllerStateChanged;
+    }
+  }
+
+  void OnEnable() {
+    // Update the position using OnPostControllerInputUpdated.
+    // This way, the position and rotation will be correct for the entire frame
+    // so that it doesn't matter what order Updates get called in.
+    GvrControllerInput.OnPostControllerInputUpdated += OnPostControllerInputUpdated;
+
+    /// Force the pose to update immediately in case the controller isn't updated before the next
+    /// time a frame is rendered.
+    UpdatePose();
+
+    GvrControllerInput.OnStateChanged += OnControllerStateChanged;
+    /// Check the controller state immediately whenever this script is enabled.
+    OnControllerStateChanged(GvrControllerInput.State, GvrControllerInput.State);
+  }
+
+  void OnDisable() {
+    GvrControllerInput.OnPostControllerInputUpdated -= OnPostControllerInputUpdated;
+  }
+
   void Start() {
     PropagateArmModel();
-    RefreshActiveStatus();
+    OnControllerStateChanged(GvrControllerInput.State, GvrControllerInput.State);
   }
 
-  void Update() {
-    RefreshActiveStatus();
+  void OnDestroy() {
+    GvrControllerInput.OnStateChanged -= OnControllerStateChanged;
   }
 
-  private bool IsControllerConnected() {
-    return GvrControllerInput.State == GvrConnectionState.Connected;
+  private void OnPostControllerInputUpdated() {
+    UpdatePose();
   }
 
-  private void RefreshActiveStatus() {
-    bool isVisible = isVisibleWhenDisconnected || IsControllerConnected();
+  private void OnControllerStateChanged(GvrConnectionState state, GvrConnectionState oldState) {
+    if (isDeactivatedWhenDisconnected && enabled) {
+      gameObject.SetActive(state == GvrConnectionState.Connected);
+    }
+  }
 
-    if (laserVisual != null) {
-      laserVisual.gameObject.SetActive(IsLaserVisualEnabled && isVisible);
+  private void UpdatePose() {
+    if (armModel == null) {
+      return;
     }
 
-    if (controllerVisual != null) {
-      controllerVisual.gameObject.SetActive(IsControllerVisualEnabled && isVisible);
-    }
+    transform.localPosition = ArmModel.ControllerPositionFromHead;
+    transform.localRotation = ArmModel.ControllerRotationFromHead;
   }
 
 #if UNITY_EDITOR
@@ -129,6 +138,7 @@ public class GvrTrackedController : MonoBehaviour {
   void OnValidate() {
     if (Application.isPlaying && isActiveAndEnabled) {
       PropagateArmModel();
+      OnControllerStateChanged(GvrControllerInput.State, GvrControllerInput.State);
     }
   }
 #endif  // UNITY_EDITOR

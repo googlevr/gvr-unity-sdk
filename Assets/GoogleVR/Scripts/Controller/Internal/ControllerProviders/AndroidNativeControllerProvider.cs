@@ -137,9 +137,6 @@ namespace Gvr.Internal {
     private static extern byte gvr_controller_state_get_recentered(IntPtr state);
 
     [DllImport(dllName)]
-    private static extern byte gvr_controller_state_get_recentering(IntPtr state);
-
-    [DllImport(dllName)]
     private static extern byte gvr_controller_state_get_button_state(IntPtr state, int button);
 
     [DllImport(dllName)]
@@ -187,13 +184,18 @@ namespace Gvr.Internal {
 
     private MutablePose3D pose3d = new MutablePose3D();
 
+    private bool lastTouchState;
+    private bool lastButtonState;
+    private bool lastAppButtonState;
+    private bool lastHomeButtonState;
+
     public bool SupportsBatteryStatus {
       get { return hasBatteryMethods; }
     }
 
     internal AndroidNativeControllerProvider() {
 #if !UNITY_EDITOR
-      Debug.Log("Initializing Daydream controller API.");
+      // Debug.Log("Initializing Daydream controller API.");
 
       int options = gvr_controller_get_default_options();
       options |= GVR_CONTROLLER_ENABLE_ACCEL;
@@ -247,17 +249,17 @@ namespace Gvr.Internal {
         // so we'll need to support this case indefinitely...
       }
 
-      Debug.Log("GVR API successfully initialized. Now resuming it.");
+      // Debug.Log("GVR API successfully initialized. Now resuming it.");
       gvr_controller_resume(api);
-      Debug.Log("GVR API resumed.");
+      // Debug.Log("GVR API resumed.");
 #endif
     }
 
     ~AndroidNativeControllerProvider() {
-      Debug.Log("Destroying GVR API structures.");
+      // Debug.Log("Destroying GVR API structures.");
       gvr_controller_state_destroy(ref statePtr);
       gvr_controller_destroy(ref api);
-      Debug.Log("AndroidNativeControllerProvider destroyed.");
+      // Debug.Log("AndroidNativeControllerProvider destroyed.");
     }
 
     public void ReadState(ControllerState outState) {
@@ -300,29 +302,24 @@ namespace Gvr.Internal {
       gvr_vec2 touchPos = gvr_controller_state_get_touch_pos(statePtr);
       outState.touchPos = new Vector2(touchPos.x, touchPos.y);
 
-      outState.touchDown = 0 != gvr_controller_state_get_touch_down(statePtr);
-      outState.touchUp = 0 != gvr_controller_state_get_touch_up(statePtr);
-
-      outState.appButtonDown =
-        0 != gvr_controller_state_get_button_down(statePtr, GVR_CONTROLLER_BUTTON_APP);
       outState.appButtonState =
         0 != gvr_controller_state_get_button_state(statePtr, GVR_CONTROLLER_BUTTON_APP);
-      outState.appButtonUp =
-        0 != gvr_controller_state_get_button_up(statePtr, GVR_CONTROLLER_BUTTON_APP);
 
-      outState.homeButtonDown =
-        0 != gvr_controller_state_get_button_down(statePtr, GVR_CONTROLLER_BUTTON_HOME);
       outState.homeButtonState =
         0 != gvr_controller_state_get_button_state(statePtr, GVR_CONTROLLER_BUTTON_HOME);
 
-      outState.clickButtonDown =
-        0 != gvr_controller_state_get_button_down(statePtr, GVR_CONTROLLER_BUTTON_CLICK);
       outState.clickButtonState =
         0 != gvr_controller_state_get_button_state(statePtr, GVR_CONTROLLER_BUTTON_CLICK);
-      outState.clickButtonUp =
-        0 != gvr_controller_state_get_button_up(statePtr, GVR_CONTROLLER_BUTTON_CLICK);
 
-      outState.recentering = 0 != gvr_controller_state_get_recentering(statePtr);
+      UpdateInputEvents(outState.isTouching, ref lastTouchState,
+        ref outState.touchUp, ref outState.touchDown);
+      UpdateInputEvents(outState.clickButtonState, ref lastButtonState,
+        ref outState.clickButtonUp, ref outState.clickButtonDown);
+      UpdateInputEvents(outState.appButtonState, ref lastAppButtonState,
+        ref outState.appButtonUp, ref outState.appButtonDown);
+      UpdateInputEvents(outState.homeButtonState, ref lastHomeButtonState,
+        ref outState.homeButtonUp, ref outState.homeButtonDown);
+
       outState.recentered = 0 != gvr_controller_state_get_recentered(statePtr);
       outState.gvrPtr = statePtr;
 
@@ -330,7 +327,7 @@ namespace Gvr.Internal {
         outState.isCharging = 0 != gvr_controller_state_get_battery_charging(statePtr);
         outState.batteryLevel = (GvrControllerBatteryLevel)gvr_controller_state_get_battery_level(statePtr);
       }
-   }
+    }
 
     public void OnPause() {
       if (IntPtr.Zero != api) {
@@ -377,6 +374,14 @@ namespace Gvr.Internal {
       }
     }
 
+    private static void UpdateInputEvents(bool currentState, ref bool previousState, ref bool up, ref bool down) {
+
+      down = !previousState && currentState;
+      up = previousState && !currentState;
+
+      previousState = currentState;
+    }
+
     private static AndroidJavaObject GetClassLoaderFromActivity(AndroidJavaObject activity) {
       AndroidJavaObject result = activity.Call<AndroidJavaObject>("getClassLoader");
       if (result == null) {
@@ -390,7 +395,7 @@ namespace Gvr.Internal {
       try {
         AndroidJavaClass utilsClass = new AndroidJavaClass(VRCORE_UTILS_CLASS);
         int apiVersion = utilsClass.CallStatic<int>("getVrCoreClientApiVersion", activity);
-        Debug.LogFormat("VrCore client API version: " + apiVersion);
+        // Debug.LogFormat("VrCore client API version: " + apiVersion);
         return apiVersion;
       } catch (Exception exc) {
         // Even though a catch-all block is normally frowned upon, in this case we really

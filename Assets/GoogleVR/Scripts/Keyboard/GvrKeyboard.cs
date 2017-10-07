@@ -217,7 +217,10 @@ public class GvrKeyboard : MonoBehaviour {
     // Get user matrix.
     Quaternion fixRot = new Quaternion(transform.rotation.x * -1, transform.rotation.y * -1,
       transform.rotation.z, transform.rotation.w);
-    Matrix4x4 modelMatrix = Matrix4x4.TRS(transform.position, fixRot, Vector3.one);
+    // Need to convert from left handed to right handed for the Keyboard coordinates.
+    Vector3 fixPos = new Vector3(transform.position.x, transform.position.y,
+      transform.position.z * -1);
+    Matrix4x4 modelMatrix = Matrix4x4.TRS(fixPos, fixRot, Vector3.one);
     Matrix4x4 mat = Matrix4x4.identity;
     Vector3 position = gameObject.transform.position;
     if (position.x == 0 && position.y == 0 && position.z == 0 && !useRecommended) {

@@ -1,4 +1,4 @@
-# Don't obfuscate any NDK/SDK code. This makes the debugging of stack traces in
+# Don't obfuscate any NDK/SDK code. This makes the debugging of stack traces
 # in release builds easier.
 -keepnames class com.google.vr.ndk.** { *; }
 -keepnames class com.google.vr.sdk.** { *; }
@@ -6,6 +6,11 @@
 # These are part of the Java <-> native interfaces for GVR.
 -keepclasseswithmembernames,includedescriptorclasses class com.google.vr.** {
     native <methods>;
+}
+
+# The SDK configuration class member names are useful for debugging client logs.
+-keepclasseswithmembernames,allowoptimization class com.google.common.logging.nano.Vr$VREvent$SdkConfigurationParams** {
+    *;
 }
 
 -keep class com.google.vr.cardboard.UsedByNative
@@ -25,3 +30,5 @@
 -keepclassmembers class * {
     @com.google.vr.cardboard.annotations.UsedByReflection *;
 }
+
+-dontwarn com.google.protobuf.nano.NanoEnumValue

@@ -30,8 +30,6 @@ using UnityEngine.EventSystems;
 /// 2. Responding to the movement of the daydream controller (Daydream 3D pointer).
 public abstract class GvrBasePointer : MonoBehaviour {
   public enum RaycastMode {
-    /// Default method for casting ray.
-    ///
     /// Casts a ray from the camera through the target of the pointer.
     /// This is ideal for reticles that are always rendered on top.
     /// The object that is selected will always be the object that appears
@@ -51,25 +49,23 @@ public abstract class GvrBasePointer : MonoBehaviour {
     ///
     /// 1. Hide the laser.
     /// 2. Use a full-length laser pointer in Direct mode.
-    /// 3. Use the experimental Hybrid raycast mode.
+    /// 3. Use the Hybrid raycast mode.
     Camera,
     /// Cast a ray directly from the pointer origin.
     ///
     /// Recommended for full-length laser pointers.
     Direct,
-    /// Experimental method for casting ray.
+    /// Default method for casting ray.
     ///
     /// Combines the Camera and Direct raycast modes.
     /// Uses a Direct ray up until the CameraRayIntersectionDistance, and then switches to use
     /// a Camera ray starting from the point where the two rays intersect.
     ///
-    /// Recommended for the standard daydream controller (short laser with a distant reticle).
-    /// Like Camera mode, this prevents the reticle appearing jumpy. Additionally, it still allows
-    /// the user to target objects that are close to them by using the laser as a visual reference.
-    ///
-    /// Note: If using this mode with GvrControllerPointer, it is recommended to turn off the flag
-    /// "allowRotation" in GvrLaserVisual.
-    HybridExperimental,
+    /// Recommended for use with the standard settings of the GvrControllerPointer prefab.
+    /// This is the most versatile raycast mode. Like Camera mode, this prevents the reticle
+    /// appearing jumpy. Additionally, it still allows the user to target objects that are close
+    /// to them by using the laser as a visual reference.
+    Hybrid,
   }
 
   /// Represents a ray segment for a series of intersecting rays.
@@ -86,13 +82,26 @@ public abstract class GvrBasePointer : MonoBehaviour {
   }
 
   /// Determines which raycast mode to use for this raycaster.
-  public RaycastMode raycastMode = RaycastMode.Camera;
+  ///   • Camera - Ray is cast from the camera through the pointer.
+  ///   • Direct - Ray is cast forward from the pointer.
+  ///   • Hybrid - Begins with a Direct ray and transitions to a Camera ray.
+  [Tooltip("Determines which raycast mode to use for this raycaster.\n" +
+    " • Camera - Ray is cast from camera.\n" +
+    " • Direct - Ray is cast from pointer.\n" +
+    " • Hybrid - Transitions from Direct ray to Camera ray.")]
+  public RaycastMode raycastMode = RaycastMode.Hybrid;
 
   /// Determines the eventCamera for _GvrPointerPhysicsRaycaster_ and _GvrPointerGraphicRaycaster_.
   /// Additionaly, this is used to control what camera to use when calculating the Camera ray for
   /// the Hybrid and Camera raycast modes.
   [Tooltip("Optional: Use a camera other than Camera.main.")]
   public Camera overridePointerCamera;
+
+#if UNITY_EDITOR
+  /// Determines if the rays used for raycasting will be drawn in the editor.
+  [Tooltip("Determines if the rays used for raycasting will be drawn in the editor.")]
+  public bool drawDebugRays = false;
+#endif  // UNITY_EDITOR
 
   /// Convenience function to access what the pointer is currently hitting.
   public RaycastResult CurrentRaycastResult {
@@ -320,7 +329,7 @@ public abstract class GvrBasePointer : MonoBehaviour {
   public PointerRay GetRayForDistance(float distance) {
     PointerRay result = new PointerRay();
 
-    if (raycastMode == RaycastMode.HybridExperimental) {
+    if (raycastMode == RaycastMode.Hybrid) {
       float directDistance = CameraRayIntersectionDistance;
       if (distance < directDistance) {
         result = CalculateHybridRay(this, RaycastMode.Direct);
@@ -413,4 +422,50 @@ public abstract class GvrBasePointer : MonoBehaviour {
   protected virtual void Start() {
     GvrPointerInputModule.OnPointerCreated(this);
   }
+
+#if UNITY_EDITOR
+  protected virtual void OnDrawGizmos() {
+    if (drawDebugRays && Application.isPlaying && isActiveAndEnabled) {
+      switch (raycastMode) {
+        case RaycastMode.Camera:
+          // Camera line.
+          Gizmos.color = Color.green;
+          PointerRay pointerRay = CalculateRay(this, RaycastMode.Camera);
+          Gizmos.DrawLine(pointerRay.ray.origin, pointerRay.ray.GetPoint(pointerRay.distance));
+          Camera camera = PointerCamera;
+
+          // Pointer to intersection dotted line.
+          Vector3 intersection =
+            PointerTransform.position + (PointerTransform.forward * CameraRayIntersectionDistance);
+          UnityEditor.Handles.DrawDottedLine(PointerTransform.position, intersection, 1.0f);
+          break;
+        case RaycastMode.Direct:
+          // Direct line.
+          Gizmos.color = Color.blue;
+          pointerRay = CalculateRay(this, RaycastMode.Direct);
+          Gizmos.DrawLine(pointerRay.ray.origin, pointerRay.ray.GetPoint(pointerRay.distance));
+          break;
+        case RaycastMode.Hybrid:
+          // Direct line.
+          Gizmos.color = Color.blue;
+          pointerRay = CalculateHybridRay(this, RaycastMode.Direct);
+          Gizmos.DrawLine(pointerRay.ray.origin, pointerRay.ray.GetPoint(pointerRay.distance));
+
+          // Camera line.
+          Gizmos.color = Color.green;
+          pointerRay = CalculateHybridRay(this, RaycastMode.Camera);
+          Gizmos.DrawLine(pointerRay.ray.origin, pointerRay.ray.GetPoint(pointerRay.distance));
+
+          // Camera to intersection dotted line.
+          camera = PointerCamera;
+          if (camera != null) {
+            UnityEditor.Handles.DrawDottedLine(camera.transform.position, pointerRay.ray.origin, 1.0f);
+          }
+          break;
+        default:
+          break;
+      }
+    }
+  }
+#endif // UNITY_EDITOR
 }

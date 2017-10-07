@@ -119,7 +119,7 @@ public class GvrEditorEmulator : MonoBehaviour {
   private IEnumerator<Camera> ValidCameras() {
     for (int i = 0; i < Camera.allCameras.Length; i++) {
       Camera cam = Camera.allCameras[i];
-      if (cam.stereoTargetEye == StereoTargetEyeMask.None) {
+      if (!cam.enabled || cam.stereoTargetEye == StereoTargetEyeMask.None) {
         continue;
       }
 

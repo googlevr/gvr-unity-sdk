@@ -18,10 +18,6 @@ using System.Collections.Generic;
 
 /// This script provides shared functionality used by all Gvr raycasters.
 public abstract class GvrBasePointerRaycaster : BaseRaycaster {
-#if UNITY_EDITOR
-  public bool drawDebugRays = false;
-#endif  // UNITY_EDITOR
-
   private GvrBasePointer.PointerRay lastRay;
 
   protected GvrBasePointer.RaycastMode CurrentRaycastModeForHybrid { get; private set; }
@@ -39,7 +35,7 @@ public abstract class GvrBasePointerRaycaster : BaseRaycaster {
       return;
     }
 
-    if (pointer.raycastMode == GvrBasePointer.RaycastMode.HybridExperimental) {
+    if (pointer.raycastMode == GvrBasePointer.RaycastMode.Hybrid) {
       RaycastHybrid(pointer, eventData, resultAppendList);
     } else {
       RaycastDefault(pointer, eventData, resultAppendList);
@@ -54,13 +50,11 @@ public abstract class GvrBasePointerRaycaster : BaseRaycaster {
     lastRay = GvrBasePointer.CalculateHybridRay(pointer, CurrentRaycastModeForHybrid);
     float radius = pointer.CurrentPointerRadius;
     bool foundHit = PerformRaycast(lastRay, radius, eventData, resultAppendList);
-    MaybeDrawDebugRaysForEditor(Color.blue);
 
     if (!foundHit) {
       CurrentRaycastModeForHybrid = GvrBasePointer.RaycastMode.Camera;
       lastRay = GvrBasePointer.CalculateHybridRay(pointer, CurrentRaycastModeForHybrid);
       PerformRaycast(lastRay, radius, eventData, resultAppendList);
-      MaybeDrawDebugRaysForEditor(Color.green);
     }
   }
 
@@ -68,14 +62,5 @@ public abstract class GvrBasePointerRaycaster : BaseRaycaster {
     lastRay = GvrBasePointer.CalculateRay(pointer, pointer.raycastMode);
     float radius = pointer.CurrentPointerRadius;
     PerformRaycast(lastRay, radius, eventData, resultAppendList);
-    MaybeDrawDebugRaysForEditor(Color.red);
-  }
-
-  private void MaybeDrawDebugRaysForEditor(Color color) {
-#if UNITY_EDITOR
-    if (drawDebugRays) {
-      Debug.DrawRay(lastRay.ray.origin, lastRay.ray.direction * lastRay.distance, color);
-    }
-#endif  // UNITY_EDITOR
   }
 }

@@ -35,8 +35,9 @@ namespace Gvr.Internal {
     private bool wasHomeButton;
     private bool wasTouching;
 
-    private const float GYRO_SENSITIVITY = 0.075f;
+    private const float ROTATE_SENSITIVITY = 0.075f;
     private const float TOUCH_SENSITIVITY = 0.002f;
+    private static readonly Vector3 INVERT_Y = new Vector3(1, -1, 1);
 
     public static bool IsMouseAvailable {
       get {
@@ -129,14 +130,13 @@ namespace Gvr.Internal {
     }
 
     private void UpdateOrientation() {
-      Vector3 currentMousePosition = Input.mousePosition;
-      Vector3 mouseDelta = currentMousePosition - lastMousePosition;
+      Vector3 mouseDelta = Input.mousePosition - lastMousePosition;
+      Vector3 deltaDegrees = Vector3.Scale(mouseDelta, INVERT_Y) * ROTATE_SENSITIVITY;
 
-      state.gyro = mouseDelta * GYRO_SENSITIVITY;
-      state.gyro.y *= -1.0f;
+      state.gyro = deltaDegrees * (Mathf.Deg2Rad / Time.deltaTime);
 
-      Quaternion yaw = Quaternion.AngleAxis(state.gyro.x, Vector3.up);
-      Quaternion pitch = Quaternion.AngleAxis(state.gyro.y, Vector3.right);
+      Quaternion yaw = Quaternion.AngleAxis(deltaDegrees.x, Vector3.up);
+      Quaternion pitch = Quaternion.AngleAxis(deltaDegrees.y, Vector3.right);
       state.orientation = state.orientation * yaw * pitch;
     }
 
@@ -159,7 +159,6 @@ namespace Gvr.Internal {
       state.homeButtonState = IsHomeButtonPressed;
       state.homeButtonDown = state.homeButtonState && !wasHomeButton;
 
-      state.recentering = state.homeButtonState;
       if (!state.homeButtonState && wasHomeButton) {
         Recenter();
       }
@@ -173,7 +172,6 @@ namespace Gvr.Internal {
     private void Recenter() {
       Quaternion yawCorrection = Quaternion.AngleAxis(-state.orientation.eulerAngles.y, Vector3.up);
       state.orientation = state.orientation * yawCorrection;
-      state.recentering = false;
       state.recentered = true;
     }
 

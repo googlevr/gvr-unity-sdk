@@ -200,7 +200,8 @@ namespace Gvr.Internal {
     }
 
     ~AndroidNativeKeyboardProvider() {
-      gvr_keyboard_destroy(keyboard_context);
+      if (keyboard_context != IntPtr.Zero)
+        gvr_keyboard_destroy(keyboard_context);
     }
 
     public bool Create(GvrKeyboard.KeyboardCallback keyboardEvent) {
@@ -220,10 +221,8 @@ namespace Gvr.Internal {
       if (useRecommended) {
         worldMatrix = getRecommendedMatrix(distance);
       } else {
-       // Convert to GVR coordinates.
-       Matrix4x4 flipZ = Matrix4x4.Scale(new Vector3(1, 1, -1));
-       worldMatrix = flipZ * userMatrix * flipZ;
-       worldMatrix = worldMatrix.transpose;
+        // Convert to GVR coordinates.
+        worldMatrix = Pose3D.FlipHandedness(userMatrix).transpose;
       }
       Matrix4x4 matToSet = worldMatrix * model.transpose;
       IntPtr mat_ptr = Marshal.AllocHGlobal(Marshal.SizeOf(matToSet));
@@ -288,8 +287,10 @@ namespace Gvr.Internal {
       // Unity projection matrices are already in a form GVR needs.
       // Unity stores matrices row-major, so both get a final transpose to get
       // them column-major for GVR.
-      Matrix4x4 flipZ = Matrix4x4.Scale(new Vector3(1, 1, -1));
-      GvrKeyboardSetEyeData(eye, (flipZ * modelview.inverse).transpose.inverse, projection.transpose, rect);
+      GvrKeyboardSetEyeData(eye,
+                            (Pose3D.FLIP_Z * modelview.inverse).transpose.inverse,
+                            projection.transpose,
+                            rect);
       GL.IssuePluginEvent(renderEventFunction, eye == 0 ? renderLeftID : renderRightID);
     }
 

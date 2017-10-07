@@ -23,6 +23,11 @@ namespace Gvr.Internal {
   class EditorControllerProvider : IControllerProvider {
     private EmulatorControllerProvider emulatorControllerProvider;
     private MouseControllerProvider mouseControllerProvider;
+#if UNITY_HAS_GOOGLEVR
+    /// Helper class to get Instant Preview controller events if connected.
+    private InstantPreviewControllerProvider instantPreviewControllerProvider =
+      new InstantPreviewControllerProvider();
+#endif // UNITY_HAS_GOOGLEVR
 
     ControllerState emulatorState = new ControllerState();
     ControllerState mouseState = new ControllerState();
@@ -37,6 +42,18 @@ namespace Gvr.Internal {
     }
 
     public void ReadState(ControllerState outState) {
+#if UNITY_HAS_GOOGLEVR
+      if (InstantPreview.Instance != null
+          && InstantPreview.Instance.IsCurrentlyConnected
+          && !EmulatorManager.Instance.Connected) {
+        // Uses Instant Preview to get controller state if connected.
+        instantPreviewControllerProvider.ReadState(outState);
+        return;
+      }
+#endif // UNITY_HAS_GOOGLEVR
+
+      // If Instant Preview is not connected, tries to use the emulator or
+      // mouse.
       emulatorControllerProvider.ReadState(emulatorState);
       mouseControllerProvider.ReadState(mouseState);
 

@@ -19,7 +19,7 @@ using UnityEngine.VR;
 // Usage: Set GvrControllerPointer > Controller as the pointer field, and
 // the camera to recenter (e.g. Main Camera).
 public class GvrRecenterOnlyController : MonoBehaviour {
-  private Quaternion recenteringOffset = Quaternion.identity;
+  private Quaternion yawCorrection = Quaternion.identity;
 
   [Tooltip("The controller to recenter")]
   public GameObject pointer;
@@ -46,24 +46,31 @@ public class GvrRecenterOnlyController : MonoBehaviour {
         }
 #endif
     if (GvrControllerInput.Recentered) {
-      pointer.transform.rotation = recenteringOffset;
-      cam.transform.parent.rotation = recenteringOffset;
+      pointer.transform.rotation = yawCorrection;
+      cam.transform.parent.rotation = yawCorrection;
       return;
     }
 
-#if !UNITY_EDITOR
+#if UNITY_EDITOR
+    // Compatibility for Instant Preview.
+    if (Gvr.Internal.InstantPreview.Instance != null &&
+      Gvr.Internal.InstantPreview.Instance.enabled &&
+      (GvrControllerInput.HomeButtonDown || GvrControllerInput.HomeButtonState)) {
+      return;
+    }
+#else  // !UNITY_EDITOR
     if (GvrControllerInput.HomeButtonDown || GvrControllerInput.HomeButtonState) {
       return;
     }
-#endif  // !UNITY_EDITOR
-    recenteringOffset = Quaternion.Euler(0, cam.transform.rotation.eulerAngles.y, 0);
+#endif  // UNITY_EDITOR
+    yawCorrection = Quaternion.Euler(0, cam.transform.rotation.eulerAngles.y, 0);
   }
 
   void OnDisable() {
-    recenteringOffset = Quaternion.identity;
+    yawCorrection = Quaternion.identity;
     if (cam != null && pointer != null) {
-      pointer.transform.rotation = recenteringOffset;
-      cam.transform.parent.rotation = recenteringOffset;
+      pointer.transform.rotation = yawCorrection;
+      cam.transform.parent.rotation = yawCorrection;
     }
   }
 

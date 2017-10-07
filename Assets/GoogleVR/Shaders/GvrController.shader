@@ -38,14 +38,6 @@ Shader "GoogleVR/Unlit/Controller" {
       /// The size of the touch display.  A value of 1 sets the radius to equal the touchpad radius
       #define _GVR_DISPLAY_RADIUS .25
 
-      /// The color constants for the battery
-      #define _GVR_BATTERY_CRITICAL_COLOR half3(1,0,0)
-      #define _GVR_BATTERY_LOW_COLOR half3(1,0.6823,0)
-      #define _GVR_BATTERY_MED_COLOR half3(0,1,0.588)
-      #define _GVR_BATTERY_HIGH_COLOR half3(0,1,0.588)
-      #define _GVR_BATTERY_FULL_COLOR half3(0,1,0.588)
-      #define _GVR_BATTERY_CHARGING_COLOR half3(0,1,0.588)
-
       // How opaque is the battery indicator when illuminated
       #define _GVR_BATTERY_ACTIVE_ALPHA 0.9
 
@@ -65,36 +57,6 @@ Shader "GoogleVR/Unlit/Controller" {
       /// The radius of the touchpad in UV space, based on the geometry
       /// Only change this value if you also change the UV layout of the mesh
       #define _GVR_TOUCHPAD_RADIUS .139
-
-      /// Battery upper threshold values.  These correspond to the values passed from C#
-      #define _BATTERY_CHARGING 0
-      #define _BATTERY_UNKNOWN 0.1
-      #define _BATTERY_CRITICAL 0.3
-      #define _BATTERY_LOW 0.5
-      #define _BATTERY_MED 0.7
-      #define _BATTERY_HIGH 0.9
-
-
-      // These are the UV coordinates that define the various controller regions
-      // Only change these if you are modifying the UV layout,
-      // and comfortable changing the shader logic below
-      #define _BATTERY_UV_X_MIN 0.3
-      #define _BATTERY_UV_Y_MAX 0.11
-
-      #define _BATTERY_UV_X_MAX_1 0.4
-      #define _BATTERY_UV_X_MAX_2 0.5
-      #define _BATTERY_UV_X_MAX_3 0.6
-      #define _BATTERY_UV_X_MAX_4 0.7
-      #define _BATTERY_UV_X_MAX_5 0.8
-      #define _BATTERY_UV_X_CHARGE_OFFSET 0.3
-
-      #define _SYSTEM_UV_X_MAX 0.2
-      #define _SYSTEM_UV_Y_MAX 0.5
-
-      #define _APP_UV_X_MAX 0.2
-      #define _APP_UV_Y_MAX 0.7
-
-      #define _TOUCHPAD_UV_X_MAX 0.295
 
       struct appdata {
         float4 vertex : POSITION;
@@ -118,6 +80,7 @@ Shader "GoogleVR/Unlit/Controller" {
       half4 _GvrTouchPadColor;
       half4 _GvrAppButtonColor;
       half4 _GvrSystemButtonColor;
+      half4 _GvrBatteryColor;
       half4 _GvrTouchInfo;//xy position, z touch duration, w battery info
 
       v2f vert (appdata v) {
@@ -129,107 +92,43 @@ Shader "GoogleVR/Unlit/Controller" {
         o.uv = TRANSFORM_TEX(v.uv, _MainTex);
         o.color = half4(0,0,0,0);
         o.touchVector = half2(0,0);
-        o.alpha = 1;
 
-        /// Battery
-        if(v.uv.y < _BATTERY_UV_Y_MAX && v.uv.x > _BATTERY_UV_X_MIN){
-          o.alpha =0;
 
-          //charging
-          if(_GvrTouchInfo.w < _BATTERY_CHARGING){
-            o.color.rgb = _GVR_BATTERY_CHARGING_COLOR;
-            o.color.a = _GVR_BATTERY_ACTIVE_ALPHA;
-            if(v.uv.x > _BATTERY_UV_X_MAX_2 && v.uv.x < _BATTERY_UV_X_MAX_3){
-              o.uv.x += _BATTERY_UV_X_CHARGE_OFFSET;
-            }
-          }
-          //unknown
-          else if(_GvrTouchInfo.w < _BATTERY_UNKNOWN){
+        half batteryOrController = saturate( 10.0 * (v.color.a - 0.6) );
+        half batteryMask = saturate( 10.0 * (1 - v.color.a) );
+        half batteryLevelMask = saturate( 20.0 * (v.color.a - _GvrTouchInfo.w) );
+        o.alpha = batteryOrController;
+        o.color.a = _GvrBatteryColor.a * batteryMask * (batteryLevelMask * _GVR_BATTERY_ACTIVE_ALPHA + (1-batteryLevelMask)*_GVR_BATTERY_OFF_ALPHA);
+        o.color.rgb = batteryMask * (batteryLevelMask * _GvrBatteryColor.rgb);
 
-          }
-          //critical low
-          else if(_GvrTouchInfo.w < _BATTERY_CRITICAL){
-            if(v.uv.x < _BATTERY_UV_X_MAX_1){
-              o.color.rgb = _GVR_BATTERY_CRITICAL_COLOR;
-              o.color.a = _GVR_BATTERY_ACTIVE_ALPHA;
-            }
-            else{
-              o.color.rgb = 0;
-              o.color.a = _GVR_BATTERY_OFF_ALPHA;
-            }
-          }
-          //low
-          else if(_GvrTouchInfo.w < _BATTERY_LOW){
-            if(v.uv.x < _BATTERY_UV_X_MAX_2){
-              o.color.rgb = _GVR_BATTERY_LOW_COLOR;
-              o.color.a = _GVR_BATTERY_ACTIVE_ALPHA;
-            }
-            else{
-              o.color.rgb = 0;
-              o.color.a = _GVR_BATTERY_OFF_ALPHA;
-            }
-          }
-          //med
-          else if(_GvrTouchInfo.w < _BATTERY_MED){
-            if(v.uv.x < _BATTERY_UV_X_MAX_3){
-              o.color.rgb = _GVR_BATTERY_MED_COLOR;
-              o.color.a = _GVR_BATTERY_ACTIVE_ALPHA;
-            }
-            else{
-              o.color.rgb = 0;
-              o.color.a = _GVR_BATTERY_OFF_ALPHA;
-            }
-          }
-          //high
-          else if(_GvrTouchInfo.w < _BATTERY_HIGH){
-            if(v.uv.x < _BATTERY_UV_X_MAX_4){
-              o.color.rgb = _GVR_BATTERY_HIGH_COLOR;
-              o.color.a = _GVR_BATTERY_ACTIVE_ALPHA;
-            }
-            else{
-              o.color.rgb = 0;
-              o.color.a = _GVR_BATTERY_OFF_ALPHA;
-            }
-          }
-          //full
-          else{
-            o.color.rgb = _GVR_BATTERY_FULL_COLOR;
-            o.color.a = _GVR_BATTERY_ACTIVE_ALPHA;
-          }
+        // v.color.r = Touchpad, v.color.g = AppButton, v.color.b = SystemButton, v.color.a = BatteryIndicator
+        // Update touch vector info, but only if in the touchpad region.
 
-        }
-        /// System Button
-        else if( v.uv.y < _SYSTEM_UV_Y_MAX){
-          if(v.uv.x < _SYSTEM_UV_X_MAX){
-            o.color = _GvrSystemButtonColor;
-            o.color.rgb = _GvrControllerAlpha.w * o.color.rgb;
-            o.color.a = ( _GvrControllerAlpha.w);
+        //This is the distance between the scaled center of the touchpad in UV space, and the input coords
+        half2 touchPosition = ((v.uv - _GVR_TOUCHPAD_CENTER)/_GVR_TOUCHPAD_RADIUS - _GvrTouchInfo.xy);
 
-            vertex4.y -= _BUTTON_PRESS_DEPTH*_GvrControllerAlpha.w;
-          }
-        }
-        /// App Button
-        else if(v.uv.y < _APP_UV_Y_MAX){
-          if(v.uv.x < _APP_UV_X_MAX){
-            o.color = _GvrAppButtonColor;
-            o.color.rgb = _GvrControllerAlpha.z * o.color.rgb;
-            o.color.a = ( _GvrControllerAlpha.z);
-            vertex4.y -= _BUTTON_PRESS_DEPTH*_GvrControllerAlpha.z;
-          }
-        }
-        /// Touchpad
-        else{
-          if(v.uv.x < _TOUCHPAD_UV_X_MAX){
-            half2 touchPosition = ((v.uv - _GVR_TOUCHPAD_CENTER)/_GVR_TOUCHPAD_RADIUS - _GvrTouchInfo.xy);
+        // the duration of a press + minimum radius
+        half scaledInput = _GvrTouchInfo.z + _GVR_DISPLAY_RADIUS;
 
-            half scaledInput = _GvrTouchInfo.z + .25;
-            half bounced = 2 * (2 * scaledInput - scaledInput*scaledInput -.4375);
-            o.touchVector = (2-bounced)*( (1 - _GvrControllerAlpha.y)/_GVR_DISPLAY_RADIUS ) *touchPosition;
-            o.color = _GvrTouchPadColor;
-            o.color.rgb = _GvrTouchInfo.z *o.color.rgb;
-            o.color.a = (_GvrTouchInfo.z);
-          }
-        }
+        // Apply a cubic function, but make sure when press duration =1 , we cancel out the min radius
+        half bounced = 2 * (2 * scaledInput - scaledInput*scaledInput ) -
+          (1 - 2.0*_GVR_DISPLAY_RADIUS*_GVR_DISPLAY_RADIUS);
+
+        o.touchVector = v.color.r * ((2-bounced)*( (1 - _GvrControllerAlpha.y)/_GVR_DISPLAY_RADIUS ) *touchPosition);
+
+        // Apply colors based on masked values.
+        o.color.rgb += v.color.r * _GvrTouchInfo.z * _GvrTouchPadColor.rgb +
+          v.color.g * _GvrControllerAlpha.z * _GvrAppButtonColor.rgb +
+          v.color.b * _GvrControllerAlpha.w * _GvrSystemButtonColor.rgb;
+
+        o.color.a += v.color.r * _GvrTouchInfo.z +
+          v.color.g * _GvrControllerAlpha.z +
+          v.color.b * _GvrControllerAlpha.w;
+
+        // Animate position based on masked values.
+        vertex4.y -= v.color.g * _BUTTON_PRESS_DEPTH*_GvrControllerAlpha.z +
+          v.color.b *  _BUTTON_PRESS_DEPTH*_GvrControllerAlpha.w;
+
         o.vertex = UnityObjectToClipPos(vertex4);
 
         return o;

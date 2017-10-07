@@ -122,10 +122,6 @@ namespace Gvr.Internal {
         lock (state) {
           state.homeButtonState = buttonEvent.down;
           state.homeButtonDown = buttonEvent.down;
-          if (buttonEvent.down) {
-            // Started the recentering gesture.
-            state.recentering = true;
-          }
         }
         if (!buttonEvent.down) {
           // Finished the recentering gesture. Recenter controller.
@@ -175,7 +171,6 @@ namespace Gvr.Internal {
         // to undo the current rotation's yaw.
         yawCorrection = Quaternion.AngleAxis(-lastRawOrientation.eulerAngles.y, Vector3.up);
         state.orientation = Quaternion.identity;
-        state.recentering = false;
         state.recentered = true;
       }
     }

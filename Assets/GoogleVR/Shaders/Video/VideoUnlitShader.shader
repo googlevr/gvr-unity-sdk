@@ -45,30 +45,30 @@ Shader "GoogleVR/Video Unlit Shader" {
         precision mediump float;
 
         #ifdef VERTEX
-          uniform vec4 _MainTex_ST;
+          uniform mat4 video_matrix;
           uniform int unity_StereoEyeIndex;
           varying vec2 uv;
 
           void main() {
             gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
-            uv = gl_MultiTexCoord0.xy;
+            vec4 untransformedUV = gl_MultiTexCoord0;
             #ifdef FLIP_X
-              uv.x = 1.0 - uv.x;
+              untransformedUV.x = 1.0 - untransformedUV.x;
             #endif  // FLIP_X
             #ifdef _STEREOMODE_TOPBOTTOM
-              uv.y *= 0.5;
+              untransformedUV.y *= 0.5;
               if (unity_StereoEyeIndex == 0) {
-                uv.y += 0.5;
+                untransformedUV.y += 0.5;
               }
             #endif  // _STEREOMODE_TOPBOTTOM
             #ifdef _STEREOMODE_LEFTRIGHT
-              uv.x *= 0.5;
+              untransformedUV.x *= 0.5;
               if (unity_StereoEyeIndex != 0) {
-                uv.x += 0.5;
+                untransformedUV.x += 0.5;
               }
             #endif  // _STEREOMODE_LEFTRIGHT
-            // Apply video texture transform from the video decoder.
-            uv = uv * _MainTex_ST.xy + _MainTex_ST.zw;
+
+            uv = (video_matrix * untransformedUV).xy;
           }
         #endif  // VERTEX
 

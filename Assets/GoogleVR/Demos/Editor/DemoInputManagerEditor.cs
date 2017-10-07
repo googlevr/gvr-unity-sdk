@@ -37,6 +37,12 @@ public class DemoInputManagerEditor : Editor {
   public override void OnInspectorGUI() {
     serializedObject.Update();
 
+    // Add clickable script field, as would have been provided by DrawDefaultInspector()
+    MonoScript script = MonoScript.FromMonoBehaviour (target as MonoBehaviour);
+    EditorGUI.BeginDisabledGroup (true);
+    EditorGUILayout.ObjectField ("Script", script, typeof(MonoScript), false);
+    EditorGUI.EndDisabledGroup ();
+
     EditorGUILayout.PropertyField(gvrControllerMainProp);
     EditorGUILayout.PropertyField(gvrControllerPointerProp);
     EditorGUILayout.PropertyField(gvrReticlePointerProp);

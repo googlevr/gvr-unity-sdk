@@ -28,10 +28,12 @@ public class DemoInputManager : MonoBehaviour {
   private const string CONTROLLER_CONNECTING_MESSAGE = "Controller connecting...";
   private const string CONTROLLER_DISCONNECTED_MESSAGE = "Controller disconnected";
   private const string CONTROLLER_SCANNING_MESSAGE =  "Controller scanning...";
+  private const string NON_GVR_PLATFORM =
+    "Please select a supported Google VR platform via 'Build Settings > Android | iOS > Switch Platform'\n";
   private const string VR_SUPPORT_NOT_CHECKED =
     "Please make sure 'Player Settings > Virtual Reality Supported' is checked\n";
   private const string EMPTY_VR_SDK_WARNING_MESSAGE =
-    "Please add Daydream or Cardboard under 'Player Settings > Virtual Reality SDKs'\n";
+    "Please add 'Daydream' or 'Cardboard' under 'Player Settings > Virtual Reality SDKs'\n";
 
   // Java class, method, and field constants.
   private const int ANDROID_MIN_DAYDREAM_API = 24;
@@ -204,6 +206,11 @@ public class DemoInputManager : MonoBehaviour {
       return;
     }
 
+#if !UNITY_ANDROID && !UNITY_IOS
+    messageText.text = NON_GVR_PLATFORM;
+    messageCanvas.SetActive(true);
+    return;
+#else
 #if UNITY_EDITOR
     if (!UnityEditor.PlayerSettings.virtualRealitySupported) {
       messageText.text = VR_SUPPORT_NOT_CHECKED;
@@ -257,6 +264,7 @@ public class DemoInputManager : MonoBehaviour {
     }
     messageCanvas.SetActive(isVrSdkListEmpty ||
                             (GvrControllerInput.State != GvrConnectionState.Connected));
+#endif  // !UNITY_ANDROID && !UNITY_IOS
   }
 
   private void SetVRInputMechanism() {

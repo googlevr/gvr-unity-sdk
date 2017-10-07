@@ -325,7 +325,7 @@ public static class GvrAudio {
   // Converts given |position| and |rotation| from Unity space to audio space.
   private static void ConvertAudioTransformFromUnity (ref Vector3 position,
                                                       ref Quaternion rotation) {
-    transformMatrix = flipZ * Matrix4x4.TRS(position, rotation, Vector3.one) * flipZ;
+    transformMatrix = Pose3D.FlipHandedness(Matrix4x4.TRS(position, rotation, Vector3.one));
     position = transformMatrix.GetColumn(3);
     rotation = Quaternion.LookRotation(transformMatrix.GetColumn(2), transformMatrix.GetColumn(1));
   }
@@ -359,9 +359,6 @@ public static class GvrAudio {
     roomProperties.reflectionScalar = room.reflectivity;
     return roomProperties;
   }
-
-  // Right-handed to left-handed matrix converter (and vice versa).
-  private static readonly Matrix4x4 flipZ = Matrix4x4.Scale(new Vector3(1.0f, 1.0f, -1.0f));
 
   // Boundaries instance to be used in room detection logic.
   private static Bounds bounds = new Bounds(Vector3.zero, Vector3.zero);

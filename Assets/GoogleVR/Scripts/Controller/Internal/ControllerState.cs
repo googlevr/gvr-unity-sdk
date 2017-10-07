@@ -34,7 +34,6 @@ namespace Gvr.Internal {
     internal Vector2 touchPos = Vector2.zero;
     internal bool touchDown = false;
     internal bool touchUp = false;
-    internal bool recentering = false;
     internal bool recentered = false;
 
     internal bool clickButtonState = false;
@@ -45,8 +44,8 @@ namespace Gvr.Internal {
     internal bool appButtonDown = false;
     internal bool appButtonUp = false;
 
-    // Always false for the emulator.
     internal bool homeButtonDown = false;
+    internal bool homeButtonUp = false;
     internal bool homeButtonState = false;
 
     internal string errorDetails = "";
@@ -65,7 +64,6 @@ namespace Gvr.Internal {
       touchPos = other.touchPos;
       touchDown = other.touchDown;
       touchUp = other.touchUp;
-      recentering = other.recentering;
       recentered = other.recentered;
       clickButtonState = other.clickButtonState;
       clickButtonDown = other.clickButtonDown;
@@ -74,6 +72,7 @@ namespace Gvr.Internal {
       appButtonDown = other.appButtonDown;
       appButtonUp = other.appButtonUp;
       homeButtonDown = other.homeButtonDown;
+      homeButtonUp = other.homeButtonUp;
       homeButtonState = other.homeButtonState;
       errorDetails = other.errorDetails;
       gvrPtr = other.gvrPtr;
@@ -92,6 +91,7 @@ namespace Gvr.Internal {
       appButtonDown = false;
       appButtonUp = false;
       homeButtonDown = false;
+      homeButtonUp = false;
     }
   }
 }
