@@ -23,9 +23,12 @@ namespace Gvr.Internal {
   /// The right mouse button is used for the appButton.
   /// The middle mouse button is used for the homeButton.
   class MouseControllerProvider : IControllerProvider {
+    private const string AXIS_MOUSE_X = "Mouse X";
+    private const string AXIS_MOUSE_Y = "Mouse Y";
+
     private ControllerState state = new ControllerState();
 
-    private Vector3 lastMousePosition;
+    private Vector2 mouseDelta = new Vector2();
 
     /// Need to store the state of the buttons from the previous frame.
     /// This is because Input.GetMouseButtonDown and Input.GetMouseButtonUp
@@ -35,8 +38,8 @@ namespace Gvr.Internal {
     private bool wasHomeButton;
     private bool wasTouching;
 
-    private const float ROTATE_SENSITIVITY = 0.075f;
-    private const float TOUCH_SENSITIVITY = 0.002f;
+    private const float ROTATE_SENSITIVITY = 4.5f;
+    private const float TOUCH_SENSITIVITY = .12f;
     private static readonly Vector3 INVERT_Y = new Vector3(1, -1, 1);
 
     public static bool IsMouseAvailable {
@@ -95,9 +98,10 @@ namespace Gvr.Internal {
     public void OnResume() {}
 
     private void UpdateState() {
+      GvrCursorHelper.ControllerEmulationActive = IsMouseAvailable;
+
       if (!IsMouseAvailable) {
         ClearState();
-        lastMousePosition = Input.mousePosition;
         return;
       }
 
@@ -108,19 +112,20 @@ namespace Gvr.Internal {
 
       UpdateButtonStates();
 
+      mouseDelta.Set(
+        Input.GetAxis(AXIS_MOUSE_X),
+        Input.GetAxis(AXIS_MOUSE_Y)
+      );
+
       if (state.isTouching) {
         UpdateTouchPos();
       } else {
         UpdateOrientation();
       }
-
-      lastMousePosition = Input.mousePosition;
     }
 
     private void UpdateTouchPos() {
       Vector3 currentMousePosition = Input.mousePosition;
-      Vector3 mouseDelta = currentMousePosition - lastMousePosition;
-
       Vector2 touchDelta = mouseDelta * TOUCH_SENSITIVITY;
       touchDelta.y *= -1.0f;
 
@@ -130,7 +135,6 @@ namespace Gvr.Internal {
     }
 
     private void UpdateOrientation() {
-      Vector3 mouseDelta = Input.mousePosition - lastMousePosition;
       Vector3 deltaDegrees = Vector3.Scale(mouseDelta, INVERT_Y) * ROTATE_SENSITIVITY;
 
       state.gyro = deltaDegrees * (Mathf.Deg2Rad / Time.deltaTime);

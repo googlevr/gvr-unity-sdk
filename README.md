@@ -11,14 +11,14 @@ For first time users, see the Get Started Guides for [Android Cardboard](https:/
 
 Please note, we do not accept pull requests.
 
-## Migration to Unity 5.6 from GVR Unity SDK 1.40 or lower
-__Unity versions 5.6 or newer are required as of v1.40 of the GVR Unity SDK.__
+## Migration to Unity 5.6 from GVR SDK for Unity 1.40 or lower
+__Unity versions 5.6 or newer are required as of v1.40 of the GVR SDK for Unity.__
 
 Migration steps:
 
-1. Update the GVR Unity SDK to [1.40](https://github.com/googlevr/gvr-unity-sdk/blob/a3d1033260dab57cb0f4a62a770796fbd09fe37a/GoogleVRForUnity.unitypackage).
+1. Update the GVR SDK for Unity to [1.40](https://github.com/googlevr/gvr-unity-sdk/blob/a3d1033260dab57cb0f4a62a770796fbd09fe37a/GoogleVRForUnity.unitypackage).
 2. Migrate to Unity 5.6.0f3, or any newer version. The SDK will import or remove the unnecessary GVR libraries.
-3. Update the GVR Unity SDK to 1.70 (or latest).
+3. Update the GVR SDK for Unity to 1.70 (or latest).
 
 ## Usage Guide
 As of the 1.70 release, the `gvr-unity-sdk` git repo can be cloned and used directly in a Unity project.
@@ -27,8 +27,8 @@ As of the 1.70 release, the `gvr-unity-sdk` git repo can be cloned and used dire
 * __Samples__: [Daydream Elements](https://github.com/googlevr/daydream-elements)
 * __Workflow__: [Instant Preview](https://github.com/googlevr/gvr-instant-preview)
 
-## Pod update to the latest GVR iOS SDK
-As of Unity 5.6, the generated Cocoapod can be updated to the latest GVR iOS SDK by following these steps.
+## Pod update to the latest GVR SDK for iOS
+As of Unity 5.6, the generated Cocoapod can be updated to the latest GVR SDK for iOS by following these steps.
 
 * Build an XCode project from Unity.
 * In a terminal, change directories into the XCode project folder.
