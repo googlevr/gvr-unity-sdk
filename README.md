@@ -1,6 +1,3 @@
-
-Matches '1. Open a terminal window and run the following commands from the Xcode project' at line 46
-52
 # Google VR SDK for Unity
 
 Use Unity to build virtual reality apps for Android and iOS.
