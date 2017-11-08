@@ -12,53 +12,55 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using UnityEngine;
-using System.Collections;
+namespace GoogleVR.VideoDemo {
+  using UnityEngine;
+  using System.Collections;
 
-public class MenuHandler : MonoBehaviour {
-  public GameObject[] menuObjects;
+  public class MenuHandler : MonoBehaviour {
+    public GameObject[] menuObjects;
 
-  public void HideMenu() {
-    foreach (GameObject m in menuObjects) {
-      Renderer r = m.GetComponent<Renderer>();
-      if (r != null) {
-        r.enabled = false;
-      } else {
-        m.SetActive(false);
-      }
-      StartCoroutine(DoFade());
-    }
-  }
-
-  public void ShowMenu() {
-    foreach (GameObject m in menuObjects) {
-      Renderer r = m.GetComponent<Renderer>();
-      if (r != null) {
-        r.enabled = true;
-      } else {
-        m.SetActive(true);
+    public void HideMenu() {
+      foreach (GameObject m in menuObjects) {
+        Renderer r = m.GetComponent<Renderer>();
+        if (r != null) {
+          r.enabled = false;
+        } else {
+          m.SetActive(false);
+        }
+        StartCoroutine(DoFade());
       }
     }
-    StartCoroutine(DoAppear());
-  }
 
-  IEnumerator DoAppear() {
-    CanvasGroup cg = GetComponent<CanvasGroup>();
-    while (cg.alpha < 1.0) {
-      cg.alpha += Time.deltaTime * 2;
-      yield return null;
+    public void ShowMenu() {
+      foreach (GameObject m in menuObjects) {
+        Renderer r = m.GetComponent<Renderer>();
+        if (r != null) {
+          r.enabled = true;
+        } else {
+          m.SetActive(true);
+        }
+      }
+      StartCoroutine(DoAppear());
     }
-    cg.interactable = true;
-    yield break;
-  }
 
-  IEnumerator DoFade() {
-    CanvasGroup cg = GetComponent<CanvasGroup>();
-    while (cg.alpha > 0) {
-      cg.alpha -= Time.deltaTime;
-      yield return null;
+    IEnumerator DoAppear() {
+      CanvasGroup cg = GetComponent<CanvasGroup>();
+      while (cg.alpha < 1.0) {
+        cg.alpha += Time.deltaTime * 2;
+        yield return null;
+      }
+      cg.interactable = true;
+      yield break;
     }
-    cg.interactable = false;
-    yield break;
+
+    IEnumerator DoFade() {
+      CanvasGroup cg = GetComponent<CanvasGroup>();
+      while (cg.alpha > 0) {
+        cg.alpha -= Time.deltaTime;
+        yield return null;
+      }
+      cg.interactable = false;
+      yield break;
+    }
   }
 }

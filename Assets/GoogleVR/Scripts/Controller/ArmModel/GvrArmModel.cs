@@ -13,7 +13,6 @@
 // limitations under the License.
 
 using UnityEngine;
-using UnityEngine.VR;
 using System.Collections;
 
 /// Standard implementation for a mathematical model to make the virtual controller approximate the
@@ -197,6 +196,11 @@ public class GvrArmModel : GvrBaseArmModel{
     // Register the controller update listener.
     GvrControllerInput.OnControllerInputUpdated += OnControllerInputUpdated;
 
+    // Force the torso direction to match the gaze direction immediately.
+    // Otherwise, the controller will not be positioned correctly if the ArmModel was enabled
+    // when the user wasn't facing forward.
+    UpdateTorsoDirection(true);
+
     // Update immediately to avoid a frame delay before the arm model is applied.
     OnControllerInputUpdated();
   }
@@ -207,7 +211,7 @@ public class GvrArmModel : GvrBaseArmModel{
 
   protected virtual void OnControllerInputUpdated() {
     UpdateHandedness();
-    UpdateTorsoDirection();
+    UpdateTorsoDirection(false);
     UpdateNeckPosition();
     ApplyArmModel();
     UpdateTransparency();
@@ -226,16 +230,20 @@ public class GvrArmModel : GvrBaseArmModel{
     }
   }
 
-  protected virtual void UpdateTorsoDirection() {
+  protected virtual void UpdateTorsoDirection(bool forceImmediate) {
     // Determine the gaze direction horizontally.
-    Vector3 gazeDirection = GetHeadForward();
+    Vector3 gazeDirection = GvrVRHelpers.GetHeadForward();
     gazeDirection.y = 0.0f;
     gazeDirection.Normalize();
 
     // Use the gaze direction to update the forward direction.
-    float angularVelocity = GvrControllerInput.Gyro.magnitude;
-    float gazeFilterStrength = Mathf.Clamp((angularVelocity - 0.2f) / 45.0f, 0.0f, 0.1f);
-    torsoDirection = Vector3.Slerp(torsoDirection, gazeDirection, gazeFilterStrength);
+    if (GvrControllerInput.Recentered || forceImmediate) {
+      torsoDirection = gazeDirection;
+    } else {
+      float angularVelocity = GvrControllerInput.Gyro.magnitude;
+      float gazeFilterStrength = Mathf.Clamp((angularVelocity - 0.2f) / 45.0f, 0.0f, 0.1f);
+      torsoDirection = Vector3.Slerp(torsoDirection, gazeDirection, gazeFilterStrength);
+    }
 
     // Calculate the torso rotation.
     torsoRotation = Quaternion.FromToRotation(Vector3.forward, torsoDirection);
@@ -245,7 +253,7 @@ public class GvrArmModel : GvrBaseArmModel{
     if (isLockedToNeck) {
       // Returns the center of the eyes.
       // However, we actually want to lock to the center of the head.
-      neckPosition = GetHeadPosition();
+      neckPosition = GvrVRHelpers.GetHeadPosition();
 
       // Find the approximate neck position by Applying an inverse neck model.
       // This transforms the head position to the center of the head and also accounts
@@ -325,7 +333,7 @@ public class GvrArmModel : GvrBaseArmModel{
 
   /// Transform the head position into an approximate neck position.
   protected virtual Vector3 ApplyInverseNeckModel(Vector3 headPosition) {
-    Quaternion headRotation = GetHeadRotation();
+    Quaternion headRotation = GvrVRHelpers.GetHeadRotation();
     Vector3 rotatedNeckOffset =
       headRotation * NECK_OFFSET - NECK_OFFSET.y * Vector3.up;
     headPosition -= rotatedNeckOffset;
@@ -341,7 +349,7 @@ public class GvrArmModel : GvrBaseArmModel{
     Vector3 offsetControllerPosition = controllerPosition + (controllerForward * fadeControllerOffset);
     Vector3 controllerRelativeToHead = offsetControllerPosition - neckPosition;
 
-    Vector3 headForward = GetHeadForward();
+    Vector3 headForward = GvrVRHelpers.GetHeadForward();
     float distanceToHeadForward = Vector3.Scale(controllerRelativeToHead, headForward).magnitude;
     Vector3 headRight = Vector3.Cross(headForward, Vector3.up);
     float distanceToHeadSide = Vector3.Scale(controllerRelativeToHead, headRight).magnitude;
@@ -385,46 +393,34 @@ public class GvrArmModel : GvrBaseArmModel{
     xyRotation = Quaternion.FromToRotation(Vector3.forward, controllerForward);
   }
 
-  protected Vector3 GetHeadForward() {
-    return GetHeadRotation() * Vector3.forward;
-  }
-
-  protected Quaternion GetHeadRotation() {
-#if UNITY_EDITOR
-    return GvrEditorEmulator.HeadRotation;
-#else
-    return InputTracking.GetLocalRotation(VRNode.Head);
-#endif // UNITY_EDITOR
-  }
-
-  protected Vector3 GetHeadPosition() {
-#if UNITY_EDITOR
-    return GvrEditorEmulator.HeadPosition;
-#else
-    return InputTracking.GetLocalPosition(VRNode.Head);
-#endif // UNITY_EDITOR
-  }
-
 #if UNITY_EDITOR
   protected virtual void OnDrawGizmosSelected() {
     if (!enabled) {
       return;
     }
 
-    Gizmos.color = Color.red;
+    if (transform.parent == null) {
+      return;
+    }
+
     Vector3 worldShoulder = transform.parent.TransformPoint(ShoulderPosition);
+    Vector3 worldElbow = transform.parent.TransformPoint(elbowPosition);
+    Vector3 worldwrist = transform.parent.TransformPoint(wristPosition);
+    Vector3 worldcontroller = transform.parent.TransformPoint(controllerPosition);
+
+
+    Gizmos.color = Color.red;
     Gizmos.DrawSphere(worldShoulder, 0.02f);
+    Gizmos.DrawLine(worldShoulder, worldElbow);
 
     Gizmos.color = Color.green;
-    Vector3 worldElbow = transform.parent.TransformPoint(elbowPosition);
     Gizmos.DrawSphere(worldElbow, 0.02f);
+    Gizmos.DrawLine(worldElbow, worldwrist);
 
     Gizmos.color = Color.cyan;
-    Vector3 worldwrist = transform.parent.TransformPoint(wristPosition);
     Gizmos.DrawSphere(worldwrist, 0.02f);
 
     Gizmos.color = Color.blue;
-    Vector3 worldcontroller = transform.parent.TransformPoint(controllerPosition);
     Gizmos.DrawSphere(worldcontroller, 0.02f);
   }
 #endif // UNITY_EDITOR

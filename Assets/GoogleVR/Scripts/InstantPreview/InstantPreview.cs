@@ -370,21 +370,24 @@ namespace Gvr.Internal {
       EnsureEyeCamera(camera, ":Instant Preview Right", new Rect(0.5f, 0.0f, 0.5f, 1.0f), ref eyeCamera.rightEyeCamera);
     }
 
-    private void CheckRemoveCameras(Camera[] cameras) {
+    private void CheckRemoveCameras(List<Camera> cameras) {
       // Any cameras that were here last frame and not here this frame need removing from eyeCameras.
       foreach (Camera oldCamera in camerasLastFrame) {
 
-        if (!UnityEditor.ArrayUtility.Contains(cameras, oldCamera)) {
+        if (!cameras.Contains(oldCamera)) {
+          // Destroys the eye cameras.
+          EyeCamera curEyeCamera;
+          if (eyeCameras.TryGetValue(oldCamera, out curEyeCamera)) {
+            Destroy(curEyeCamera.leftEyeCamera.gameObject);
+            Destroy(curEyeCamera.rightEyeCamera.gameObject);
+          }
+
+          // Removes eye camera entry from dictionary.
           eyeCameras.Remove(oldCamera);
         }
       }
 
-      camerasLastFrame.Clear();
-      foreach (Camera camera in cameras) {
-        if (camera.stereoTargetEye != StereoTargetEyeMask.None) {
-          camerasLastFrame.Add(camera);
-        }
-      }
+      camerasLastFrame = cameras;
     }
 
     bool EnsureCameras() {
@@ -399,7 +402,7 @@ namespace Gvr.Internal {
       }
 
       // Find all the cameras and make sure any non-Instant Preview cameras have left/right eyes attached.
-      var cameras = Camera.allCameras;
+      var cameras = new List<Camera>(ValidCameras());
       CheckRemoveCameras(cameras);
 
       // Now go and make sure that all cameras that are to be driven by Instant Preview have the correct setup.
@@ -410,14 +413,7 @@ namespace Gvr.Internal {
           continue;
         }
 
-        // Makes sure this isn't actually an eye camera so that it isn't called recursively.
-        var parent = camera.transform.parent;
-        var parentCamera = (parent != null) ? parent.GetComponent<Camera>() : null;
-        var isEyeCamera = (parentCamera != null) && eyeCameras.ContainsKey(parentCamera);
-
-        if (!isEyeCamera && camera.stereoTargetEye != StereoTargetEyeMask.None) {
-          EnsureCamera(camera);
-        }
+        EnsureCamera(camera);
       }
 
       return true;
@@ -543,6 +539,32 @@ namespace Gvr.Internal {
         errors = errorBuilder.ToString().Trim();
       }
     }
+
+    // Gets active, stereo, non-eye cameras in the scene.
+    private IEnumerable<Camera> ValidCameras() {
+      foreach (var camera in Camera.allCameras) {
+        if (!camera.enabled || camera.stereoTargetEye == StereoTargetEyeMask.None) {
+          continue;
+        }
+
+        // Skips camera if it is determined to be an eye camera.
+        var parent = camera.transform.parent;
+        if (parent != null) {
+          var parentCamera = parent.GetComponent<Camera>();
+          if (parentCamera != null) {
+            EyeCamera parentEyeCamera;
+            if (eyeCameras.TryGetValue(parentCamera, out parentEyeCamera)) {
+              if (camera == parentEyeCamera.leftEyeCamera || camera == parentEyeCamera.rightEyeCamera) {
+                continue;
+              }
+            }
+          }
+        }
+
+        yield return camera;
+      }
+    }
+
 #else
     public bool IsCurrentlyConnected { get { return false; } }
 #endif

@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using UnityEngine;
-using UnityEngine.Events;
+namespace GoogleVR.VideoDemo {
+  using UnityEngine;
+  using UnityEngine.Events;
 
-namespace GVR.Events {
   /// <summary>
   /// Throws a Unity event when the internal state is changed. This
   /// component can be used by other components the fire Unity Events in

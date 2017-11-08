@@ -12,48 +12,50 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using UnityEngine;
-using UnityEditor;
+namespace GoogleVR.Demos {
+  using UnityEngine;
+  using UnityEditor;
 
-[CustomEditor(typeof(DemoInputManager))]
-public class DemoInputManagerEditor : Editor {
-  SerializedProperty emulatedPlatformTypeProp;
-  SerializedProperty gvrControllerMainProp;
-  SerializedProperty gvrControllerPointerProp;
-  SerializedProperty gvrReticlePointerProp;
+  [CustomEditor(typeof(DemoInputManager))]
+  public class DemoInputManagerEditor : Editor {
+    SerializedProperty emulatedPlatformTypeProp;
+    SerializedProperty gvrControllerMainProp;
+    SerializedProperty gvrControllerPointerProp;
+    SerializedProperty gvrReticlePointerProp;
 
-  void OnEnable () {
-    gvrControllerMainProp =
-      serializedObject.FindProperty(DemoInputManager.CONTROLLER_MAIN_PROP_NAME);
-    gvrControllerPointerProp =
-      serializedObject.FindProperty(DemoInputManager.CONTROLLER_POINTER_PROP_NAME);
-    gvrReticlePointerProp =
-      serializedObject.FindProperty(DemoInputManager.RETICLE_POINTER_PROP_NAME);
+    void OnEnable () {
+      gvrControllerMainProp =
+        serializedObject.FindProperty(DemoInputManager.CONTROLLER_MAIN_PROP_NAME);
+      gvrControllerPointerProp =
+        serializedObject.FindProperty(DemoInputManager.CONTROLLER_POINTER_PROP_NAME);
+      gvrReticlePointerProp =
+        serializedObject.FindProperty(DemoInputManager.RETICLE_POINTER_PROP_NAME);
 
-    emulatedPlatformTypeProp =
-      serializedObject.FindProperty(DemoInputManager.EMULATED_PLATFORM_PROP_NAME);
-  }
-
-  public override void OnInspectorGUI() {
-    serializedObject.Update();
-
-    // Add clickable script field, as would have been provided by DrawDefaultInspector()
-    MonoScript script = MonoScript.FromMonoBehaviour (target as MonoBehaviour);
-    EditorGUI.BeginDisabledGroup (true);
-    EditorGUILayout.ObjectField ("Script", script, typeof(MonoScript), false);
-    EditorGUI.EndDisabledGroup ();
-
-    EditorGUILayout.PropertyField(gvrControllerMainProp);
-    EditorGUILayout.PropertyField(gvrControllerPointerProp);
-    EditorGUILayout.PropertyField(gvrReticlePointerProp);
-
-    if (DemoInputManager.playerSettingsHasCardboard() ==
-        DemoInputManager.playerSettingsHasDaydream()) {
-      // Show the platform emulation dropdown only if both or neither VR SDK selected in
-      // Player Settings > Virtual Reality supported,
-      EditorGUILayout.PropertyField(emulatedPlatformTypeProp);
+      emulatedPlatformTypeProp =
+        serializedObject.FindProperty(DemoInputManager.EMULATED_PLATFORM_PROP_NAME);
     }
 
-    serializedObject.ApplyModifiedProperties();
+    public override void OnInspectorGUI() {
+      serializedObject.Update();
+
+      // Add clickable script field, as would have been provided by DrawDefaultInspector()
+      MonoScript script = MonoScript.FromMonoBehaviour (target as MonoBehaviour);
+      EditorGUI.BeginDisabledGroup (true);
+      EditorGUILayout.ObjectField ("Script", script, typeof(MonoScript), false);
+      EditorGUI.EndDisabledGroup ();
+
+      EditorGUILayout.PropertyField(gvrControllerMainProp);
+      EditorGUILayout.PropertyField(gvrControllerPointerProp);
+      EditorGUILayout.PropertyField(gvrReticlePointerProp);
+
+      if (DemoInputManager.playerSettingsHasCardboard() ==
+          DemoInputManager.playerSettingsHasDaydream()) {
+        // Show the platform emulation dropdown only if both or neither VR SDK selected in
+        // Player Settings > Virtual Reality supported,
+        EditorGUILayout.PropertyField(emulatedPlatformTypeProp);
+      }
+
+      serializedObject.ApplyModifiedProperties();
+    }
   }
 }

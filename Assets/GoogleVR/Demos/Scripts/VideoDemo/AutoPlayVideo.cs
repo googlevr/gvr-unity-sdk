@@ -15,7 +15,7 @@
 //    limitations under the License.
 // </copyright>
 
-namespace GVRSample {
+namespace GoogleVR.VideoDemo {
   using UnityEngine;
 
   /// <summary>

@@ -18,9 +18,9 @@ using UnityEngine;
 /// Provides and logs versioning information for the GVR SDK for Unity.
 /// </summary>
 public class GvrUnitySdkVersion {
-  public const string GVR_SDK_VERSION = "1.100.1";
+  public const string GVR_SDK_VERSION = "1.110.0";
 
-// Google VR SDK supports Unity 5.6 or later.
+// Google VR SDK supports Unity 5.6 or newer.
 #if !UNITY_5_6_OR_NEWER
   #error Google VR SDK requires Unity version 5.6 or newer.
 #endif  // !UNITY_5_6_OR_NEWER

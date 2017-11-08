@@ -14,7 +14,12 @@
 using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.VR;
+
+#if UNITY_2017_2_OR_NEWER
+using UnityEngine.XR;
+#else
+using XRSettings = UnityEngine.VR.VRSettings;
+#endif  // UNITY_2017_2_OR_NEWER
 
 /// Implementation of _GvrPointerInputModule_
 public class GvrPointerInputModuleImpl {
@@ -60,7 +65,7 @@ public class GvrPointerInputModuleImpl {
 
   public bool ShouldActivateModule() {
     bool isVrModeEnabled = !VrModeOnly;
-    isVrModeEnabled |= VRSettings.enabled;
+    isVrModeEnabled |= XRSettings.enabled;
 
     bool activeState = ModuleController.ShouldActivate() && isVrModeEnabled;
 
@@ -149,7 +154,7 @@ public class GvrPointerInputModuleImpl {
     // Set the position to the center of the camera.
     // This is only necessary if using the built-in Unity raycasters.
     RaycastResult raycastResult;
-    CurrentEventData.position = GvrMathHelpers.GetViewportCenter();
+    CurrentEventData.position = GvrVRHelpers.GetViewportCenter();
     bool isPointerActiveAndAvailable = IsPointerActiveAndAvailable();
     if (isPointerActiveAndAvailable) {
       RaycastAll();

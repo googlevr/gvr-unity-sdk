@@ -16,9 +16,14 @@
 // full VR Keyboard.
 
 using UnityEngine;
-using UnityEngine.VR;
 using System;
 using System.Runtime.InteropServices;
+
+#if UNITY_2017_2_OR_NEWER
+using UnityEngine.XR;
+#else
+using UnityEngine.VR;
+#endif  // UNITY_2017_2_OR_NEWER
 
 /// @cond
 namespace Gvr.Internal {

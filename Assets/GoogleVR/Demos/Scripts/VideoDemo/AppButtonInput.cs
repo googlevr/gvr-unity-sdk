@@ -12,9 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using UnityEngine;
 
-namespace GVR.Input {
+namespace GoogleVR.VideoDemo {
+  using UnityEngine;
+
   /// <summary>
   /// Provides controller app button input through UnityEvents.
   /// </summary>

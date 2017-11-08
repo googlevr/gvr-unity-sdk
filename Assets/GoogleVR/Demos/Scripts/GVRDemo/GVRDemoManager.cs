@@ -12,46 +12,48 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using UnityEngine;
-using System.Collections;
+namespace GoogleVR.GVRDemo {
+  using UnityEngine;
+  using GoogleVR.Demos;
 
-public class GVRDemoManager : MonoBehaviour {
-  public GameObject m_launchVrHomeButton;
-  public DemoInputManager m_demoInputManager;
+  public class GVRDemoManager : MonoBehaviour {
+    public GameObject m_launchVrHomeButton;
+    public DemoInputManager m_demoInputManager;
 
-  void Start() {
+    void Start() {
 #if !UNITY_ANDROID || UNITY_EDITOR
-    if (m_launchVrHomeButton == null) {
-      return;
-    }
-    m_launchVrHomeButton.SetActive(false);
-#else
-    GvrDaydreamApi.CreateAsync((success) => {
-      if (!success) {
-        // Unexpected. See GvrDaydreamApi log messages for details.
-        Debug.LogError("GvrDaydreamApi.CreateAsync() failed");
+      if (m_launchVrHomeButton == null) {
+        return;
       }
-    });
+      m_launchVrHomeButton.SetActive(false);
+#else
+      GvrDaydreamApi.CreateAsync((success) => {
+        if (!success) {
+          // Unexpected. See GvrDaydreamApi log messages for details.
+          Debug.LogError("GvrDaydreamApi.CreateAsync() failed");
+        }
+      });
 #endif  // !UNITY_ANDROID || UNITY_EDITOR
   }
 
 #if UNITY_ANDROID && !UNITY_EDITOR
-  void Update() {
-    if (m_launchVrHomeButton == null || m_demoInputManager == null) {
-      return;
+    void Update() {
+      if (m_launchVrHomeButton == null || m_demoInputManager == null) {
+        return;
+      }
+      m_launchVrHomeButton.SetActive(m_demoInputManager.IsCurrentlyDaydream());
     }
-    m_launchVrHomeButton.SetActive(m_demoInputManager.IsCurrentlyDaydream());
-  }
 #endif  // UNITY_ANDROID && !UNITY_EDITOR
 
-  public void LaunchVrHome() {
+    public void LaunchVrHome() {
 #if UNITY_ANDROID && !UNITY_EDITOR
-    GvrDaydreamApi.LaunchVrHomeAsync((success) => {
-      if (!success) {
-        // Unexpected. See GvrDaydreamApi log messages for details.
-        Debug.LogError("GvrDaydreamApi.LaunchVrHomeAsync() failed");
-      }
-    });
+      GvrDaydreamApi.LaunchVrHomeAsync((success) => {
+        if (!success) {
+          // Unexpected. See GvrDaydreamApi log messages for details.
+          Debug.LogError("GvrDaydreamApi.LaunchVrHomeAsync() failed");
+        }
+      });
 #endif  // UNITY_ANDROID && !UNITY_EDITOR
+    }
   }
 }

@@ -30,6 +30,8 @@ public class GvrEditorEmulator : MonoBehaviour {
   // queries the camera pose during Update or LateUpdate after GvrEditorEmulator has been
   // updated will get the wrong value applied by GvrEditorEmulator intsead.
 #if UNITY_EDITOR
+  public static GvrEditorEmulator Instance { get; private set; }
+
   private const string AXIS_MOUSE_X = "Mouse X";
   private const string AXIS_MOUSE_Y = "Mouse Y";
 
@@ -39,28 +41,26 @@ public class GvrEditorEmulator : MonoBehaviour {
   // Use mouse to emulate head in the editor.
   // These variables must be static so that head pose is maintained between scene changes,
   // as it is on device.
-  private static float mouseX = 0;
-  private static float mouseY = 0;
-  private static float mouseZ = 0;
+  private float mouseX = 0;
+  private float mouseY = 0;
+  private float mouseZ = 0;
 
-  public static Vector3 HeadPosition { get; private set; }
-  public static Quaternion HeadRotation { get; private set; }
+  public Vector3 HeadPosition { get; private set; }
+  public Quaternion HeadRotation { get; private set; }
 
   public void Recenter() {
     mouseX = mouseZ = 0;  // Do not reset pitch, which is how it works on the phone.
+    UpdateHeadPositionAndRotation();
+
     IEnumerator<Camera> validCameras = ValidCameras();
     while (validCameras.MoveNext()) {
       Camera cam = validCameras.Current;
-
-      HeadPosition = Vector3.zero;
-      cam.transform.localPosition = HeadPosition;
-
-      HeadRotation = new Quaternion(mouseX, mouseY, mouseZ, 1);
+      cam.transform.localPosition = HeadPosition * cam.transform.lossyScale.y;
       cam.transform.localRotation = HeadRotation;
     }
   }
 
-  void Update() {
+  public void UpdateEditorEmulation() {
     if (GvrControllerInput.Recentered) {
       Recenter();
     }
@@ -90,16 +90,24 @@ public class GvrEditorEmulator : MonoBehaviour {
       mouseZ = Mathf.Lerp(mouseZ, 0, Time.deltaTime / (Time.deltaTime + 0.1f));
     }
 
-    HeadRotation = Quaternion.Euler(mouseY, mouseX, mouseZ);
+    UpdateHeadPositionAndRotation();
 
     IEnumerator<Camera> validCameras = ValidCameras();
     while (validCameras.MoveNext()) {
       Camera cam = validCameras.Current;
-      HeadPosition = (HeadRotation * NECK_OFFSET - NECK_OFFSET.y * Vector3.up) * cam.transform.lossyScale.y;
-
-      cam.transform.localPosition = HeadPosition;
+      cam.transform.localPosition = HeadPosition * cam.transform.lossyScale.y;
       cam.transform.localRotation = HeadRotation;
     }
+  }
+
+  void Awake() {
+    if (Instance != null) {
+      Debug.LogError("More than one GvrEditorEmulator instance was found in your scene. "
+        + "Ensure that there is only one GvrEditorEmulator.");
+      this.enabled = false;
+      return;
+    }
+    Instance = this;
   }
 
   private bool CanChangeYawPitch() {
@@ -118,6 +126,11 @@ public class GvrEditorEmulator : MonoBehaviour {
     }
 
     return Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
+  }
+
+  private void UpdateHeadPositionAndRotation() {
+    HeadRotation = Quaternion.Euler(mouseY, mouseX, mouseZ);
+    HeadPosition = HeadRotation * NECK_OFFSET - NECK_OFFSET.y * Vector3.up;
   }
 
   private IEnumerator<Camera> ValidCameras() {

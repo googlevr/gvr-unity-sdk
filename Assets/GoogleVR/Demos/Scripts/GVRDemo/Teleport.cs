@@ -12,50 +12,48 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-using UnityEngine;
+namespace GoogleVR.GVRDemo {
+  using UnityEngine;
 
-using System.Collections;
+  [RequireComponent(typeof(Collider))]
+  public class Teleport : MonoBehaviour {
+    private Vector3 startingPosition;
 
-[RequireComponent(typeof(Collider))]
-public class Teleport : MonoBehaviour {
-  private Vector3 startingPosition;
+    public Material inactiveMaterial;
+    public Material gazedAtMaterial;
 
-  public Material inactiveMaterial;
-  public Material gazedAtMaterial;
-
-  void Start() {
-    startingPosition = transform.localPosition;
-    SetGazedAt(false);
-  }
-
-  public void SetGazedAt(bool gazedAt) {
-    if (inactiveMaterial != null && gazedAtMaterial != null) {
-      GetComponent<Renderer>().material = gazedAt ? gazedAtMaterial : inactiveMaterial;
-      return;
+    void Start() {
+      startingPosition = transform.localPosition;
+      SetGazedAt(false);
     }
-    GetComponent<Renderer>().material.color = gazedAt ? Color.green : Color.red;
-  }
 
-  public void Reset() {
-    transform.localPosition = startingPosition;
-  }
+    public void SetGazedAt(bool gazedAt) {
+      if (inactiveMaterial != null && gazedAtMaterial != null) {
+        GetComponent<Renderer>().material = gazedAt ? gazedAtMaterial : inactiveMaterial;
+        return;
+      }
+      GetComponent<Renderer>().material.color = gazedAt ? Color.green : Color.red;
+    }
 
-  public void Recenter() {
+    public void Reset() {
+      transform.localPosition = startingPosition;
+    }
+
+    public void Recenter() {
 #if !UNITY_EDITOR
-    GvrCardboardHelpers.Recenter();
+      GvrCardboardHelpers.Recenter();
 #else
-    GvrEditorEmulator emulator = FindObjectOfType<GvrEditorEmulator>();
-    if (emulator == null) {
-      return;
-    }
-    emulator.Recenter();
+      if (GvrEditorEmulator.Instance != null) {
+        GvrEditorEmulator.Instance.Recenter();
+      }
 #endif  // !UNITY_EDITOR
-  }
+    }
 
-  public void TeleportRandomly() {
-    Vector3 direction = Random.onUnitSphere;
-    direction.y = Mathf.Clamp(direction.y, 0.5f, 1f);
-    float distance = 2 * Random.value + 1.5f;
-    transform.localPosition = direction * distance;
+    public void TeleportRandomly() {
+      Vector3 direction = Random.onUnitSphere;
+      direction.y = Mathf.Clamp(direction.y, 0.5f, 1f);
+      float distance = 2 * Random.value + 1.5f;
+      transform.localPosition = direction * distance;
+    }
   }
 }
