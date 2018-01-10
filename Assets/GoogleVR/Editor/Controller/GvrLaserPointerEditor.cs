@@ -14,7 +14,6 @@
 
 using UnityEngine;
 using UnityEditor;
-using System.Collections;
 
 /// Custom editor for GvrLaserPointer.
 /// Adds buttons that allows user's to set the recommended default values for the different
@@ -104,18 +103,18 @@ public class GvrLaserPointerEditor : Editor {
     switch (raycastMode) {
       case GvrBasePointer.RaycastMode.Hybrid:
         mode.intValue = (int)raycastMode;
-        rayIntersection.floatValue = 0.0f;
-        SetPropertiesForVisual(true, 1.0f);
+        rayIntersection.floatValue = GvrVRHelpers.GetRayIntersection(raycastMode);
+        SetPropertiesForVisual(GvrVRHelpers.GetShrinkLaser(raycastMode), GvrVRHelpers.GetRecommendedMaxLaserDistance(raycastMode));
         break;
       case GvrBasePointer.RaycastMode.Camera:
         mode.intValue = (int)raycastMode;
-        rayIntersection.floatValue = 2.5f;
-        SetPropertiesForVisual(false, 0.75f);
+        rayIntersection.floatValue = GvrVRHelpers.GetRayIntersection(raycastMode);
+        SetPropertiesForVisual(GvrVRHelpers.GetShrinkLaser(raycastMode), GvrVRHelpers.GetRecommendedMaxLaserDistance(raycastMode));
         break;
       case GvrBasePointer.RaycastMode.Direct:
         mode.intValue = (int)raycastMode;
-        rayIntersection.floatValue = 0.0f;
-        SetPropertiesForVisual(false, 20.0f);
+        rayIntersection.floatValue = GvrVRHelpers.GetRayIntersection(raycastMode);
+        SetPropertiesForVisual(GvrVRHelpers.GetShrinkLaser(raycastMode), GvrVRHelpers.GetRecommendedMaxLaserDistance(raycastMode));
         break;
       default:
         Debug.LogError("Trying to set defaults for invalid Raycast Mode: " + raycastMode);

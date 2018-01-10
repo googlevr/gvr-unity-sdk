@@ -110,6 +110,18 @@ public class GvrEditorEmulator : MonoBehaviour {
     Instance = this;
   }
 
+  void Update() {
+    // GvrControllerInput automatically updates GvrEditorEmulator.
+    // This guarantees that GvrEditorEmulator is updated before anything else responds to
+    // controller input, which ensures that re-centering works correctly in the editor.
+    // If GvrControllerInput is not available, then fallback to using Update().
+    if (GvrControllerInput.ApiStatus != GvrControllerApiStatus.Error) {
+      return;
+    }
+
+    UpdateEditorEmulation();
+  }
+
   private bool CanChangeYawPitch() {
     // If the MouseControllerProvider is currently active, then don't move the camera.
     if (MouseControllerProvider.IsActivateButtonPressed) {

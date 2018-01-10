@@ -19,8 +19,10 @@ using System.Collections;
 #pragma warning disable 0618 // Ignore GvrAudio* deprecation
 
 /// GVR audio source component that enhances AudioSource to provide advanced spatial audio features.
-[System.Obsolete("GvrAudioSource is deprecated. Please upgrade to Resonance Audio (https://developers.google.com/resonance-audio/migrate).")]
-[AddComponentMenu("GoogleVR/Audio/Deprecated/GvrAudioSource")]
+#if UNITY_2017_1_OR_NEWER
+[System.Obsolete("Please upgrade to Resonance Audio (https://developers.google.com/resonance-audio/migrate).")]
+#endif  // UNITY_2017_1_OR_NEWER
+[AddComponentMenu("GoogleVR/Audio/GvrAudioSource")]
 public class GvrAudioSource : MonoBehaviour {
   /// Denotes whether the room effects should be bypassed.
   public bool bypassRoomEffects = false;
@@ -276,11 +278,11 @@ public class GvrAudioSource : MonoBehaviour {
   private bool isPaused = false;
 
   void Awake () {
-#if UNITY_EDITOR
+#if UNITY_EDITOR && UNITY_2017_1_OR_NEWER
     Debug.LogWarningFormat(gameObject,
         "Game object '{0}' uses deprecated {1} component.\nPlease upgrade to Resonance Audio ({2}).",
         name, GetType().Name, "https://developers.google.com/resonance-audio/migrate");
-#endif  // UNITY_EDITOR
+#endif  // UNITY_EDITOR && UNITY_2017_1_OR_NEWER
     if (audioSource == null) {
       // Ensure the audio source gets created once.
       audioSource = gameObject.AddComponent<AudioSource>();

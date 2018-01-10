@@ -20,8 +20,10 @@ using System.Collections;
 
 /// GVR soundfield component that allows playback of first-order ambisonic recordings. The audio
 /// sample should be in Ambix (ACN-SN3D) format.
-[System.Obsolete("GvrAudioSoundfield is deprecated. Please upgrade to Resonance Audio (https://developers.google.com/resonance-audio/migrate).")]
-[AddComponentMenu("GoogleVR/Audio/Deprecated/GvrAudioSoundfield")]
+#if UNITY_2017_1_OR_NEWER
+[System.Obsolete("Please upgrade to Resonance Audio (https://developers.google.com/resonance-audio/migrate).")]
+#endif  // UNITY_2017_1_OR_NEWER
+[AddComponentMenu("GoogleVR/Audio/GvrAudioSoundfield")]
 public class GvrAudioSoundfield : MonoBehaviour {
   /// Denotes whether the room effects should be bypassed.
   public bool bypassRoomEffects = true;
@@ -274,11 +276,11 @@ public class GvrAudioSoundfield : MonoBehaviour {
   private bool isPaused = false;
 
   void Awake () {
-#if UNITY_EDITOR
+#if UNITY_EDITOR && UNITY_2017_1_OR_NEWER
     Debug.LogWarningFormat(gameObject,
         "Game object '{0}' uses deprecated {1} component.\nPlease upgrade to Resonance Audio ({2}).",
         name, GetType().Name, "https://developers.google.com/resonance-audio/migrate");
-#endif  // UNITY_EDITOR
+#endif  // UNITY_EDITOR && UNITY_2017_1_OR_NEWER
     // Route the source output to |GvrAudioMixer|.
     AudioMixer mixer = (Resources.Load("GvrAudioMixer") as AudioMixer);
     if(mixer == null) {

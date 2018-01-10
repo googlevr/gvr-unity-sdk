@@ -22,7 +22,9 @@ using System.Runtime.InteropServices;
 /// This is the main GVR audio class that communicates with the native code implementation of
 /// the audio system. Native functions of the system can only be called through this class to
 /// preserve the internal system functionality. Public function calls are *not* thread-safe.
+#if UNITY_2017_1_OR_NEWER
 [System.Obsolete("GvrAudio is deprecated. Please upgrade to Resonance Audio (https://developers.google.com/resonance-audio/migrate).")]
+#endif  // UNITY_2017_1_OR_NEWER
 public static class GvrAudio {
   /// Audio system rendering quality.
   public enum Quality {
@@ -382,11 +384,11 @@ public static class GvrAudio {
   // 4x4 transformation matrix to be used in transform space conversion.
   private static Matrix4x4 transformMatrix = Matrix4x4.identity;
 
-#if UNITY_IOS
+#if !UNITY_EDITOR && UNITY_IOS
   private const string pluginName = "__Internal";
 #else
   private const string pluginName = "audioplugingvrunity";
-#endif
+#endif  // !UNITY_EDITOR && UNITY_IOS
 
   // Listener handlers.
   [DllImport(pluginName)]

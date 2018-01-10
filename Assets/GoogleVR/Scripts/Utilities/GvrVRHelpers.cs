@@ -68,4 +68,40 @@ public static class GvrVRHelpers {
     return InputTracking.GetLocalPosition(XRNode.Head);
 #endif // UNITY_EDITOR
   }
+
+  public static float GetRecommendedMaxLaserDistance(GvrBasePointer.RaycastMode mode) {
+    switch(mode) {
+      case GvrBasePointer.RaycastMode.Direct:
+        return 20.0f;
+      case GvrBasePointer.RaycastMode.Hybrid:
+        return 1.0f;
+      case GvrBasePointer.RaycastMode.Camera:
+      default:
+        return 0.75f;
+    }
+  }
+
+  public static float GetRayIntersection(GvrBasePointer.RaycastMode mode) {
+    switch (mode) {
+      case GvrBasePointer.RaycastMode.Direct:
+        return 0.0f;
+      case GvrBasePointer.RaycastMode.Hybrid:
+        return 0.0f;
+      case GvrBasePointer.RaycastMode.Camera:
+      default:
+        return 2.5f;
+    }
+  }
+
+  public static bool GetShrinkLaser(GvrBasePointer.RaycastMode mode) {
+    switch (mode) {
+      case GvrBasePointer.RaycastMode.Direct:
+        return false;
+      case GvrBasePointer.RaycastMode.Hybrid:
+        return true;
+      case GvrBasePointer.RaycastMode.Camera:
+      default:
+        return false;
+    }
+  }
 }
