@@ -1,17 +1,18 @@
-<Brief summary of the issue you encountered>
+Summary:
+
 
 Found using:
- * Google VR SDK version: ___
- * Unity version: ___
- * Phone manufacturer, model, and O/S version: ___
- * Viewer manufacturer & model: ___
+ * Google VR SDK version:
+ * Unity version:
+ * Phone manufacturer, model, and O/S version:
+ * Viewer manufacturer & model:
 
 Steps to reproduce the issue:
- 1. ___
- 1. ___
+ 1.
+ 1.
+ 1.
 
 Workarounds:
-___
+
 
 Additional comments:
-___
