@@ -17,6 +17,8 @@
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.Build;
+using UnityEditor.iOS.Xcode;
+using System.IO;
 using System.Linq;
 
 #if UNITY_2017_2_OR_NEWER
@@ -25,8 +27,12 @@ using UnityEngine.XR;
 using XRSettings = UnityEngine.VR.VRSettings;
 #endif  // UNITY_2017_2_OR_NEWER
 
+#if UNITY_2018_1_OR_NEWER
+using UnityEditor.Build.Reporting;
+#endif
+
 // Notifies users if they build for Android or iOS without Cardboard or Daydream enabled.
-class GvrBuildProcessor : IPreprocessBuild {
+class GvrBuildProcessor : IPreprocessBuild, IPostprocessBuild {
   private const string VR_SETTINGS_NOT_ENABLED_ERROR_MESSAGE_FORMAT =
     "To use the Google VR SDK on {0}, 'Player Settings > Virtual Reality Supported' setting must be checked.\n" +
     "Please fix this setting and rebuild your app.";
@@ -40,6 +46,13 @@ class GvrBuildProcessor : IPreprocessBuild {
   public int callbackOrder {
     get { return 0; }
   }
+
+#if UNITY_2018_1_OR_NEWER
+  public void OnPreprocessBuild(BuildReport report)
+  {
+    OnPreprocessBuild(report.summary.platform, report.summary.outputPath);
+  }
+#endif
 
   public void OnPreprocessBuild (BuildTarget target, string path)
   {
@@ -67,6 +80,29 @@ class GvrBuildProcessor : IPreprocessBuild {
       if (!IsSDKOtherThanNoneIncluded()) {
         Debug.LogError(IOS_MISSING_GVR_SDK_ERROR_MESSAGE);
       }
+    }
+  }
+
+#if UNITY_2018_1_OR_NEWER
+  public void OnPostprocessBuild(BuildReport report) {
+    OnPostprocessBuild(report.summary.platform, report.summary.outputPath);
+  }
+#endif
+
+  public void OnPostprocessBuild(BuildTarget target, string outputPath) {
+    // Add Camera usage description for scanning viewer QR codes on iOS.
+    if (target == BuildTarget.iOS) {
+      // Read plist
+      var plistPath = Path.Combine(outputPath, "Info.plist");
+      var plist = new PlistDocument();
+      plist.ReadFromFile(plistPath);
+
+      // Update value
+      PlistElementDict rootDict = plist.root;
+      rootDict.SetString("NSCameraUsageDescription", "Scan Cardboard viewer QR code");
+
+      // Write plist
+      File.WriteAllText(plistPath, plist.WriteToString());
     }
   }
 

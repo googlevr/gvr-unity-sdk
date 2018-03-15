@@ -18,20 +18,20 @@ namespace GoogleVR.HelloVR {
   [RequireComponent(typeof(Collider))]
   public class ObjectController : MonoBehaviour {
     private Vector3 startingPosition;
-    private Renderer renderer;
+    private Renderer myRenderer;
 
     public Material inactiveMaterial;
     public Material gazedAtMaterial;
 
     void Start() {
       startingPosition = transform.localPosition;
-      renderer = GetComponent<Renderer>();
+      myRenderer = GetComponent<Renderer>();
       SetGazedAt(false);
     }
 
     public void SetGazedAt(bool gazedAt) {
       if (inactiveMaterial != null && gazedAtMaterial != null) {
-        renderer.material = gazedAt ? gazedAtMaterial : inactiveMaterial;
+        myRenderer.material = gazedAt ? gazedAtMaterial : inactiveMaterial;
         return;
       }
     }

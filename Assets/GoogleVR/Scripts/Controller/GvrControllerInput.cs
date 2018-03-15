@@ -95,13 +95,13 @@ public enum GvrControllerBatteryLevel {
 
 /// Main entry point for the Daydream controller API.
 ///
-/// To use this API, add this behavior to a GameObject in your scene, or use the
-/// GvrControllerMain prefab. There can only be one object with this behavior on your scene.
+/// To use this API, add this behavior to a game object in your scene, or use the
+/// **GvrControllerMain** prefab.
 ///
-/// This is a singleton object.
+/// This is a singleton object. There can only be one object with this behavior in your scene.
 ///
 /// To access the controller state, simply read the static properties of this class. For example,
-/// to know the controller's current orientation, use GvrControllerInput.Orientation.
+/// to get the controller's current orientation, use `GvrControllerInput.Orientation`.
 public class GvrControllerInput : MonoBehaviour {
   private static GvrControllerInput instance;
   private static IControllerProvider controllerProvider;

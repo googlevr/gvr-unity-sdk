@@ -35,7 +35,7 @@ public class GvrPointerGraphicRaycaster : GvrBasePointerRaycaster {
   private const int NO_EVENT_MASK_SET = -1;
 
   public bool ignoreReversedGraphics = true;
-  public BlockingObjects blockingObjects = BlockingObjects.None;
+  public BlockingObjects blockingObjects = BlockingObjects.ThreeD;
   public LayerMask blockingMask = NO_EVENT_MASK_SET;
 
   private Canvas targetCanvas;

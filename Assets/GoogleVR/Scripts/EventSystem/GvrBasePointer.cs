@@ -316,8 +316,8 @@ public abstract class GvrBasePointer : MonoBehaviour {
   /// Returns a point in worldspace a specified distance along the pointer.
   /// What this point will be is different depending on the raycastMode.
   ///
-  /// Due to the the differences in raycast modes, it is recommended to use this function
-  /// instead of attempting to calculate a point projected out from the pointer yourself.
+  /// Because raycast modes differ, use this function instead of manually calculating a point
+  /// projected from the pointer.
   public Vector3 GetPointAlongPointer(float distance) {
     PointerRay pointerRay = GetRayForDistance(distance);
     return pointerRay.ray.GetPoint(distance - pointerRay.distanceFromStart);

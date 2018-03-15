@@ -41,7 +41,7 @@ public static class GvrIntent {
 #endif  // UNITY_EDITOR || !UNITY_ANDROID
   }
 
-  // Returns true if the intent category contains com.google.intent.category.DAYDREAM.
+  // Returns true if the intent category contains "android.intent.extra.VR_LAUNCH".
   public static bool IsLaunchedFromVr() {
 #if UNITY_EDITOR || !UNITY_ANDROID
     return false;

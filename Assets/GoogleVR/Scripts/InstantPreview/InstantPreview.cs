@@ -196,7 +196,7 @@ namespace Gvr.Internal {
             }
 
             // Determines if app is installed.
-            if (installedVersionName == null) {
+            if (installedVersionName != localVersionName) {
               if (installedVersionName == null) {
                 Debug.Log(string.Format(
                   "Instant Preview: app not found on device, attempting to install it from {0}.",
