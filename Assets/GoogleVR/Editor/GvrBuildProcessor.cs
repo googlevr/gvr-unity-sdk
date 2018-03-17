@@ -17,9 +17,12 @@
 using UnityEngine;
 using UnityEditor;
 using UnityEditor.Build;
+using System.Linq;
+
+#if UNITY_IOS
 using UnityEditor.iOS.Xcode;
 using System.IO;
-using System.Linq;
+#endif
 
 #if UNITY_2017_2_OR_NEWER
 using UnityEngine.XR;
@@ -90,6 +93,7 @@ class GvrBuildProcessor : IPreprocessBuild, IPostprocessBuild {
 #endif
 
   public void OnPostprocessBuild(BuildTarget target, string outputPath) {
+#if UNITY_IOS
     // Add Camera usage description for scanning viewer QR codes on iOS.
     if (target == BuildTarget.iOS) {
       // Read plist
@@ -104,6 +108,7 @@ class GvrBuildProcessor : IPreprocessBuild, IPostprocessBuild {
       // Write plist
       File.WriteAllText(plistPath, plist.WriteToString());
     }
+#endif
   }
 
   // 'Player Settings > Virtual Reality Supported' enabled?
