@@ -1,0 +1,4 @@
+include ':gvr-exoplayersupport'
+include ':video_plugin'
+include ':gvr-permissionsupport'
+include ':gvr-keyboardsupport'

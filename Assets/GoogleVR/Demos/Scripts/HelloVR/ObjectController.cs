@@ -14,6 +14,7 @@
 
 namespace GoogleVR.HelloVR {
   using UnityEngine;
+  using UnityEngine.EventSystems;
 
   [RequireComponent(typeof(Collider))]
   public class ObjectController : MonoBehaviour {
@@ -56,7 +57,7 @@ namespace GoogleVR.HelloVR {
 #endif  // !UNITY_EDITOR
     }
 
-    public void TeleportRandomly() {
+    public void TeleportRandomly(BaseEventData eventData) {
       // Pick a random sibling, move them somewhere random, activate them,
       // deactivate ourself.
       int sibIdx = transform.GetSiblingIndex();

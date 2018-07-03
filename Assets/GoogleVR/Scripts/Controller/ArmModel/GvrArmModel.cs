@@ -17,7 +17,7 @@ using System.Collections;
 
 /// Standard implementation for a mathematical model to make the virtual controller approximate the
 /// physical location of the Daydream controller.
-public class GvrArmModel : GvrBaseArmModel{
+public class GvrArmModel : GvrBaseArmModel, IGvrControllerInputDeviceReceiver {
   /// Position of the elbow joint relative to the head before the arm model is applied.
   public Vector3 elbowRestPosition = DEFAULT_ELBOW_REST_POSITION;
 
@@ -150,6 +150,8 @@ public class GvrArmModel : GvrBaseArmModel{
     }
   }
 
+  public GvrControllerInputDevice ControllerInputDevice { get; set; }
+
   protected Vector3 neckPosition;
   protected Vector3 elbowPosition;
   protected Quaternion elbowRotation;
@@ -218,14 +220,15 @@ public class GvrArmModel : GvrBaseArmModel{
   }
 
   protected virtual void UpdateHandedness() {
-    // Update user handedness if the setting has changed
-    GvrSettings.UserPrefsHandedness handedness = GvrSettings.Handedness;
-
+    // Update user handedness if the setting has changed.
+    if (ControllerInputDevice == null) {
+      return;
+    }
     // Determine handedness multiplier.
     handedMultiplier.Set(0, 1, 1);
-    if (handedness == GvrSettings.UserPrefsHandedness.Right) {
+    if (ControllerInputDevice.IsRightHand) {
       handedMultiplier.x = 1.0f;
-    } else if (handedness == GvrSettings.UserPrefsHandedness.Left) {
+    } else {
       handedMultiplier.x = -1.0f;
     }
   }
@@ -237,10 +240,11 @@ public class GvrArmModel : GvrBaseArmModel{
     gazeDirection.Normalize();
 
     // Use the gaze direction to update the forward direction.
-    if (GvrControllerInput.Recentered || forceImmediate) {
+    if (forceImmediate ||
+        (ControllerInputDevice != null && ControllerInputDevice.Recentered)) {
       torsoDirection = gazeDirection;
     } else {
-      float angularVelocity = GvrControllerInput.Gyro.magnitude;
+      float angularVelocity = ControllerInputDevice != null ? ControllerInputDevice.Gyro.magnitude : 0;
       float gazeFilterStrength = Mathf.Clamp((angularVelocity - 0.2f) / 45.0f, 0.0f, 0.1f);
       torsoDirection = Vector3.Slerp(torsoDirection, gazeDirection, gazeFilterStrength);
     }
@@ -382,7 +386,7 @@ public class GvrArmModel : GvrBaseArmModel{
   /// Get the controller's orientation.
   protected void GetControllerRotation(out Quaternion rotation, out Quaternion xyRotation, out float xAngle) {
     // Find the controller's orientation relative to the player.
-    rotation = GvrControllerInput.Orientation;
+    rotation = ControllerInputDevice != null ? ControllerInputDevice.Orientation : Quaternion.identity;
     rotation = Quaternion.Inverse(torsoRotation) * rotation;
 
     // Extract just the x rotation angle.

@@ -246,42 +246,46 @@ namespace Gvr.Internal {
       // Update controller state.
       GvrBasePointer pointer = GvrPointerInputModule.Pointer;
       bool isPointerAvailable = pointer != null && pointer.IsAvailable;
-      if (isPointerAvailable && GvrControllerInput.State == GvrConnectionState.Connected) {
-        bool pressed = GvrControllerInput.ClickButton;
-        gvr_keyboard_update_button_state(keyboard_context, kGvrControllerButtonClick, pressed);
+      if (isPointerAvailable) {
+        GvrControllerInputDevice controllerInputDevice = pointer.ControllerInputDevice;
+        if (controllerInputDevice != null && controllerInputDevice.State == GvrConnectionState.Connected) {
+          bool pressed = controllerInputDevice.GetButton(GvrControllerButton.TouchPadButton);
+          gvr_keyboard_update_button_state(keyboard_context, kGvrControllerButtonClick, pressed);
 
-        // Update touch state
-        Vector2 touch_pos = GvrControllerInput.TouchPos;
-        IntPtr touch_ptr = Marshal.AllocHGlobal(Marshal.SizeOf(touch_pos));
-        Marshal.StructureToPtr(touch_pos, touch_ptr, true);
-        gvr_keyboard_update_controller_touch(keyboard_context, GvrControllerInput.IsTouching, touch_ptr);
+          // Update touch state
+          Vector2 touch_pos = controllerInputDevice.TouchPos;
+          IntPtr touch_ptr = Marshal.AllocHGlobal(Marshal.SizeOf(touch_pos));
+          Marshal.StructureToPtr(touch_pos, touch_ptr, true);
+          bool isTouching = controllerInputDevice.GetButton(GvrControllerButton.TouchPadTouch);
+          gvr_keyboard_update_controller_touch(keyboard_context, isTouching, touch_ptr);
 
-        GvrBasePointer.PointerRay pointerRay = pointer.GetRayForDistance(currentDistance);
+          GvrBasePointer.PointerRay pointerRay = pointer.GetRayForDistance(currentDistance);
 
-        Vector3 startPoint = pointerRay.ray.origin;
-        // Need to flip Z for native library
-        startPoint.z *= -1;
-        IntPtr start_ptr = Marshal.AllocHGlobal(Marshal.SizeOf(startPoint));
-        Marshal.StructureToPtr(startPoint, start_ptr, true);
+          Vector3 startPoint = pointerRay.ray.origin;
+          // Need to flip Z for native library
+          startPoint.z *= -1;
+          IntPtr start_ptr = Marshal.AllocHGlobal(Marshal.SizeOf(startPoint));
+          Marshal.StructureToPtr(startPoint, start_ptr, true);
 
-        Vector3 endPoint = pointerRay.ray.GetPoint(pointerRay.distance);
-        // Need to flip Z for native library
-        endPoint.z *= -1;
-        IntPtr end_ptr = Marshal.AllocHGlobal(Marshal.SizeOf(endPoint));
-        Marshal.StructureToPtr(endPoint, end_ptr, true);
+          Vector3 endPoint = pointerRay.ray.GetPoint(pointerRay.distance);
+          // Need to flip Z for native library
+          endPoint.z *= -1;
+          IntPtr end_ptr = Marshal.AllocHGlobal(Marshal.SizeOf(endPoint));
+          Marshal.StructureToPtr(endPoint, end_ptr, true);
 
-        Vector3 hit = Vector3.one;
-        IntPtr hit_ptr = Marshal.AllocHGlobal(Marshal.SizeOf(Vector3.zero));
-        Marshal.StructureToPtr(Vector3.zero, hit_ptr, true);
+          Vector3 hit = Vector3.one;
+          IntPtr hit_ptr = Marshal.AllocHGlobal(Marshal.SizeOf(Vector3.zero));
+          Marshal.StructureToPtr(Vector3.zero, hit_ptr, true);
 
-        gvr_keyboard_update_controller_ray(keyboard_context, start_ptr, end_ptr, hit_ptr);
-        hit = (Vector3)Marshal.PtrToStructure(hit_ptr, typeof(Vector3));
-        hit.z *= -1;
+          gvr_keyboard_update_controller_ray(keyboard_context, start_ptr, end_ptr, hit_ptr);
+          hit = (Vector3)Marshal.PtrToStructure(hit_ptr, typeof(Vector3));
+          hit.z *= -1;
 
-        Marshal.FreeHGlobal(touch_ptr);
-        Marshal.FreeHGlobal(hit_ptr);
-        Marshal.FreeHGlobal(end_ptr);
-        Marshal.FreeHGlobal(start_ptr);
+          Marshal.FreeHGlobal(touch_ptr);
+          Marshal.FreeHGlobal(hit_ptr);
+          Marshal.FreeHGlobal(end_ptr);
+          Marshal.FreeHGlobal(start_ptr);
+        }
       }
 #endif  // UNITY_ANDROID && !UNITY_EDITOR
 

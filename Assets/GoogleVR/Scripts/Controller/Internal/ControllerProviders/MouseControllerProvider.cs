@@ -32,11 +32,9 @@ namespace Gvr.Internal {
 
     /// Need to store the state of the buttons from the previous frame.
     /// This is because Input.GetMouseButtonDown and Input.GetMouseButtonUp
-    /// Don't work when called after WaitForEndOfFrame, which is when ReadState is called.
-    private bool wasClickButton;
-    private bool wasAppButton;
-    private bool wasHomeButton;
+    /// don't work when called after WaitForEndOfFrame, which is when ReadState is called.
     private bool wasTouching;
+    private GvrControllerButton lastButtonsState;
 
     private const float ROTATE_SENSITIVITY = 4.5f;
     private const float TOUCH_SENSITIVITY = .12f;
@@ -82,10 +80,18 @@ namespace Gvr.Internal {
       get { return false; }
     }
 
-    internal MouseControllerProvider() {
+    public int MaxControllerCount {
+      get { return 1; }
     }
 
-    public void ReadState(ControllerState outState) {
+    internal MouseControllerProvider() {}
+
+    public void Dispose() {}
+
+    public void ReadState(ControllerState outState, int controller_id) {
+      if (controller_id != 0) {
+        return;
+      }
       lock (state) {
         UpdateState();
 
@@ -117,7 +123,7 @@ namespace Gvr.Internal {
         Input.GetAxis(AXIS_MOUSE_Y)
       );
 
-      if (state.isTouching) {
+      if (0 != (state.buttonsState & GvrControllerButton.TouchPadTouch)) {
         UpdateTouchPos();
       } else {
         UpdateOrientation();
@@ -145,32 +151,30 @@ namespace Gvr.Internal {
     }
 
     private void UpdateButtonStates() {
-      state.clickButtonState = IsClickButtonPressed;
-      state.clickButtonDown = state.clickButtonState && !wasClickButton;
-      state.clickButtonUp = !state.clickButtonState && wasClickButton;
+      state.buttonsState = 0;
+      if (IsClickButtonPressed) {
+        state.buttonsState |= GvrControllerButton.TouchPadButton;
+      }
+      if (IsAppButtonPressed) {
+        state.buttonsState |= GvrControllerButton.App;
+      }
+      if (IsHomeButtonPressed) {
+        state.buttonsState |= GvrControllerButton.System;
+      }
+      if (IsTouching) {
+        state.buttonsState |= GvrControllerButton.TouchPadTouch;
+      }
 
-      state.isTouching = IsTouching;
-      state.touchDown = state.isTouching && !wasTouching;
-      state.touchUp = !state.isTouching && wasTouching;
-      if (state.touchUp) {
+      state.SetButtonsUpDownFromPrevious(lastButtonsState);
+      lastButtonsState = state.buttonsState;
+
+      if (0 != (state.buttonsUp & GvrControllerButton.TouchPadTouch)) {
         ClearTouchPos();
       }
 
-      state.appButtonState = IsAppButtonPressed;
-      state.appButtonDown = state.appButtonState && !wasAppButton;
-      state.appButtonUp = !state.appButtonState && wasAppButton;
-
-      state.homeButtonState = IsHomeButtonPressed;
-      state.homeButtonDown = state.homeButtonState && !wasHomeButton;
-
-      if (!state.homeButtonState && wasHomeButton) {
+      if (0 != (state.buttonsUp & GvrControllerButton.System)) {
         Recenter();
       }
-
-      wasClickButton = state.clickButtonState;
-      wasTouching = state.isTouching;
-      wasAppButton = state.appButtonState;
-      wasHomeButton = state.homeButtonState;
     }
 
     private void Recenter() {
@@ -185,12 +189,9 @@ namespace Gvr.Internal {
 
     private void ClearState() {
       state.connectionState = GvrConnectionState.Disconnected;
-      state.clickButtonState = false;
-      state.clickButtonDown = false;
-      state.clickButtonUp = false;
-      state.appButtonState = false;
-      state.appButtonDown = false;
-      state.appButtonUp = false;
+      state.buttonsState = 0;
+      state.buttonsDown = 0;
+      state.buttonsUp = 0;
       ClearTouchPos();
     }
   }

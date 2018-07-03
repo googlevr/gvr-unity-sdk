@@ -25,7 +25,11 @@ namespace GoogleVR.Demos
     using UnityEditor.Build.Reporting;
 #endif
 
+#if UNITY_2018_1_OR_NEWER
+    class PermissionsDemoBuildProcessor : IPreprocessBuildWithReport, IPostprocessBuildWithReport
+#else
     class PermissionsDemoBuildProcessor : IPreprocessBuild, IPostprocessBuild
+#endif
     {
         private const string SCENE_NAME_PERMISSIONS_DEMO = "PermissionsDemo";
 

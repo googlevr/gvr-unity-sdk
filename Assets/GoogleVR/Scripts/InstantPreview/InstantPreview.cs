@@ -236,7 +236,7 @@ namespace Gvr.Internal {
       }
     }
 
-    void UpdateCamera(Camera camera, GameObject cameraObject, Transform cameraTransform) {
+    void UpdateCamera(Camera camera) {
 
       EyeCamera eyeCamera;
 
@@ -247,7 +247,8 @@ namespace Gvr.Internal {
       if (connected) {
         if (GetHeadPose(out headPose, out timestamp)) {
           SetEditorEmulatorsEnabled(false);
-          cameraTransform.localRotation = Quaternion.LookRotation(headPose.GetColumn(2), headPose.GetColumn(1));
+          camera.transform.localRotation = Quaternion.LookRotation(headPose.GetColumn(2), headPose.GetColumn(1));
+          camera.transform.localPosition = camera.transform.localRotation * headPose.GetRow(3) * -1;
         } else {
           SetEditorEmulatorsEnabled(true);
         }
@@ -330,11 +331,7 @@ namespace Gvr.Internal {
       connected = newConnectionState;
 
       foreach (KeyValuePair<Camera, EyeCamera> eyeCamera in eyeCameras) {
-        var mainCamera = eyeCamera.Key;
-        var mainCameraObject = mainCamera.gameObject;
-        var mainCameraTransform = mainCameraObject.transform;
-
-        UpdateCamera(mainCamera, mainCameraObject, mainCameraTransform);
+        UpdateCamera(eyeCamera.Key);
       }
     }
 
@@ -347,8 +344,6 @@ namespace Gvr.Internal {
     }
 
     void EnsureCamera(Camera camera) {
-      var cameraObject = camera.gameObject;
-
       // renderTexture might still be null so this creates and assigns it.
       if (renderTexture == null) {
         if (OutputResolution != Resolutions.WindowSized) {
@@ -525,8 +520,8 @@ namespace Gvr.Internal {
 
         var outputBuilder = new StringBuilder();
         var errorBuilder = new StringBuilder();
-        process.OutputDataReceived += (o, ef) => outputBuilder.Append(ef.Data);
-        process.ErrorDataReceived += (o, ef) => errorBuilder.Append(ef.Data);
+        process.OutputDataReceived += (o, ef) => outputBuilder.AppendLine(ef.Data);
+        process.ErrorDataReceived += (o, ef) => errorBuilder.AppendLine(ef.Data);
 
         process.Start();
         process.BeginOutputReadLine();

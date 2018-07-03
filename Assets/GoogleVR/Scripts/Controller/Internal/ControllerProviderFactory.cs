@@ -26,7 +26,7 @@ namespace Gvr.Internal {
     static internal IControllerProvider CreateControllerProvider(GvrControllerInput owner) {
 // Use emualtor in editor, and in Standalone builds (for demo purposes).
 #if UNITY_EDITOR
-      // Use the Editor controller provider which supports the controller emulator and the mouse.
+      // Use the Editor controller provider that supports the controller emulator and the mouse.
       return new EditorControllerProvider(owner.emulatorConnectionMode);
 #elif UNITY_ANDROID
       // Use the GVR C API.
@@ -35,7 +35,7 @@ namespace Gvr.Internal {
       // Platform not supported.
       Debug.LogWarning("No controller support on this platform.");
       return new DummyControllerProvider();
-#endif  // UNITY_EDITOR || UNITY_STANDALONE
+#endif  // UNITY_EDITOR || UNITY_ANDROID
     }
   }
 }

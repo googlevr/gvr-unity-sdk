@@ -15,6 +15,7 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using System.Collections;
+using Gvr.Internal;
 
 #if UNITY_2017_2_OR_NEWER
 using UnityEngine.XR;
@@ -43,14 +44,21 @@ public static class GvrVRHelpers {
 
   public static Quaternion GetHeadRotation() {
 #if UNITY_EDITOR
-    if (GvrEditorEmulator.Instance == null) {
-      Debug.LogWarning("No GvrEditorEmulator instance was found in your scene. Please ensure that" +
-        "GvrEditorEmulator exists in your scene.");
-      return Quaternion.identity;
-    }
+    if (InstantPreview.Instance != null && InstantPreview.Instance.IsCurrentlyConnected) {
+      // In-editor; Instant Preview is active:
+      return Camera.main.transform.localRotation;
+    } else {
+      // In-editor; Instant Preview is not active:
+      if (GvrEditorEmulator.Instance == null) {
+        Debug.LogWarning("No GvrEditorEmulator instance was found in your scene. Please ensure that " +
+          "GvrEditorEmulator exists in your scene.");
+        return Quaternion.identity;
+      }
 
-    return GvrEditorEmulator.Instance.HeadRotation;
+      return GvrEditorEmulator.Instance.HeadRotation;
+    }
 #else
+    // Not running in editor:
     return InputTracking.GetLocalRotation(XRNode.Head);
 #endif // UNITY_EDITOR
   }
@@ -58,7 +66,7 @@ public static class GvrVRHelpers {
   public static Vector3 GetHeadPosition() {
 #if UNITY_EDITOR
     if (GvrEditorEmulator.Instance == null) {
-      Debug.LogWarning("No GvrEditorEmulator instance was found in your scene. Please ensure that" +
+      Debug.LogWarning("No GvrEditorEmulator instance was found in your scene. Please ensure that " +
         "GvrEditorEmulator exists in your scene.");
       return Vector3.zero;
     }

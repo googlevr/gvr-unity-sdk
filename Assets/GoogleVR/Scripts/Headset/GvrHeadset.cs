@@ -78,7 +78,7 @@ public class GvrHeadset : MonoBehaviour {
   }
 #endregion  // DELEGATE_HANDLERS
 
-#region GVR_STANDALONE_PROPERTIES
+#region GVR_HEADSET_PROPERTIES
   /// Returns |true| if the current headset supports positionally tracked, 6DOF head poses.
   /// Returns |false| if only rotation-based head poses are supported.
   public static bool SupportsPositionalTracking {
@@ -149,7 +149,7 @@ public class GvrHeadset : MonoBehaviour {
     }
     return instance.headsetProvider.TryGetSafetyCylinderOuterRadius(ref outerRadius);
   }
-#endregion  // GVR_STANDALONE_PROPERTIES
+#endregion  // GVR_HEADSET_PROPERTIES
 
   private GvrHeadset() {
     headsetState.Initialize();

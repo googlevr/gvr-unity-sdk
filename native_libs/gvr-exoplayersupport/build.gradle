@@ -1,0 +1,41 @@
+apply plugin: 'com.android.library'
+
+
+android {
+    compileSdkVersion 24
+    buildToolsVersion "24.0.2"
+    defaultConfig {
+        minSdkVersion 19
+        targetSdkVersion 24
+        versionCode 1
+        versionName "1.0"
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+        }
+    }
+}
+
+dependencies {
+    compile 'com.google.android.exoplayer:exoplayer:r1.5.11'
+}
+
+task makeexoplayeraar(type:Zip) {
+    from "${buildDir}/intermediates/exploded-aar/com.google.android.exoplayer/exoplayer/r1.5.11"
+              include '*'
+            include '*/*' //to include contents of a folder present inside Reports directory
+            archiveName 'exoplayer-r1.5.11.aar'
+            destinationDir(file("${buildDir}/outputs/aar"))
+
+
+}
+
+tasks['makeexoplayeraar'].doFirst {
+    file(
+            "${buildDir}/intermediates/exploded-aar/com.google.android.exoplayer/exoplayer/r1.5.11/jars/classes.jar").renameTo(
+            "${buildDir}/intermediates/exploded-aar/com.google.android.exoplayer/exoplayer/r1.5.11/classes.jar"
+    )
+}
+

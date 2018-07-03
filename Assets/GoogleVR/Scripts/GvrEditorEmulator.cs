@@ -31,7 +31,8 @@ public class GvrEditorEmulator : MonoBehaviour {
   // updated will get the wrong value applied by GvrEditorEmulator intsead.
 #if UNITY_EDITOR
   public static GvrEditorEmulator Instance { get; private set; }
-
+  // Allocate an initial capacity; this will be resized if needed.
+  private static Camera[] AllCameras = new Camera[32];
   private const string AXIS_MOUSE_X = "Mouse X";
   private const string AXIS_MOUSE_Y = "Mouse Y";
 
@@ -51,20 +52,13 @@ public class GvrEditorEmulator : MonoBehaviour {
   public void Recenter() {
     mouseX = mouseZ = 0;  // Do not reset pitch, which is how it works on the phone.
     UpdateHeadPositionAndRotation();
-
-    IEnumerator<Camera> validCameras = ValidCameras();
-    while (validCameras.MoveNext()) {
-      Camera cam = validCameras.Current;
-      cam.transform.localPosition = HeadPosition * cam.transform.lossyScale.y;
-      cam.transform.localRotation = HeadRotation;
-    }
+    ApplyHeadOrientationToVRCameras();
   }
 
   public void UpdateEditorEmulation() {
     if (GvrControllerInput.Recentered) {
       Recenter();
     }
-
     bool rolled = false;
     if (CanChangeYawPitch()) {
       GvrCursorHelper.HeadEmulationActive = true;
@@ -91,13 +85,7 @@ public class GvrEditorEmulator : MonoBehaviour {
     }
 
     UpdateHeadPositionAndRotation();
-
-    IEnumerator<Camera> validCameras = ValidCameras();
-    while (validCameras.MoveNext()) {
-      Camera cam = validCameras.Current;
-      cam.transform.localPosition = HeadPosition * cam.transform.lossyScale.y;
-      cam.transform.localRotation = HeadRotation;
-    }
+    ApplyHeadOrientationToVRCameras();
   }
 
   void Awake() {
@@ -145,14 +133,25 @@ public class GvrEditorEmulator : MonoBehaviour {
     HeadPosition = HeadRotation * NECK_OFFSET - NECK_OFFSET.y * Vector3.up;
   }
 
-  private IEnumerator<Camera> ValidCameras() {
-    for (int i = 0; i < Camera.allCameras.Length; i++) {
-      Camera cam = Camera.allCameras[i];
-      if (!cam.enabled || cam.stereoTargetEye == StereoTargetEyeMask.None) {
-        continue;
+  private void ApplyHeadOrientationToVRCameras() {
+    // Get all Cameras in the scene using persistent data structures.
+    if (Camera.allCamerasCount > AllCameras.Length) {
+      int newAllCamerasSize = Camera.allCamerasCount;
+      while (Camera.allCamerasCount > newAllCamerasSize) {
+        newAllCamerasSize *= 2;
       }
-
-      yield return cam;
+      AllCameras = new Camera[newAllCamerasSize];
+    }
+    // The GetAllCameras method doesn't allocate memory (Camera.allCameras does).
+    Camera.GetAllCameras(AllCameras);
+    // Update all VR cameras using Head position and rotation information.
+    for (int i=0; i < Camera.allCamerasCount; ++i) {
+      Camera cam = AllCameras[i];
+      // Check if the Camera is a valid VR Camera, and if so update it to track head motion.
+      if (cam && cam.enabled && cam.stereoTargetEye != StereoTargetEyeMask.None) {
+        cam.transform.localPosition = HeadPosition * cam.transform.lossyScale.y;
+        cam.transform.localRotation = HeadRotation;
+      }
     }
   }
 #endif  // UNITY_EDITOR

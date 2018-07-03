@@ -32,9 +32,13 @@ namespace Gvr.Internal {
 
     /// The last (uncorrected) orientation received from the emulator.
     private Quaternion lastRawOrientation = Quaternion.identity;
+    private GvrControllerButton lastButtonsState;
 
     public bool SupportsBatteryStatus {
       get { return true; }
+    }
+    public int MaxControllerCount {
+      get { return 1; }
     }
 
     /// Creates a new EmulatorControllerProvider with the specified settings.
@@ -54,7 +58,12 @@ namespace Gvr.Internal {
       EmulatorManager.Instance.accelEventListeners += HandleAccelEvent;
     }
 
-    public void ReadState(ControllerState outState) {
+    public void Dispose() {}
+
+    public void ReadState(ControllerState outState, int controller_id) {
+      if (controller_id != 0) {
+        return;
+      }
       lock (state) {
         state.connectionState = GvrConnectionState.Connected;
         if (!EmulatorManager.Instance.Connected) {
@@ -67,6 +76,9 @@ namespace Gvr.Internal {
         // During emulation, just assume the controller is fully charged
         state.isCharging = false;
         state.batteryLevel = GvrControllerBatteryLevel.Full;
+
+        state.SetButtonsUpDownFromPrevious(lastButtonsState);
+        lastButtonsState = state.buttonsState;
 
         outState.CopyFrom(state);
       }
@@ -84,15 +96,13 @@ namespace Gvr.Internal {
         state.touchPos = new Vector2(pointer.normalizedX, pointer.normalizedY);
         switch (touchEvent.getActionMasked()) {
           case EmulatorTouchEvent.Action.kActionDown:
-            state.touchDown = true;
-            state.isTouching = true;
+            state.buttonsState |= GvrControllerButton.TouchPadTouch;
             break;
           case EmulatorTouchEvent.Action.kActionMove:
-            state.isTouching = true;
+            state.buttonsState |= GvrControllerButton.TouchPadTouch;
             break;
           case EmulatorTouchEvent.Action.kActionUp:
-            state.isTouching = false;
-            state.touchUp = true;
+            state.buttonsState &= ~GvrControllerButton.TouchPadTouch;
             break;
         }
       }
@@ -110,31 +120,31 @@ namespace Gvr.Internal {
     }
 
     private void HandleButtonEvent(EmulatorButtonEvent buttonEvent) {
+      GvrControllerButton buttonMask = 0;
       switch (buttonEvent.code) {
       case EmulatorButtonEvent.ButtonCode.kApp:
-        lock (state) {
-          state.appButtonState = buttonEvent.down;
-          state.appButtonDown = buttonEvent.down;
-          state.appButtonUp = !buttonEvent.down;
-        }
+        buttonMask = GvrControllerButton.App;
         break;
       case EmulatorButtonEvent.ButtonCode.kHome:
-        lock (state) {
-          state.homeButtonState = buttonEvent.down;
-          state.homeButtonDown = buttonEvent.down;
-        }
-        if (!buttonEvent.down) {
-          // Finished the recentering gesture. Recenter controller.
-          Recenter();
-        }
+        buttonMask = GvrControllerButton.System;
         break;
       case EmulatorButtonEvent.ButtonCode.kClick:
-        lock (state) {
-          state.clickButtonState = buttonEvent.down;
-          state.clickButtonDown = buttonEvent.down;
-          state.clickButtonUp = !buttonEvent.down;
-        }
+        buttonMask = GvrControllerButton.TouchPadButton;
         break;
+      }
+      if (buttonMask != 0) {
+        lock (state) {
+          state.buttonsState &= ~buttonMask;
+          if (buttonEvent.down) {
+            state.buttonsState |= buttonMask;
+          }
+        }
+        if (buttonMask == GvrControllerButton.System) {
+          if (!buttonEvent.down) {
+            // Finished the recentering gesture. Recenter controller.
+            Recenter();
+          }
+        }
       }
     }
 

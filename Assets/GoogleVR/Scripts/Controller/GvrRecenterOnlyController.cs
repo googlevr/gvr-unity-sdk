@@ -20,7 +20,7 @@ using UnityEngine.XR;
 using XRSettings = UnityEngine.VR.VRSettings;
 #endif  // UNITY_2017_2_OR_NEWER
 
-/// Used to recenter only the controller, required for scenes that have no clear forward direction.
+/// Used to recenter only the controllers, required for scenes that have no clear forward direction.
 /// Details: https://developers.google.com/vr/distribute/daydream/design-requirements#UX-D6
 ///
 /// Works by offsetting the orientation of the transform when a recenter occurs to correct for the
@@ -32,7 +32,15 @@ public class GvrRecenterOnlyController : MonoBehaviour {
   private Quaternion yawCorrection = Quaternion.identity;
 
   void Update() {
-    if (GvrControllerInput.State != GvrConnectionState.Connected) {
+    bool connected = false;
+    foreach (var hand in Gvr.Internal.ControllerUtils.AllHands) {
+      GvrControllerInputDevice device = GvrControllerInput.GetDevice(hand);
+      if (device.State == GvrConnectionState.Connected) {
+        connected = true;
+        break;
+      }
+    }
+    if (!connected) {
       return;
     }
 
@@ -52,11 +60,11 @@ public class GvrRecenterOnlyController : MonoBehaviour {
     // Compatibility for Instant Preview.
     if (Gvr.Internal.InstantPreview.Instance != null &&
       Gvr.Internal.InstantPreview.Instance.enabled &&
-      (GvrControllerInput.HomeButtonDown || GvrControllerInput.HomeButtonState)) {
+      Gvr.Internal.ControllerUtils.AnyButton(GvrControllerButton.System)) {
       return;
     }
 #else  // !UNITY_EDITOR
-    if (GvrControllerInput.HomeButtonDown || GvrControllerInput.HomeButtonState) {
+    if (Gvr.Internal.ControllerUtils.AnyButton(GvrControllerButton.System)) {
       return;
     }
 #endif  // UNITY_EDITOR

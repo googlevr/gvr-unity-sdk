@@ -159,6 +159,11 @@ public class GvrPointerInputModuleImpl {
     if (isPointerActiveAndAvailable) {
       RaycastAll();
       raycastResult = ModuleController.FindFirstRaycast(ModuleController.RaycastResultCache);
+      if (Pointer.ControllerInputDevice == null || Pointer.ControllerInputDevice.IsDominantHand) {
+        CurrentEventData.pointerId = (int)GvrControllerHand.Dominant;
+      } else {
+        CurrentEventData.pointerId = (int)GvrControllerHand.NonDominant;
+      }
     } else {
       raycastResult = new RaycastResult();
       raycastResult.Clear();

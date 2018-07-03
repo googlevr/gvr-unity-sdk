@@ -131,6 +131,7 @@ public class GvrKeyboard : MonoBehaviour {
 
   void OnDestroy() {
     instance = null;
+    threadSafeCallbacks.Clear();
   }
 
   // Use this for initialization.
@@ -313,6 +314,7 @@ public class GvrKeyboard : MonoBehaviour {
     }
   }
 
+  [AOT.MonoPInvokeCallback(typeof(GvrKeyboardEvent))]
   private static void OnKeyboardCallback(IntPtr closure, GvrKeyboardEvent keyboardEvent) {
     lock (callbacksLock) {
       threadSafeCallbacks.Add(keyboardEvent);

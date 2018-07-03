@@ -45,7 +45,7 @@ namespace GoogleVR.Demos {
       EditorGUI.EndDisabledGroup ();
 
       EditorGUILayout.PropertyField(gvrControllerMainProp);
-      EditorGUILayout.PropertyField(gvrControllerPointerProp);
+      EditorGUILayout.PropertyField(gvrControllerPointerProp, true);
       EditorGUILayout.PropertyField(gvrReticlePointerProp);
 
       if (DemoInputManager.playerSettingsHasCardboard() ==

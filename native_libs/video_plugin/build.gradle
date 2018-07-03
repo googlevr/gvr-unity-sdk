@@ -1,0 +1,24 @@
+apply plugin: 'com.android.model.native'
+
+model {
+    android {
+        compileSdkVersion = 24
+        buildToolsVersion = '24.0.2'
+
+        defaultConfig {
+            minSdkVersion.apiLevel = 19
+            targetSdkVersion.apiLevel = 24
+            versionCode = 1
+            versionName = '1.0'
+        }
+        ndk {
+            platformVersion = '19'
+            moduleName = 'gvrvideo'
+            stl = 'c++_static'
+            abiFilters.addAll(['armeabi-v7a', 'x86'])
+            cppFlags.addAll(['-I' + file('src/main/jni/ndk_helper')])
+            cppFlags.addAll(['-std=c++11'])
+            ldLibs.addAll(['android', 'log', "EGL", "GLESv2"])
+        }
+    }
+}

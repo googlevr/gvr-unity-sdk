@@ -19,7 +19,7 @@ namespace GoogleVR.HelloVR {
   /// Demonstrates the use of GvrHeadset events and APIs.
   public class HeadsetDemoManager : MonoBehaviour {
     public GameObject safetyRing;
-    public bool enableDebugLog = true;
+    public bool enableDebugLog = false;
     private WaitForSeconds waitFourSeconds = new WaitForSeconds(4);
 
 #region STANDALONE_DELEGATES
@@ -60,7 +60,7 @@ namespace GoogleVR.HelloVR {
       bool success = GvrHeadset.TryGetSafetyCylinderInnerRadius(ref innerRadius);
       Debug.Log("Safety region inner radius success " + success + "; value " + innerRadius);
       // Don't activate the safety cylinder visual until the radius is a reasonable value.
-      if (innerRadius > 0.1f) {
+      if (innerRadius > 0.1f && safetyRing != null) {
         safetyRing.SetActive(true);
         safetyRing.transform.localScale = new Vector3(innerRadius, 1, innerRadius);
       }
@@ -73,7 +73,9 @@ namespace GoogleVR.HelloVR {
     }
 
     void OnEnable() {
-      safetyRing.SetActive(false);
+      if (safetyRing != null) {
+        safetyRing.SetActive(false);
+      }
       if (!GvrHeadset.SupportsPositionalTracking) {
         return;
       }

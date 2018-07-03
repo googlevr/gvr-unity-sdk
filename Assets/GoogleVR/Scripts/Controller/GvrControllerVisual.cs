@@ -20,8 +20,7 @@ using System.Collections;
 
 /// Provides visual feedback for the daydream controller.
 [RequireComponent(typeof(Renderer))]
-public class GvrControllerVisual : MonoBehaviour, IGvrArmModelReceiver {
-
+public class GvrControllerVisual : MonoBehaviour, IGvrArmModelReceiver, IGvrControllerInputDeviceReceiver {
   [System.Serializable]
   public struct ControllerDisplayState {
 
@@ -47,8 +46,8 @@ public class GvrControllerVisual : MonoBehaviour, IGvrArmModelReceiver {
   [SerializeField] private Color systemButtonColor =
       new Color(20f / 255f, 20f / 255f, 20f / 255f, 1);
 
-  /// Determines if the displayState is set from GvrControllerInput.
-  [Tooltip("Determines if the displayState is set from GvrControllerInput.")]
+  /// Determines if the displayState is set from GvrControllerInputDevice.
+  [Tooltip("Determines if the displayState is set from GvrControllerInputDevice.")]
   public bool readControllerState = true;
 
   /// Used to set the display state of the controller visual.
@@ -64,6 +63,8 @@ public class GvrControllerVisual : MonoBehaviour, IGvrArmModelReceiver {
   public float maximumAlpha = 1.0f;
 
   public GvrBaseArmModel ArmModel { get; set; }
+
+  public GvrControllerInputDevice ControllerInputDevice { get; set; }
 
   public float PreferredAlpha{
     get{
@@ -217,21 +218,24 @@ public class GvrControllerVisual : MonoBehaviour, IGvrArmModelReceiver {
 
   private void UpdateControllerState() {
     // Return early when the application isn't playing to ensure that the serialized displayState
-    // is used to preview the controller visual instead of the default GvrControllerInput values.
+    // is used to preview the controller visual instead of the default GvrControllerInputDevice
+    // values.
 #if UNITY_EDITOR
     if (!Application.isPlaying) {
       return;
     }
 #endif
 
-    displayState.batteryLevel = GvrControllerInput.BatteryLevel;
-    displayState.batteryCharging = GvrControllerInput.IsCharging;
+    if(ControllerInputDevice != null) {
+      displayState.batteryLevel = ControllerInputDevice.BatteryLevel;
+      displayState.batteryCharging = ControllerInputDevice.IsCharging;
 
-    displayState.clickButton = GvrControllerInput.ClickButton;
-    displayState.appButton = GvrControllerInput.AppButton;
-    displayState.homeButton = GvrControllerInput.HomeButtonState;
-    displayState.touching = GvrControllerInput.IsTouching;
-    displayState.touchPos = GvrControllerInput.TouchPosCentered;
+      displayState.clickButton = ControllerInputDevice.GetButton(GvrControllerButton.TouchPadButton);
+      displayState.appButton = ControllerInputDevice.GetButton(GvrControllerButton.App);
+      displayState.homeButton = ControllerInputDevice.GetButton(GvrControllerButton.System);
+      displayState.touching = ControllerInputDevice.GetButton(GvrControllerButton.TouchPadTouch);
+      displayState.touchPos = ControllerInputDevice.TouchPos;
+    }
   }
 
   private void OnVisualUpdate(bool updateImmediately = false) {
