@@ -17,6 +17,7 @@ using System.Collections;
 
 /// Standard implementation for a mathematical model to make the virtual controller approximate the
 /// physical location of the Daydream controller.
+[HelpURL("https://developers.google.com/vr/unity/reference/class/GvrArmModel")]
 public class GvrArmModel : GvrBaseArmModel, IGvrControllerInputDeviceReceiver {
   /// Position of the elbow joint relative to the head before the arm model is applied.
   public Vector3 elbowRestPosition = DEFAULT_ELBOW_REST_POSITION;

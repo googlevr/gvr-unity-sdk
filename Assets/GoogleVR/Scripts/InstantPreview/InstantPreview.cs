@@ -21,6 +21,7 @@ using System.IO;
 using System.Threading;
 
 namespace Gvr.Internal {
+  [HelpURL("https://developers.google.com/vr/unity/reference/class/InstantPreview")]
   public class InstantPreview : MonoBehaviour {
     private const string NoDevicesFoundAdbResult = "error: no devices/emulators found";
 

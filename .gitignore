@@ -11,5 +11,8 @@ obj/
 *.suo
 *.userprefs
 
+# Gradle generated
+.gradle
+
 # OS generated
 .DS_Store

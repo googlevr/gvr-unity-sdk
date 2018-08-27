@@ -19,6 +19,7 @@ using System.Collections.Generic;
 using Gvr.Internal;
 
 /// Provides mouse-controlled head tracking emulation in the Unity editor.
+[HelpURL("https://developers.google.com/vr/unity/reference/class/GvrEditorEmulator")]
 public class GvrEditorEmulator : MonoBehaviour {
   // GvrEditorEmulator should only be compiled in the Editor.
   //
@@ -30,7 +31,17 @@ public class GvrEditorEmulator : MonoBehaviour {
   // queries the camera pose during Update or LateUpdate after GvrEditorEmulator has been
   // updated will get the wrong value applied by GvrEditorEmulator intsead.
 #if UNITY_EDITOR
-  public static GvrEditorEmulator Instance { get; private set; }
+  private static GvrEditorEmulator instance;
+  private static bool instance_searched_for = false;
+  public static GvrEditorEmulator Instance {
+    get {
+      if (instance == null && !instance_searched_for) {
+        instance = FindObjectOfType<GvrEditorEmulator>();
+        instance_searched_for = true;
+      }
+      return instance;
+    }
+  }
   // Allocate an initial capacity; this will be resized if needed.
   private static Camera[] AllCameras = new Camera[32];
   private const string AXIS_MOUSE_X = "Mouse X";
@@ -89,13 +100,14 @@ public class GvrEditorEmulator : MonoBehaviour {
   }
 
   void Awake() {
-    if (Instance != null) {
-      Debug.LogError("More than one GvrEditorEmulator instance was found in your scene. "
-        + "Ensure that there is only one GvrEditorEmulator.");
+    if (Instance == null) {
+      instance = this;
+    } else if (Instance != this) {
+      Debug.LogError("More than one active GvrEditorEmulator instance was found in your scene. "
+        + "Ensure that there is only one active GvrEditorEmulator.");
       this.enabled = false;
       return;
     }
-    Instance = this;
   }
 
   void Update() {

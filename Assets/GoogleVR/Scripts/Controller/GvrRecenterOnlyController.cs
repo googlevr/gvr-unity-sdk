@@ -27,6 +27,7 @@ using XRSettings = UnityEngine.VR.VRSettings;
 /// orientation change caused by the recenter event.
 ///
 /// Usage: Place on the parent of the camera that should have it's orientation corrected.
+[HelpURL("https://developers.google.com/vr/unity/reference/class/GvrRecenterOnlyController")]
 public class GvrRecenterOnlyController : MonoBehaviour {
   private Quaternion lastAppliedYawCorrection = Quaternion.identity;
   private Quaternion yawCorrection = Quaternion.identity;

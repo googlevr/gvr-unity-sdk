@@ -20,6 +20,7 @@ using UnityEngine.Assertions;
 /// Provides functions for settings the end point of the laser,
 /// and clamps the laser and reticle based on max distances.
 [RequireComponent(typeof(LineRenderer))]
+[HelpURL("https://developers.google.com/vr/unity/reference/class/GvrLaserVisual")]
 public class GvrLaserVisual : MonoBehaviour, IGvrArmModelReceiver {
   /// Used to position the reticle at the current position.
   [Tooltip("Used to position the reticle at the current position.")]

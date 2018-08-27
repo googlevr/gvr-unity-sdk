@@ -134,6 +134,7 @@ public enum GvrControllerHand {
 /// To access a controller's state, get a device from `GvrControllerInput.GetDevice` then
 /// query it for state. For example, to the dominant controller's current orientation, use
 /// `GvrControllerInput.GetDevice(GvrControllerHand.Dominant).Orientation`.
+[HelpURL("https://developers.google.com/vr/unity/reference/class/GvrControllerInput")]
 public class GvrControllerInput : MonoBehaviour {
   private static GvrControllerInputDevice[] instances = new GvrControllerInputDevice[0];
   private static IControllerProvider controllerProvider;

@@ -23,6 +23,7 @@ using System.Collections;
 /// tracked, position of the object is updated to approximate arm mechanics by using a
 /// `GvrBaseArmModel`.  `GvrBaseArmModel`s are also propagated to all `IGvrArmModelReceiver`s
 /// underneath this object.
+[HelpURL("https://developers.google.com/vr/unity/reference/class/GvrTrackedController")]
 public class GvrTrackedController : MonoBehaviour {
   [SerializeField]
   [Tooltip("Arm model used to control the pose (position and rotation) of the object, " +

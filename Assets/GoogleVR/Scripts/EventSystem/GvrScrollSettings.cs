@@ -17,6 +17,7 @@ using System.Collections;
 
 /// Used to override the global scroll settings in _GvrPointerScrollInput_
 /// for the GameObject that this script is attached to.
+[HelpURL("https://developers.google.com/vr/unity/reference/class/GvrScrollSettings")]
 public class GvrScrollSettings : MonoBehaviour, IGvrScrollSettings {
   /// Override the Inertia property in _GvrPointerScrollInput_ for this object.
   ///

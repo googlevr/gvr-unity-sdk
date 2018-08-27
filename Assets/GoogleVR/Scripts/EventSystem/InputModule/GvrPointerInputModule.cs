@@ -47,6 +47,7 @@ using UnityEngine.EventSystems;
 ///   - Set the parent of GvrReticlePointer to the main camera.
 ///
 [AddComponentMenu("GoogleVR/GvrPointerInputModule")]
+[HelpURL("https://developers.google.com/vr/unity/reference/class/GvrPointerInputModule")]
 public class GvrPointerInputModule : BaseInputModule, IGvrInputModuleController {
   /// Determines whether Pointer input is active in VR Mode only (`true`), or all of the
   /// time (`false`).  Set to false if you plan to use direct screen taps or other

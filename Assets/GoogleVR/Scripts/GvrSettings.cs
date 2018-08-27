@@ -169,10 +169,14 @@ public static class GvrSettings {
       Debug.LogError("VR is disabled");
       return IntPtr.Zero;
     }
-    if (XRSettings.loadedDeviceName != VR_SDK_DAYDREAM
-        && XRSettings.loadedDeviceName != VR_SDK_CARDBOARD) {
+#if UNITY_2018_3_OR_NEWER
+    string loadedDeviceName = GvrXREventsSubscriber.loadedDeviceName;
+#else // !UNITY_2018_3_OR_NEWER; this leaks 30 bytes of memory per update.
+    string loadedDeviceName = XRSettings.loadedDeviceName;
+#endif // UNITY_2018_3_OR_NEWER
+    if (loadedDeviceName != VR_SDK_DAYDREAM && loadedDeviceName != VR_SDK_CARDBOARD) {
       Debug.LogErrorFormat("Loaded VR SDK '{0}' must be '{1}' or '{2}'",
-          XRSettings.loadedDeviceName, VR_SDK_DAYDREAM, VR_SDK_CARDBOARD);
+          loadedDeviceName, VR_SDK_DAYDREAM, VR_SDK_CARDBOARD);
       return IntPtr.Zero;
     }
     IntPtr gvrContextPtr = XRDevice.GetNativePtr();

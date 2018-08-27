@@ -20,6 +20,7 @@ using System.Collections;
 
 /// Provides visual feedback for the daydream controller.
 [RequireComponent(typeof(Renderer))]
+[HelpURL("https://developers.google.com/vr/unity/reference/class/GvrControllerVisual")]
 public class GvrControllerVisual : MonoBehaviour, IGvrArmModelReceiver, IGvrControllerInputDeviceReceiver {
   [System.Serializable]
   public struct ControllerDisplayState {

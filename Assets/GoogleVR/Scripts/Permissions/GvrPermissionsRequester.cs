@@ -17,6 +17,7 @@ using System;
 using System.Collections.Generic;
 
 // Requests dangerous permissions at runtime
+[HelpURL("https://developers.google.com/vr/unity/reference/class/GvrPermissionsRequester")]
 public class GvrPermissionsRequester {
 
   // Permissions are requested via an Android Activity Fragment java object.

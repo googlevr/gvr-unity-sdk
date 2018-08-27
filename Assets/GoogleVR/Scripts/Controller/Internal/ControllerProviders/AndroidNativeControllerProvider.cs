@@ -63,6 +63,24 @@ namespace Gvr.Internal {
     private const int GVR_CONTROLLER_API_CLIENT_OBSOLETE = 5;
     private const int GVR_CONTROLLER_API_MALFUNCTION = 6;
 
+    // The serialization of button-state used to determine which buttons are being pressed.
+    private readonly GvrControllerButton[] GVR_UNITY_BUTTONS = new GvrControllerButton[] {
+        GvrControllerButton.App,
+        GvrControllerButton.System,
+        GvrControllerButton.TouchPadButton,
+        GvrControllerButton.Reserved0,
+        GvrControllerButton.Reserved1,
+        GvrControllerButton.Reserved2
+    };
+    private readonly int[] GVR_BUTTONS = new int[] {
+        GVR_CONTROLLER_BUTTON_APP,
+        GVR_CONTROLLER_BUTTON_HOME,
+        GVR_CONTROLLER_BUTTON_CLICK,
+        GVR_CONTROLLER_BUTTON_RESERVED0,
+        GVR_CONTROLLER_BUTTON_RESERVED1,
+        GVR_CONTROLLER_BUTTON_RESERVED2
+    };
+
     [StructLayout(LayoutKind.Sequential)]
     private struct gvr_quat {
       internal float x;
@@ -336,27 +354,10 @@ namespace Gvr.Internal {
       gvr_vec2 touchPos = gvr_controller_state_get_touch_pos(statePtr);
       outState.touchPos = new Vector2(touchPos.x, touchPos.y);
 
-      int[] gvr_buttons = new int[] {
-        GVR_CONTROLLER_BUTTON_APP,
-        GVR_CONTROLLER_BUTTON_HOME,
-        GVR_CONTROLLER_BUTTON_CLICK,
-        GVR_CONTROLLER_BUTTON_RESERVED0,
-        GVR_CONTROLLER_BUTTON_RESERVED1,
-        GVR_CONTROLLER_BUTTON_RESERVED2
-      };
-      GvrControllerButton[] gvrUnityButtons = new GvrControllerButton[] {
-        GvrControllerButton.App,
-        GvrControllerButton.System,
-        GvrControllerButton.TouchPadButton,
-        GvrControllerButton.Reserved0,
-        GvrControllerButton.Reserved1,
-        GvrControllerButton.Reserved2
-      };
-
       outState.buttonsState = 0;
-      for (int i=0; i<gvr_buttons.Length; i++) {
-        if (0 != gvr_controller_state_get_button_state(statePtr, gvr_buttons[i])) {
-          outState.buttonsState |= gvrUnityButtons[i];
+      for (int i=0; i<GVR_BUTTONS.Length; i++) {
+        if (0 != gvr_controller_state_get_button_state(statePtr, GVR_BUTTONS[i])) {
+          outState.buttonsState |= GVR_UNITY_BUTTONS[i];
         }
       }
       if (0 != gvr_controller_state_is_touching(statePtr)) {

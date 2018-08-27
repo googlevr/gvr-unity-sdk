@@ -23,6 +23,7 @@ using UnityEngine.EventSystems;
 ///
 /// View GvrBasePointerRaycaster.cs and GvrPointerInputModule.cs for more details.
 [AddComponentMenu("GoogleVR/GvrPointerPhysicsRaycaster")]
+[HelpURL("https://developers.google.com/vr/unity/reference/class/GvrPointerPhysicsRaycaster")]
 public class GvrPointerPhysicsRaycaster : GvrBasePointerRaycaster {
   /// Used to sort the raycast hits by distance.
   private class HitComparer: IComparer<RaycastHit> {

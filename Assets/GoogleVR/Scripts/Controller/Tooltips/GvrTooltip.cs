@@ -25,6 +25,7 @@ using System.Collections;
 [RequireComponent(typeof(CanvasGroup))]
 [RequireComponent(typeof(RectTransform))]
 [ExecuteInEditMode]
+[HelpURL("https://developers.google.com/vr/unity/reference/class/GvrTooltip")]
 public class GvrTooltip : MonoBehaviour, IGvrArmModelReceiver {
   /// Rotation for a tooltip when it is displayed on the right side of the controller visual.
   protected static readonly Quaternion RIGHT_SIDE_ROTATION = Quaternion.Euler(0.0f, 0.0f, 0.0f);

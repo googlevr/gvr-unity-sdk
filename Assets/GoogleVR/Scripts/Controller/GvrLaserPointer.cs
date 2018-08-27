@@ -23,6 +23,7 @@ using UnityEngine.EventSystems;
 /// The laser visual is important to help users locate their cursor
 /// when its not directly in their field of view.
 [RequireComponent(typeof(GvrLaserVisual))]
+[HelpURL("https://developers.google.com/vr/unity/reference/class/GvrLaserPointer")]
 public class GvrLaserPointer : GvrBasePointer {
   [Tooltip("Distance from the pointer that raycast hits will be detected.")]
   public float maxPointerDistance = 20.0f;

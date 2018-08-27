@@ -25,6 +25,7 @@ using Gvr.Internal;
 /// such prefab in a scene.
 ///
 /// This is a singleton object.
+[HelpURL("https://developers.google.com/vr/unity/reference/class/GvrHeadset")]
 public class GvrHeadset : MonoBehaviour {
   private static GvrHeadset instance;
 

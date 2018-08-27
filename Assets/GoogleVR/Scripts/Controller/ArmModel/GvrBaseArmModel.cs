@@ -19,6 +19,7 @@ using UnityEngine;
 /// Interface for a mathematical model that uses the orientation and location
 /// of the physical controller, and predicts the location of the controller and pointer
 /// to determine where to place the controller model within the scene.
+[HelpURL("https://developers.google.com/vr/unity/reference/class/GvrBaseArmModel")]
 public abstract class GvrBaseArmModel : MonoBehaviour {
   /// Vector to represent the controller's location relative to
   /// the user's head position.

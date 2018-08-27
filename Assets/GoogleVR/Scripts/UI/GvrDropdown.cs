@@ -20,6 +20,7 @@ using System.Collections;
 /// Dropdown UI component that works with the GvrRaycasters.
 /// This is a workaround for the fact that the Dropdown component doesn't work with custom raycasters
 /// because it internally adds two GraphicRaycasters.
+[HelpURL("https://developers.google.com/vr/unity/reference/class/GvrDropdown")]
 public class GvrDropdown : Dropdown {
   private GameObject currentBlocker;
 

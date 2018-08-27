@@ -58,6 +58,7 @@ public enum GvrKeyboardInputMode {
 
 // Handles keyboard state management such as hiding and displaying
 // the keyboard, directly modifying text and stereoscopic rendering.
+[HelpURL("https://developers.google.com/vr/unity/reference/class/GvrKeyboard")]
 public class GvrKeyboard : MonoBehaviour {
 
   private static GvrKeyboard instance;
