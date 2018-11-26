@@ -16,6 +16,7 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using Gvr.Internal;
 
 /// Wraps UnityEngine.EventSystems.ExecuteEvents.
 /// Also, exposes event delegates to allow global handling of events.
@@ -89,6 +90,7 @@ public class GvrEventExecutor : IGvrEventExecutor {
     eventTable = new Dictionary<Type, EventDelegate>();
   }
 
+  [SuppressMemoryAllocationError(IsWarning=true, Reason="Pending documentation.")]
   public bool Execute<T>(GameObject target,
     BaseEventData eventData,
     ExecuteEvents.EventFunction<T> functor)
@@ -99,6 +101,7 @@ public class GvrEventExecutor : IGvrEventExecutor {
     return result;
   }
 
+  [SuppressMemoryAllocationError(IsWarning=true, Reason="Pending documentation.")]
   public GameObject ExecuteHierarchy<T>(GameObject root,
     BaseEventData eventData,
     ExecuteEvents.EventFunction<T> callbackFunction)
@@ -109,6 +112,7 @@ public class GvrEventExecutor : IGvrEventExecutor {
     return result;
   }
 
+  [SuppressMemoryAllocationError(IsWarning=true, Reason="Pending documentation.")]
   public GameObject GetEventHandler<T>(GameObject root)
     where T : IEventSystemHandler {
     return ExecuteEvents.GetEventHandler<T>(root);

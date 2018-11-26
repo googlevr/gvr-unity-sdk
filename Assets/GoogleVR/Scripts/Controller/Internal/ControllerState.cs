@@ -33,6 +33,7 @@ namespace Gvr.Internal {
     internal Vector3 accel = Vector3.zero;
     internal Vector2 touchPos = Vector2.zero;
     internal bool recentered = false;
+    internal bool is6DoF = false;
 
     internal GvrControllerButton buttonsState;
     internal GvrControllerButton buttonsDown;
@@ -53,6 +54,7 @@ namespace Gvr.Internal {
       accel = other.accel;
       touchPos = other.touchPos;
       recentered = other.recentered;
+      is6DoF = other.is6DoF;
       buttonsState = other.buttonsState;
       buttonsDown = other.buttonsDown;
       buttonsUp = other.buttonsUp;

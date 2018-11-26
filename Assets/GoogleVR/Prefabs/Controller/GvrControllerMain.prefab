@@ -51,5 +51,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 41251d5f89d5546bb9d8ba907686b71f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  enablePositionalTracking: 1
-  emulatorConnectionMode: 1
+  emulatorConnectionMode: 0

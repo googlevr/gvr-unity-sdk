@@ -29,8 +29,13 @@ namespace Gvr.Internal {
       // Use the Editor controller provider that supports the controller emulator and the mouse.
       return new EditorControllerProvider(owner.emulatorConnectionMode);
 #elif UNITY_ANDROID
-      // Use the GVR C API.
-      return new AndroidNativeControllerProvider();
+      if (AndroidNativeShimControllerProvider.ShimAvailable()) {
+        // Use the GVR Unity Shim API.
+        return new AndroidNativeShimControllerProvider();
+      } else {
+        Debug.LogWarning("Creating dummy controller provider.");
+        return new DummyControllerProvider();
+      }
 #else
       // Platform not supported.
       Debug.LogWarning("No controller support on this platform.");

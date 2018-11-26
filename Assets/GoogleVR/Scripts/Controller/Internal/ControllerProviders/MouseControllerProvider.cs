@@ -143,7 +143,7 @@ namespace Gvr.Internal {
     private void UpdateOrientation() {
       Vector3 deltaDegrees = Vector3.Scale(mouseDelta, INVERT_Y) * ROTATE_SENSITIVITY;
 
-      state.gyro = deltaDegrees * (Mathf.Deg2Rad / Time.deltaTime);
+      state.gyro = deltaDegrees * (Mathf.Deg2Rad / Time.unscaledDeltaTime);
 
       Quaternion yaw = Quaternion.AngleAxis(deltaDegrees.x, Vector3.up);
       Quaternion pitch = Quaternion.AngleAxis(deltaDegrees.y, Vector3.right);

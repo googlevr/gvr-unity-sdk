@@ -17,6 +17,7 @@ using UnityEngine.EventSystems;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using Gvr.Internal;
 
 /// This class is used by _GvrPointerInputModule_ to route scroll events through Unity's Event System.
 /// It maintains indepedent velocities for each instance of _IScrollHandler_ that is currently being scrolled.
@@ -70,6 +71,7 @@ public class GvrPointerScrollInput {
   private Dictionary<GameObject, ScrollInfo> scrollHandlers = new Dictionary<GameObject, ScrollInfo>();
   private List<GameObject> scrollingObjects = new List<GameObject>();
 
+  [SuppressMemoryAllocationError(IsWarning=true, Reason="Pending documentation.")]
   public void HandleScroll(GameObject currentGameObject, PointerEventData pointerData,
     GvrBasePointer pointer, IGvrEventExecutor eventExecutor) {
     bool touchDown = false;

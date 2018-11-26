@@ -12,11 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-
-/// <summary>
-/// Accesses and configures Daydream settings.
-/// </summary>
-
 using UnityEngine;
 using System;
 using System.Runtime.InteropServices;
@@ -32,6 +27,7 @@ using XRSettings = UnityEngine.VR.VRSettings;
 using UnityEditor;
 #endif  // UNITY_EDITOR
 
+/// <summary>Accesses and configures Daydream settings.</summary>
 public static class GvrSettings {
   /// Name of 'None' VR SDK, as returned by `VRSettings.loadedDeviceName`.
   public const string VR_SDK_NONE = "None";

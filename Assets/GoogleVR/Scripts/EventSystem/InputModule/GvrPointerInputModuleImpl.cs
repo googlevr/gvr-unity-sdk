@@ -14,6 +14,7 @@
 using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using Gvr.Internal;
 
 #if UNITY_2017_2_OR_NEWER
 using UnityEngine.XR;
@@ -38,7 +39,7 @@ public class GvrPointerInputModuleImpl {
   public GvrPointerScrollInput ScrollInput { get; set; }
 
   /// PointerEventData from the most recent frame.
-  public PointerEventData CurrentEventData { get; private set; }
+  public GvrPointerEventData CurrentEventData { get; private set; }
 
   /// The GvrBasePointer which will be responding to pointer events.
   public GvrBasePointer Pointer {
@@ -63,6 +64,7 @@ public class GvrPointerInputModuleImpl {
   // Active state
   private bool isActive = false;
 
+  [SuppressMemoryAllocationError(IsWarning=true, Reason="Pending documentation.")]
   public bool ShouldActivateModule() {
     bool isVrModeEnabled = !VrModeOnly;
     isVrModeEnabled |= XRSettings.enabled;
@@ -76,6 +78,7 @@ public class GvrPointerInputModuleImpl {
     return activeState;
   }
 
+  [SuppressMemoryAllocationError(IsWarning=true, Reason="Pending documentation.")]
   public void DeactivateModule() {
     TryExitPointer();
     ModuleController.Deactivate();
@@ -88,9 +91,12 @@ public class GvrPointerInputModuleImpl {
   }
 
   public bool IsPointerOverGameObject(int pointerId) {
-    return CurrentEventData != null && CurrentEventData.pointerEnter != null;
+    return CurrentEventData != null &&
+            CurrentEventData.pointerEnter != null &&
+            CurrentEventData.pointerId == pointerId;
   }
 
+  [SuppressMemoryAllocationError(IsWarning=true, Reason="Pending documentation.")]
   public void Process() {
     // If the pointer is inactive, make sure it is exited if necessary.
     if (!IsPointerActiveAndAvailable()) {
@@ -137,7 +143,7 @@ public class GvrPointerInputModuleImpl {
     }
 
     if (CurrentEventData == null) {
-      CurrentEventData = new PointerEventData(ModuleController.eventSystem);
+      CurrentEventData = new GvrPointerEventData(ModuleController.eventSystem);
       lastPose = currentPose;
     }
 
@@ -298,6 +304,8 @@ public class GvrPointerInputModuleImpl {
         EventExecutor.Execute(CurrentEventData.pointerPress, CurrentEventData, ExecuteEvents.pointerUpHandler);
 
         CurrentEventData.eligibleForClick = false;
+        CurrentEventData.gvrButtonsDown = 0;
+        CurrentEventData.button = 0;
         CurrentEventData.pointerPress = null;
         CurrentEventData.rawPointerPress = null;
       }
@@ -332,6 +340,8 @@ public class GvrPointerInputModuleImpl {
 
     if (CurrentEventData != null) {
       // Clear the click state.
+      CurrentEventData.gvrButtonsDown = 0;
+      CurrentEventData.button = 0;
       CurrentEventData.pointerPress = null;
       CurrentEventData.rawPointerPress = null;
       CurrentEventData.eligibleForClick = false;
@@ -346,6 +356,8 @@ public class GvrPointerInputModuleImpl {
     var go = CurrentEventData.pointerCurrentRaycast.gameObject;
 
     // Send pointer down event.
+    CurrentEventData.gvrButtonsDown = Pointer.ControllerButtonDown;
+    CurrentEventData.button = Pointer.InputButtonDown;
     CurrentEventData.pressPosition = CurrentEventData.position;
     CurrentEventData.pointerPressRaycast = CurrentEventData.pointerCurrentRaycast;
     CurrentEventData.pointerPress =

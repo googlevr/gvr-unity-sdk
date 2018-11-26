@@ -15,6 +15,7 @@
 using UnityEngine;
 using System;
 using System.Collections.Generic;
+using Gvr.Internal;
 
 // Requests dangerous permissions at runtime
 [HelpURL("https://developers.google.com/vr/unity/reference/class/GvrPermissionsRequester")]
@@ -33,8 +34,9 @@ public class GvrPermissionsRequester {
   private static GvrPermissionsRequester theInstance;
 
   /// The singleton instance of the PermissionsRequester class,
-  /// lazily instanciated.
+  /// lazily instantiated.
   public static GvrPermissionsRequester Instance {
+    [SuppressMemoryAllocationError(IsWarning=false, Reason="Lazy-loading getter is allowed to allocate sometimes.")]
     get {
       if (theInstance == null) {
         theInstance = new GvrPermissionsRequester();
@@ -69,10 +71,12 @@ public class GvrPermissionsRequester {
 #endif  // !UNITY_ANDROID || UNITY_EDITOR
   }
 
+  [SuppressMemoryAllocationError(IsWarning=true)]
   public bool IsPermissionGranted(string permission) {
     return permissionsFragment.Call<bool>("hasPermission", permission);
   }
 
+  [SuppressMemoryAllocationError(IsWarning=true)]
   public bool[] HasPermissionsGranted(string[] permissions) {
     Debug.Log("Calling HasPermissionsGranted: " + permissions);
 

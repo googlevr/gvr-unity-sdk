@@ -58,6 +58,15 @@ namespace GoogleVR.HelloVR {
     }
 
     public void TeleportRandomly(BaseEventData eventData) {
+      // Only trigger on left input button, which maps to
+      // Daydream controller TouchPadButton and Trigger buttons.
+      PointerEventData ped = eventData as PointerEventData;
+      if (ped != null) {
+        if (ped.button != PointerEventData.InputButton.Left) {
+          return;
+        }
+      }
+
       // Pick a random sibling, move them somewhere random, activate them,
       // deactivate ourself.
       int sibIdx = transform.GetSiblingIndex();
@@ -65,7 +74,7 @@ namespace GoogleVR.HelloVR {
       sibIdx = (sibIdx + Random.Range(1, numSibs)) % numSibs;
       GameObject randomSib = transform.parent.GetChild(sibIdx).gameObject;
 
-      // Move to random new location ±100º horzontal.
+      // Move to random new location ±90˚ horzontal.
       Vector3 direction = Quaternion.Euler(
           0,
           Random.Range(-90, 90),

@@ -100,6 +100,7 @@ public class GvrHeadset : MonoBehaviour {
   /// If a floor is found, populates floorHeight with the detected height.
   /// Otherwise, leaves the value unchanged.
   /// Returns true if value retrieval was successful, false otherwise (depends on tracking state).
+  [SuppressMemoryAllocationError(IsWarning=true, Reason="A getter for a float should not allocate.")]
   public static bool TryGetFloorHeight(ref float floorHeight) {
     if (instance == null) {
       return false;

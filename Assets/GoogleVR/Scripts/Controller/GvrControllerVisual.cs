@@ -17,6 +17,7 @@
 
 using UnityEngine;
 using System.Collections;
+using Gvr.Internal;
 
 /// Provides visual feedback for the daydream controller.
 [RequireComponent(typeof(Renderer))]
@@ -35,11 +36,19 @@ public class GvrControllerVisual : MonoBehaviour, IGvrArmModelReceiver, IGvrCont
     public Vector2 touchPos;
   }
 
+  /// Struct that describes a mesh, material pair used for rendering a controller visual.
+  [System.Serializable]
+  public struct VisualAssets {
+    public Mesh mesh;
+    public Material material;
+  }
+
   /// An array of prefabs that will be instantiated and added as children
   /// of the controller visual when the controller is created. Used to
   /// attach tooltips or other additional visual elements to the control dynamically.
   [SerializeField]
   private GameObject[] attachmentPrefabs;
+
   [SerializeField] private Color touchPadColor =
       new Color(200f / 255f, 200f / 255f, 200f / 255f, 1);
   [SerializeField] private Color appButtonColor =
@@ -67,9 +76,9 @@ public class GvrControllerVisual : MonoBehaviour, IGvrArmModelReceiver, IGvrCont
 
   public GvrControllerInputDevice ControllerInputDevice { get; set; }
 
-  public float PreferredAlpha{
-    get{
-      return ArmModel != null ?  maximumAlpha * ArmModel.PreferredAlpha : maximumAlpha;
+  public virtual float PreferredAlpha {
+    get {
+      return ArmModel != null ? maximumAlpha * ArmModel.PreferredAlpha : maximumAlpha;
     }
   }
 
@@ -110,6 +119,7 @@ public class GvrControllerVisual : MonoBehaviour, IGvrArmModelReceiver, IGvrCont
   }
 
   private Renderer controllerRenderer;
+  private MeshFilter meshFilter;
   private MaterialPropertyBlock materialPropertyBlock;
 
   private int alphaId;
@@ -203,6 +213,9 @@ public class GvrControllerVisual : MonoBehaviour, IGvrArmModelReceiver, IGvrCont
     if(materialPropertyBlock == null) {
       materialPropertyBlock = new MaterialPropertyBlock();
     }
+    if (meshFilter == null) {
+      meshFilter = GetComponent<MeshFilter>();
+    }
 
     alphaId = Shader.PropertyToID("_GvrControllerAlpha");
     touchId = Shader.PropertyToID("_GvrTouchInfo");
@@ -239,6 +252,16 @@ public class GvrControllerVisual : MonoBehaviour, IGvrArmModelReceiver, IGvrCont
     }
   }
 
+  /// Override this method to customize the visual's assets. This method is called
+  /// once per frame in the visual update process. Return a VisualAssets struct with
+  /// the assets to change.  Call this base method to get the current assets.
+  protected virtual VisualAssets GetVisualAssets() {
+    return new VisualAssets() {
+          mesh=meshFilter.sharedMesh,
+          material=controllerRenderer.sharedMaterial
+        };
+  }
+
   private void OnVisualUpdate(bool updateImmediately = false) {
 
     // Update the visual display based on the controller state
@@ -246,10 +269,18 @@ public class GvrControllerVisual : MonoBehaviour, IGvrArmModelReceiver, IGvrCont
       UpdateControllerState();
     }
 
+    VisualAssets newAssets = GetVisualAssets();
+    if (newAssets.mesh != meshFilter.sharedMesh) {
+      meshFilter.sharedMesh = newAssets.mesh;
+    }
+    if (newAssets.material != controllerRenderer.sharedMaterial) {
+      controllerRenderer.sharedMaterial = newAssets.material;
+    }
+
     float deltaTime = Time.deltaTime;
 
-    // If flagged to update immediately, set deltaTime to an arbitrarily large value
-    // This is particularly useful in editor, but also for resetting state quickly
+    // If flagged to update immediately, set deltaTime to an arbitrarily large value.
+    // This is particularly useful in editor, but also for resetting state quickly.
     if(updateImmediately) {
       deltaTime = IMMEDIATE_UPDATE_TIME;
     }
@@ -341,6 +372,7 @@ public class GvrControllerVisual : MonoBehaviour, IGvrArmModelReceiver, IGvrCont
     }
   }
 
+  [SuppressMemoryAllocationError(IsWarning=true, Reason="Pending documentation.")]
   public void SetControllerTexture(Texture newTexture) {
     controllerRenderer.material.mainTexture = newTexture;
   }

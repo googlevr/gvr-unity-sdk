@@ -14,6 +14,7 @@
 
 using UnityEngine;
 using System.Collections;
+using Gvr.Internal;
 
 /// Represents an object tracked by controller input.
 /// Manages the active status of the tracked controller based on controller connection status.
@@ -92,6 +93,8 @@ public class GvrTrackedController : MonoBehaviour {
     }
   }
 
+
+  [SuppressMemoryAllocationError(IsWarning=false, Reason="Only called when ArmModel is instantiated or changed.")]
   public void PropagateArmModel() {
     IGvrArmModelReceiver[] receivers =
       GetComponentsInChildren<IGvrArmModelReceiver>(true);
@@ -205,8 +208,8 @@ public class GvrTrackedController : MonoBehaviour {
       return;
     }
 
-    // Non-positionally tracked controllers always return Position of Vector3.zero.
-    if (controllerInputDevice.Position != Vector3.zero) {
+    // Disable arm model if the device supports 6DoF.
+    if (controllerInputDevice.SupportsPositionalTracking) {
       transform.localPosition = controllerInputDevice.Position;
       transform.localRotation = controllerInputDevice.Orientation;
     } else {

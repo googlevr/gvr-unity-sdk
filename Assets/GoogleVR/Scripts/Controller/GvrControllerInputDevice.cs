@@ -49,6 +49,7 @@ public class GvrControllerInputDevice {
   }
 
   public bool IsRightHand {
+    [SuppressMemoryAllocationError(IsWarning=true)]
     get {
       if (controllerId == 0) {
         return GvrSettings.Handedness == GvrSettings.UserPrefsHandedness.Right;
@@ -60,6 +61,7 @@ public class GvrControllerInputDevice {
 
   /// Returns the controller's current connection state.
   public GvrConnectionState State {
+    [SuppressMemoryAllocationError(IsWarning=true)]
     get {
       Update();
       return controllerState.connectionState;
@@ -71,6 +73,13 @@ public class GvrControllerInputDevice {
     get {
       Update();
       return controllerState.apiStatus;
+    }
+  }
+
+  // Returns true if the controller can be positionally tracked.
+  internal bool SupportsPositionalTracking {
+    get {
+      return controllerState.is6DoF;
     }
   }
 
@@ -172,6 +181,33 @@ public class GvrControllerInputDevice {
   public bool GetButtonUp(GvrControllerButton buttons) {
     Update();
     return (controllerState.buttonsUp & buttons) != 0;
+  }
+
+  /// Returns the bitmask of the buttons that are down in the current frame.
+  public GvrControllerButton Buttons {
+    get {
+      return controllerState.buttonsState;
+    }
+  }
+
+  /// Returns the bitmask of the buttons that began being pressed in the current frame.
+  /// Each individual button enum is guaranteed to be followed by exactly one ButtonsUp
+  /// event in a later frame. Also, ButtonsDown and ButtonsUp will never both be true
+  /// in the same frame for an individual button.
+  public GvrControllerButton ButtonsDown {
+    get {
+      return controllerState.buttonsDown;
+    }
+  }
+
+  /// Returns the bitmask of the buttons that ended being pressed in the current frame.
+  /// Each individual button enum is guaranteed to be preceded by exactly one ButtonsDown
+  /// event in an earlier frame. Also, ButtonsDown and ButtonsUp will never both be true
+  /// in the same frame for an individual button.
+  public GvrControllerButton ButtonsUp {
+    get {
+      return controllerState.buttonsUp;
+    }
   }
 
   /// If State == GvrConnectionState.Error, this contains details about the error.

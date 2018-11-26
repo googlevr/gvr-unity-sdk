@@ -22,7 +22,7 @@ namespace Gvr.Internal {
   class ControllerUtils {
 
     /// Convenience array of all hands.
-    public static GvrControllerHand[] AllHands = {
+    public static readonly GvrControllerHand[] AllHands = {
       GvrControllerHand.Right,
       GvrControllerHand.Left,
     };

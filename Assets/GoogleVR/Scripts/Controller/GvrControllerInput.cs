@@ -108,9 +108,13 @@ public enum GvrControllerButton {
   /// System button. Formerly known as Home.
   System = 1 << 2,
 
+  /// Primary button on the underside of the controller.
+  Trigger = 1 << 6,
+
+  /// Secondary button on the underside of the controller.
+  Grip = 1 << 7,
+
   /// Buttons reserved for future use. Subject to name change.
-  Reserved0 = 1 << 6,
-  Reserved1 = 1 << 7,
   Reserved2 = 1 << 8,
 
 }
@@ -157,10 +161,12 @@ public class GvrControllerInput : MonoBehaviour {
   /// Existing `GvrControllerInputDevice`s will be marked invalid and will log errors
   /// when used. Event handlers are called immediately when added.
   public static event Action OnDevicesChanged {
+    [SuppressMemoryAllocationError(IsWarning=false, Reason="Only called on input device change.")]
     add {
       onDevicesChangedInternal += value;
       value();
     }
+    [SuppressMemoryAllocationError(IsWarning=false, Reason="Only called on input device change.")]
     remove {
       onDevicesChangedInternal -= value;
     }
@@ -201,7 +207,7 @@ public class GvrControllerInput : MonoBehaviour {
            "   • Ctrl + Move Mouse = Change TouchPos", 8)]
   [Tooltip("How to connect to the emulator: USB cable (recommended) or WIFI.")]
 
-  public EmulatorConnectionMode emulatorConnectionMode = EmulatorConnectionMode.USB;
+  public EmulatorConnectionMode emulatorConnectionMode = EmulatorConnectionMode.OFF;
 
   /// Returns a controller device for the specified hand.
   public static GvrControllerInputDevice GetDevice(GvrControllerHand hand) {

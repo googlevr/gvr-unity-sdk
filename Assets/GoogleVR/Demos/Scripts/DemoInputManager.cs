@@ -51,10 +51,16 @@ namespace GoogleVR.Demos {
 
     private bool isDaydream = false;
     private int activeControllerPointer = 0;
-    private static GvrControllerHand[] AllHands = {
+    private static readonly GvrControllerHand[] AllHands = {
       GvrControllerHand.Right,
       GvrControllerHand.Left,
     };
+    // Buttons that can trigger pointer switching.
+    private const GvrControllerButton pointerButtonMask =
+            GvrControllerButton.App |
+            GvrControllerButton.TouchPadButton |
+            GvrControllerButton.Trigger |
+            GvrControllerButton.Grip;
 
     [Tooltip("Reference to GvrControllerMain")]
     public GameObject controllerMain;
@@ -136,12 +142,10 @@ namespace GoogleVR.Demos {
       int newPointer = activeControllerPointer;
 
       if (controllerPointers.Length > 1 && controllerPointers[1] != null) {
-        // Buttons that can trigger pointer switching.
-        GvrControllerButton buttonMask = GvrControllerButton.App | GvrControllerButton.TouchPadButton;
         GvrTrackedController trackedController1 = controllerPointers[1].GetComponent<GvrTrackedController>();
         foreach (var hand in AllHands) {
           GvrControllerInputDevice device = GvrControllerInput.GetDevice(hand);
-          if (device.GetButtonDown(buttonMask)) {
+          if (device.GetButtonDown(pointerButtonMask)) {
             // Match the button to our own controllerPointers list.
             if (device == trackedController1.ControllerInputDevice) {
               newPointer = 1;

@@ -17,6 +17,8 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
+using Gvr.Internal;
+
 /// This script provides a raycaster for use with the GvrPointerInputModule.
 /// It behaves similarly to the standards Graphic raycaster, except that it utilize raycast
 /// modes specifically for Gvr.
@@ -46,6 +48,7 @@ public class GvrPointerGraphicRaycaster : GvrBasePointerRaycaster {
   private static readonly List<Graphic> sortedGraphics = new List<Graphic>();
 
   public override Camera eventCamera {
+    [SuppressMemoryAllocationError(IsWarning=true, Reason="A getter for a Camera should not allocate.")]
     get {
       GvrBasePointer pointer = GvrPointerInputModule.Pointer;
       if (pointer == null) {

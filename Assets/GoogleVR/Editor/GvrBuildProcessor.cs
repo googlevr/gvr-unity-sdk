@@ -70,14 +70,14 @@ class GvrBuildProcessor : IPreprocessBuild, IPostprocessBuild {
 
     // 'Player Settings > Virtual Reality Supported' must be enabled.
     if (!IsVRSupportEnabled()) {
-      Debug.LogErrorFormat(VR_SETTINGS_NOT_ENABLED_ERROR_MESSAGE_FORMAT, target);
+      Debug.LogWarningFormat(VR_SETTINGS_NOT_ENABLED_ERROR_MESSAGE_FORMAT, target);
     }
 
     if (target == BuildTarget.Android) {
       // When building for Android at least one VR SDK must be included.
       // For Google VR valid VR SDKs are 'Daydream' and/or 'Cardboard'.
       if (!IsSDKOtherThanNoneIncluded()) {
-        Debug.LogError(ANDROID_MISSING_GVR_SDK_ERROR_MESSAGE);
+        Debug.LogWarning(ANDROID_MISSING_GVR_SDK_ERROR_MESSAGE);
       }
     }
 
@@ -85,7 +85,7 @@ class GvrBuildProcessor : IPreprocessBuild, IPostprocessBuild {
       // When building for iOS at least one VR SDK must be included.
       // For Google VR only 'Cardboard' is supported.
       if (!IsSDKOtherThanNoneIncluded()) {
-        Debug.LogError(IOS_MISSING_GVR_SDK_ERROR_MESSAGE);
+        Debug.LogWarning(IOS_MISSING_GVR_SDK_ERROR_MESSAGE);
       }
     }
   }
