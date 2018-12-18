@@ -15,8 +15,8 @@
 using UnityEngine.EventSystems;
 
 /// Interface to implement if you wish to receive OnGvrPointerHover callbacks.
-public interface IGvrPointerHoverHandler : IEventSystemHandler {
-
-  /// Called when pointer is hovering over GameObject.
-  void OnGvrPointerHover(PointerEventData eventData);
+public interface IGvrPointerHoverHandler : IEventSystemHandler
+{
+    /// Called when pointer is hovering over GameObject.
+    void OnGvrPointerHover(PointerEventData eventData);
 }

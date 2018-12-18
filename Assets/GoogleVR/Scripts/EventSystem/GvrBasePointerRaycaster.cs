@@ -17,50 +17,61 @@ using UnityEngine.EventSystems;
 using System.Collections.Generic;
 
 /// This script provides shared functionality used by all Gvr raycasters.
-public abstract class GvrBasePointerRaycaster : BaseRaycaster {
-  private GvrBasePointer.PointerRay lastRay;
+public abstract class GvrBasePointerRaycaster : BaseRaycaster
+{
+    private GvrBasePointer.PointerRay lastRay;
 
-  protected GvrBasePointer.RaycastMode CurrentRaycastModeForHybrid { get; private set; }
+    protected GvrBasePointer.RaycastMode CurrentRaycastModeForHybrid { get; private set; }
 
-  protected GvrBasePointerRaycaster() {
-  }
-
-  public GvrBasePointer.PointerRay GetLastRay() {
-    return lastRay;
-  }
-
-  public override void Raycast(PointerEventData eventData, List<RaycastResult> resultAppendList) {
-    GvrBasePointer pointer = GvrPointerInputModule.Pointer;
-    if (pointer == null || !pointer.IsAvailable) {
-      return;
+    protected GvrBasePointerRaycaster()
+    {
     }
 
-    if (pointer.raycastMode == GvrBasePointer.RaycastMode.Hybrid) {
-      RaycastHybrid(pointer, eventData, resultAppendList);
-    } else {
-      RaycastDefault(pointer, eventData, resultAppendList);
+    public GvrBasePointer.PointerRay GetLastRay()
+    {
+        return lastRay;
     }
-  }
 
-  protected abstract bool PerformRaycast(GvrBasePointer.PointerRay pointerRay, float radius,
-    PointerEventData eventData, List<RaycastResult> resultAppendList);
+    public override void Raycast(PointerEventData eventData, List<RaycastResult> resultAppendList)
+    {
+        GvrBasePointer pointer = GvrPointerInputModule.Pointer;
+        if (pointer == null || !pointer.IsAvailable)
+        {
+            return;
+        }
 
-  private void RaycastHybrid(GvrBasePointer pointer, PointerEventData eventData, List<RaycastResult> resultAppendList) {
-    CurrentRaycastModeForHybrid = GvrBasePointer.RaycastMode.Direct;
-    lastRay = GvrBasePointer.CalculateHybridRay(pointer, CurrentRaycastModeForHybrid);
-    float radius = pointer.CurrentPointerRadius;
-    bool foundHit = PerformRaycast(lastRay, radius, eventData, resultAppendList);
-
-    if (!foundHit) {
-      CurrentRaycastModeForHybrid = GvrBasePointer.RaycastMode.Camera;
-      lastRay = GvrBasePointer.CalculateHybridRay(pointer, CurrentRaycastModeForHybrid);
-      PerformRaycast(lastRay, radius, eventData, resultAppendList);
+        if (pointer.raycastMode == GvrBasePointer.RaycastMode.Hybrid)
+        {
+            RaycastHybrid(pointer, eventData, resultAppendList);
+        }
+        else
+        {
+            RaycastDefault(pointer, eventData, resultAppendList);
+        }
     }
-  }
 
-  private void RaycastDefault(GvrBasePointer pointer, PointerEventData eventData, List<RaycastResult> resultAppendList) {
-    lastRay = GvrBasePointer.CalculateRay(pointer, pointer.raycastMode);
-    float radius = pointer.CurrentPointerRadius;
-    PerformRaycast(lastRay, radius, eventData, resultAppendList);
-  }
+    protected abstract bool PerformRaycast(GvrBasePointer.PointerRay pointerRay, float radius,
+                                           PointerEventData eventData, List<RaycastResult> resultAppendList);
+
+    private void RaycastHybrid(GvrBasePointer pointer, PointerEventData eventData, List<RaycastResult> resultAppendList)
+    {
+        CurrentRaycastModeForHybrid = GvrBasePointer.RaycastMode.Direct;
+        lastRay = GvrBasePointer.CalculateHybridRay(pointer, CurrentRaycastModeForHybrid);
+        float radius = pointer.CurrentPointerRadius;
+        bool foundHit = PerformRaycast(lastRay, radius, eventData, resultAppendList);
+
+        if (!foundHit)
+        {
+            CurrentRaycastModeForHybrid = GvrBasePointer.RaycastMode.Camera;
+            lastRay = GvrBasePointer.CalculateHybridRay(pointer, CurrentRaycastModeForHybrid);
+            PerformRaycast(lastRay, radius, eventData, resultAppendList);
+        }
+    }
+
+    private void RaycastDefault(GvrBasePointer pointer, PointerEventData eventData, List<RaycastResult> resultAppendList)
+    {
+        lastRay = GvrBasePointer.CalculateRay(pointer, pointer.raycastMode);
+        float radius = pointer.CurrentPointerRadius;
+        PerformRaycast(lastRay, radius, eventData, resultAppendList);
+    }
 }

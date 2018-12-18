@@ -17,34 +17,50 @@ using UnityEngine;
 
 /// Used for platforms that do not support the GoogleVR standalone headset (6DOF).
 /// @cond
-namespace Gvr.Internal {
-  class DummyHeadsetProvider : IHeadsetProvider {
-    private HeadsetState dummyState;
+namespace Gvr.Internal
+{
+    class DummyHeadsetProvider : IHeadsetProvider
+    {
+        private HeadsetState dummyState;
 
-    public bool SupportsPositionalTracking { get { return false; } }
+        public bool SupportsPositionalTracking
+        {
+            get
+            {
+                return false;
+            }
+        }
 
-    public void PollEventState(ref HeadsetState state) { }
+        public void PollEventState(ref HeadsetState state)
+        {
+        }
 
-    public bool TryGetFloorHeight(ref float floorHeight) {
-      return false;
+        public bool TryGetFloorHeight(ref float floorHeight)
+        {
+            return false;
+        }
+
+        public bool TryGetRecenterTransform(
+            ref Vector3 position, ref Quaternion rotation)
+        {
+            return false;
+        }
+
+        public bool TryGetSafetyRegionType(ref GvrSafetyRegionType safetyType)
+        {
+            return false;
+        }
+
+        public bool TryGetSafetyCylinderInnerRadius(ref float innerRadius)
+        {
+            return false;
+        }
+
+        public bool TryGetSafetyCylinderOuterRadius(ref float outerRadius)
+        {
+            return false;
+        }
     }
-
-    public bool TryGetRecenterTransform(
-        ref Vector3 position, ref Quaternion rotation) {
-      return false;
-    }
-
-    public bool TryGetSafetyRegionType(ref GvrSafetyRegionType safetyType) {
-      return false;
-    }
-
-    public bool TryGetSafetyCylinderInnerRadius(ref float innerRadius) {
-      return false;
-    }
-
-    public bool TryGetSafetyCylinderOuterRadius(ref float outerRadius) {
-      return false;
-    }
-  }
 }
+
 /// @endcond

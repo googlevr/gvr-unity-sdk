@@ -15,31 +15,34 @@
 using UnityEngine;
 
 /// @cond
-namespace Gvr.Internal {
-  /// Factory that provides a concrete implementation of IHeadsetProvider for the
-  /// current platform.
-  static class HeadsetProviderFactory {
-    /// Provides a concrete implementation of IHeadsetProvider appropriate for the current
-    /// platform. This method never returns null. In the worst case, it might return a dummy
-    /// provider if the platform is not supported. For demo purposes the emulator controller
-    /// is returned in the editor and in Unity Standalone (desktop) builds, for use inside the
-    /// desktop player.
-    static internal IHeadsetProvider CreateProvider() {
+namespace Gvr.Internal
+{
+    /// Factory that provides a concrete implementation of IHeadsetProvider for the
+    /// current platform.
+    static class HeadsetProviderFactory
+    {
+        /// Provides a concrete implementation of IHeadsetProvider appropriate for the current
+        /// platform. This method never returns null. In the worst case, it might return a dummy
+        /// provider if the platform is not supported. For demo purposes the emulator controller
+        /// is returned in the editor and in Unity Standalone (desktop) builds, for use inside the
+        /// desktop player.
+        static internal IHeadsetProvider CreateProvider()
+        {
 // Use emualtor in editor, GVR SDK support on Android standalone headsets, and a
 // dummy implementation otherwise..
 #if UNITY_EDITOR
-      return new EditorHeadsetProvider();
+            return new EditorHeadsetProvider();
 #elif UNITY_ANDROID
-      // Use the GVR C API.
-      return new AndroidNativeHeadsetProvider();
+            // Use the GVR C API.
+            return new AndroidNativeHeadsetProvider();
 #else
-      // Platform not supported.
-      Debug.LogWarning("No Google VR standalone headset / 6DOF support on " +
-          Application.platform + " platform.");
-      return new DummyHeadsetProvider();
+            // Platform not supported.
+            Debug.LogWarning("No Google VR standalone headset / 6DOF support on " +
+            Application.platform + " platform.");
+            return new DummyHeadsetProvider();
 #endif  // UNITY_EDITOR || UNITY_ANDROID
+        }
     }
-  }
 }
-/// @endcond
 
+/// @endcond

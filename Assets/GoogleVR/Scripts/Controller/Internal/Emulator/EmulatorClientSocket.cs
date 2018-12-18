@@ -29,230 +29,287 @@ using System.Threading;
 using proto;
 
 /// @cond
-namespace Gvr.Internal {
-
-  public enum EmulatorClientSocketConnectionState {
-    Disconnected = 0,
-    Connecting = 1,
-    Connected = 2,
-  };
-
-  class EmulatorClientSocket : MonoBehaviour {
-    private static readonly int kPhoneEventPort = 7003;
-    private const int kSocketReadTimeoutMillis = 5000;
-
-    // Minimum interval, in seconds, between attempts to reconnect the socket.
-    private const float kMinReconnectInterval = 1f;
-
-    private TcpClient phoneMirroringSocket;
-
-    private Thread phoneEventThread;
-
-    private volatile bool shouldStop = false;
-
-    // Flag used to limit connection state logging to initial failure and successful reconnects.
-    private volatile bool lastConnectionAttemptWasSuccessful = true;
-
-    private EmulatorManager phoneRemote;
-    public EmulatorClientSocketConnectionState connected { get; private set; }
-
-    public void Init(EmulatorManager remote) {
-      phoneRemote = remote;
-
-      if (EmulatorConfig.Instance.PHONE_EVENT_MODE != EmulatorConfig.Mode.OFF) {
-        phoneEventThread = new Thread(phoneEventSocketLoop);
-        phoneEventThread.IsBackground = true;
-        phoneEventThread.Start();
-      }
+namespace Gvr.Internal
+{
+    public enum EmulatorClientSocketConnectionState
+    {
+        Disconnected = 0,
+        Connecting = 1,
+        Connected = 2,
     }
 
-    private void phoneEventSocketLoop() {
-      while (!shouldStop) {
-        long lastConnectionAttemptTime = DateTime.Now.Ticks;
-        try {
-          phoneConnect();
-        } catch(Exception e) {
-          if (lastConnectionAttemptWasSuccessful) {
-            Debug.LogWarningFormat("{0}\n{1}", e.Message, e.StackTrace);
-            // Suppress additional failures until we have successfully reconnected.
-            lastConnectionAttemptWasSuccessful = false;
-          }
+    class EmulatorClientSocket : MonoBehaviour
+    {
+        private static readonly int kPhoneEventPort = 7003;
+        private const int kSocketReadTimeoutMillis = 5000;
+
+        // Minimum interval, in seconds, between attempts to reconnect the socket.
+        private const float kMinReconnectInterval = 1f;
+
+        private TcpClient phoneMirroringSocket;
+
+        private Thread phoneEventThread;
+
+        private volatile bool shouldStop = false;
+
+        // Flag used to limit connection state logging to initial failure and successful reconnects.
+        private volatile bool lastConnectionAttemptWasSuccessful = true;
+
+        private EmulatorManager phoneRemote;
+
+        public EmulatorClientSocketConnectionState connected { get; private set; }
+
+        public void Init(EmulatorManager remote)
+        {
+            phoneRemote = remote;
+
+            if (EmulatorConfig.Instance.PHONE_EVENT_MODE != EmulatorConfig.Mode.OFF)
+            {
+                phoneEventThread = new Thread(phoneEventSocketLoop);
+                phoneEventThread.IsBackground = true;
+                phoneEventThread.Start();
+            }
         }
 
-        // Wait a while in order to enforce the minimum time between connection attempts.
-        TimeSpan elapsed = new TimeSpan(DateTime.Now.Ticks - lastConnectionAttemptTime);
-        float toWait = kMinReconnectInterval - (float) elapsed.TotalSeconds;
-        if (toWait > 0) {
-          Thread.Sleep((int) (toWait * 1000));
-        }
-      }
-    }
+        private void phoneEventSocketLoop()
+        {
+            while (!shouldStop)
+            {
+                long lastConnectionAttemptTime = DateTime.Now.Ticks;
+                try
+                {
+                    phoneConnect();
+                }
+                catch (Exception e)
+                {
+                    if (lastConnectionAttemptWasSuccessful)
+                    {
+                        Debug.LogWarningFormat("{0}\n{1}", e.Message, e.StackTrace);
 
-    private void phoneConnect() {
-      string addr = EmulatorConfig.Instance.PHONE_EVENT_MODE == EmulatorConfig.Mode.USB
+                        // Suppress additional failures until we have successfully reconnected.
+                        lastConnectionAttemptWasSuccessful = false;
+                    }
+                }
+
+                // Wait a while in order to enforce the minimum time between connection attempts.
+                TimeSpan elapsed = new TimeSpan(DateTime.Now.Ticks - lastConnectionAttemptTime);
+                float toWait = kMinReconnectInterval - (float)elapsed.TotalSeconds;
+                if (toWait > 0)
+                {
+                    Thread.Sleep((int)(toWait * 1000));
+                }
+            }
+        }
+
+        private void phoneConnect()
+        {
+            string addr = EmulatorConfig.Instance.PHONE_EVENT_MODE == EmulatorConfig.Mode.USB
         ? EmulatorConfig.USB_SERVER_IP : EmulatorConfig.WIFI_SERVER_IP;
 
-      try {
-        if (EmulatorConfig.Instance.PHONE_EVENT_MODE == EmulatorConfig.Mode.USB) {
-          setupPortForwarding(kPhoneEventPort);
-        }
-        TcpClient tcpClient = new TcpClient(addr, kPhoneEventPort);
-        connected = EmulatorClientSocketConnectionState.Connecting;
-        ProcessConnection(tcpClient);
-        tcpClient.Close();
-      } finally {
-        connected = EmulatorClientSocketConnectionState.Disconnected;
-      }
-    }
+            try
+            {
+                if (EmulatorConfig.Instance.PHONE_EVENT_MODE == EmulatorConfig.Mode.USB)
+                {
+                    setupPortForwarding(kPhoneEventPort);
+                }
 
-    private void setupPortForwarding(int port) {
+                TcpClient tcpClient = new TcpClient(addr, kPhoneEventPort);
+                connected = EmulatorClientSocketConnectionState.Connecting;
+                ProcessConnection(tcpClient);
+                tcpClient.Close();
+            }
+            finally
+            {
+                connected = EmulatorClientSocketConnectionState.Disconnected;
+            }
+        }
+
+        private void setupPortForwarding(int port)
+        {
 #if !UNITY_WEBPLAYER
-      string adbCommand = string.Format("adb forward tcp:{0} tcp:{0}", port);
-      System.Diagnostics.Process myProcess = new System.Diagnostics.Process();
-      string processFilename;
-      string processArguments;
-      int kExitCodeCommandNotFound;
+            string adbCommand = string.Format("adb forward tcp:{0} tcp:{0}", port);
+            System.Diagnostics.Process myProcess = new System.Diagnostics.Process();
+            string processFilename;
+            string processArguments;
+            int kExitCodeCommandNotFound;
 
-      if (Application.platform == RuntimePlatform.WindowsEditor ||
-          Application.platform == RuntimePlatform.WindowsPlayer) {
-        processFilename = "CMD.exe";
-        processArguments = @"/k " + adbCommand + " & exit";
-        // See "Common Error Lookup Tool" (https://www.microsoft.com/en-us/download/details.aspx?id=985)
-        // MSG_DIR_BAD_COMMAND_OR_FILE (cmdmsg.h)
-        kExitCodeCommandNotFound = 9009; // 0x2331
-      } else { // Unix
-        processFilename = "bash";
-        processArguments = string.Format("-l -c \"{0}\"", adbCommand);
-        // "command not found" (see http://tldp.org/LDP/abs/html/exitcodes.html)
-        kExitCodeCommandNotFound = 127;
-      }
+            if (Application.platform == RuntimePlatform.WindowsEditor ||
+                   Application.platform == RuntimePlatform.WindowsPlayer)
+            {
+                processFilename = "CMD.exe";
+                processArguments = @"/k " + adbCommand + " & exit";
 
-      System.Diagnostics.ProcessStartInfo myProcessStartInfo =
-        new System.Diagnostics.ProcessStartInfo(processFilename, processArguments);
-      myProcessStartInfo.UseShellExecute = false;
-      myProcessStartInfo.RedirectStandardError = true;
-      myProcessStartInfo.CreateNoWindow = true;
-      myProcess.StartInfo = myProcessStartInfo;
-      myProcess.Start();
-      myProcess.WaitForExit();
-      // Also wait for HasExited here, to avoid ExitCode access below occasionally throwing InvalidOperationException
-      while (!myProcess.HasExited) {
-        Thread.Sleep(1);
-      }
-      int exitCode = myProcess.ExitCode;
-      string standardError = myProcess.StandardError.ReadToEnd();
-      myProcess.Close();
+                // See "Common Error Lookup Tool" (https://www.microsoft.com/en-us/download/details.aspx?id=985)
+                // MSG_DIR_BAD_COMMAND_OR_FILE (cmdmsg.h)
+                kExitCodeCommandNotFound = 9009; // 0x2331
+            }
+            else
+            { // Unix
+                processFilename = "bash";
+                processArguments = string.Format("-l -c \"{0}\"", adbCommand);
 
-      if (exitCode == 0) {
-        // Port forwarding setup successfully.
-        return;
-      }
+                // "command not found" (see http://tldp.org/LDP/abs/html/exitcodes.html)
+                kExitCodeCommandNotFound = 127;
+            }
 
-      if (exitCode == kExitCodeCommandNotFound) {
-        // Caught by phoneEventSocketLoop.
-        throw new Exception(
-          "Android Debug Bridge (`adb`) command not found." +
-          "\nVerify that the Android SDK is installed and that the directory containing" +
-          " `adb` is included in your PATH environment variable.");
-      }
-      // Caught by phoneEventSocketLoop.
-      throw new Exception(
-        string.Format(
-          "Failed to setup port forwarding." +
-          " Exit code {0} returned by process: {1} {2}\n{3}",
-          exitCode, processFilename, processArguments, standardError));
+            System.Diagnostics.ProcessStartInfo myProcessStartInfo =
+                new System.Diagnostics.ProcessStartInfo(processFilename, processArguments);
+            myProcessStartInfo.UseShellExecute = false;
+            myProcessStartInfo.RedirectStandardError = true;
+            myProcessStartInfo.CreateNoWindow = true;
+            myProcess.StartInfo = myProcessStartInfo;
+            myProcess.Start();
+            myProcess.WaitForExit();
+
+            // Also wait for HasExited here, to avoid ExitCode access below occasionally throwing InvalidOperationException
+            while (!myProcess.HasExited)
+            {
+                Thread.Sleep(1);
+            }
+
+            int exitCode = myProcess.ExitCode;
+            string standardError = myProcess.StandardError.ReadToEnd();
+            myProcess.Close();
+
+            if (exitCode == 0)
+            {
+                // Port forwarding setup successfully.
+                return;
+            }
+
+            if (exitCode == kExitCodeCommandNotFound)
+            {
+                // Caught by phoneEventSocketLoop.
+                throw new Exception(
+                    "Android Debug Bridge (`adb`) command not found." +
+                    "\nVerify that the Android SDK is installed and that the directory containing" +
+                    " `adb` is included in your PATH environment variable.");
+            }
+
+            // Caught by phoneEventSocketLoop.
+            throw new Exception(
+                string.Format(
+                    "Failed to setup port forwarding." +
+                    " Exit code {0} returned by process: {1} {2}\n{3}",
+                    exitCode, processFilename, processArguments, standardError));
 #endif  // !UNITY_WEBPLAYER
-    }
-
-    private void ProcessConnection(TcpClient tcpClient) {
-      byte[] buffer = new byte[4];
-      NetworkStream stream = tcpClient.GetStream();
-      stream.ReadTimeout = kSocketReadTimeoutMillis;
-      tcpClient.ReceiveTimeout = kSocketReadTimeoutMillis;
-      while (!shouldStop) {
-        int bytesRead = blockingRead(stream, buffer, 0, 4);
-        if (bytesRead < 4) {
-          // Caught by phoneEventSocketLoop.
-          throw new Exception(
-            "Failed to read from controller emulator app event socket." +
-            "\nVerify that the controller emulator app is running.");
-        }
-        int msgLen = unpack32bits(correctEndianness(buffer), 0);
-
-        byte[] dataBuffer = new byte[msgLen];
-        bytesRead = blockingRead(stream, dataBuffer, 0, msgLen);
-        if (bytesRead < msgLen) {
-          // Caught by phoneEventSocketLoop.
-          throw new Exception(
-            "Failed to read from controller emulator app event socket." +
-            "\nVerify that the controller emulator app is running.");
         }
 
-        PhoneEvent proto =
-            PhoneEvent.CreateBuilder().MergeFrom(dataBuffer).Build();
-        phoneRemote.OnPhoneEvent(proto);
+        private void ProcessConnection(TcpClient tcpClient)
+        {
+            byte[] buffer = new byte[4];
+            NetworkStream stream = tcpClient.GetStream();
+            stream.ReadTimeout = kSocketReadTimeoutMillis;
+            tcpClient.ReceiveTimeout = kSocketReadTimeoutMillis;
+            while (!shouldStop)
+            {
+                int bytesRead = blockingRead(stream, buffer, 0, 4);
+                if (bytesRead < 4)
+                {
+                    // Caught by phoneEventSocketLoop.
+                    throw new Exception(
+                        "Failed to read from controller emulator app event socket." +
+                        "\nVerify that the controller emulator app is running.");
+                }
 
-        connected = EmulatorClientSocketConnectionState.Connected;
+                int msgLen = unpack32bits(correctEndianness(buffer), 0);
 
-        if (!lastConnectionAttemptWasSuccessful) {
-          Debug.Log("Successfully connected to controller emulator app.");
-          // Log first failure after after successful read from event socket.
-          lastConnectionAttemptWasSuccessful = true;
+                byte[] dataBuffer = new byte[msgLen];
+                bytesRead = blockingRead(stream, dataBuffer, 0, msgLen);
+                if (bytesRead < msgLen)
+                {
+                    // Caught by phoneEventSocketLoop.
+                    throw new Exception(
+                        "Failed to read from controller emulator app event socket." +
+                        "\nVerify that the controller emulator app is running.");
+                }
+
+                PhoneEvent proto =
+                    PhoneEvent.CreateBuilder().MergeFrom(dataBuffer).Build();
+                phoneRemote.OnPhoneEvent(proto);
+
+                connected = EmulatorClientSocketConnectionState.Connected;
+
+                if (!lastConnectionAttemptWasSuccessful)
+                {
+                    Debug.Log("Successfully connected to controller emulator app.");
+
+                    // Log first failure after after successful read from event socket.
+                    lastConnectionAttemptWasSuccessful = true;
+                }
+            }
         }
-      }
-    }
 
-    private int blockingRead(NetworkStream stream, byte[] buffer, int index,
-        int count) {
-      int bytesRead = 0;
-      while (!shouldStop && bytesRead < count) {
-        try {
-          int n = stream.Read(buffer, index + bytesRead, count - bytesRead);
-          if (n <= 0) {
-            // Failed to read.
-            return -1;
-          }
-          bytesRead += n;
-        } catch (IOException) {
-          // Read failed or timed out.
-          return -1;
-        } catch (ObjectDisposedException) {
-          // Socket closed.
-          return -1;
+        private int blockingRead(NetworkStream stream, byte[] buffer, int index,
+                                int count)
+        {
+            int bytesRead = 0;
+            while (!shouldStop && bytesRead < count)
+            {
+                try
+                {
+                    int n = stream.Read(buffer, index + bytesRead, count - bytesRead);
+                    if (n <= 0)
+                    {
+                        // Failed to read.
+                        return -1;
+                    }
+
+                    bytesRead += n;
+                }
+                catch (IOException)
+                {
+                    // Read failed or timed out.
+                    return -1;
+                }
+                catch (ObjectDisposedException)
+                {
+                    // Socket closed.
+                    return -1;
+                }
+            }
+
+            return bytesRead;
         }
-      }
-      return bytesRead;
+
+        void OnDestroy()
+        {
+            shouldStop = true;
+
+            if (phoneMirroringSocket != null)
+            {
+                phoneMirroringSocket.Close();
+                phoneMirroringSocket = null;
+            }
+
+            if (phoneEventThread != null)
+            {
+                phoneEventThread.Join();
+            }
+        }
+
+        private int unpack32bits(byte[] array, int offset)
+        {
+            int num = 0;
+            for (int i = 0; i < 4; i++)
+            {
+                num += array[offset + i] << (i * 8);
+            }
+
+            return num;
+        }
+
+        static private byte[] correctEndianness(byte[] array)
+        {
+            if (BitConverter.IsLittleEndian)
+            {
+                Array.Reverse(array);
+            }
+
+            return array;
+        }
     }
-
-    void OnDestroy() {
-      shouldStop = true;
-
-      if (phoneMirroringSocket != null) {
-        phoneMirroringSocket.Close ();
-        phoneMirroringSocket = null;
-      }
-
-      if (phoneEventThread != null) {
-        phoneEventThread.Join();
-      }
-    }
-
-    private int unpack32bits(byte[] array, int offset) {
-      int num = 0;
-      for (int i = 0; i < 4; i++) {
-        num += array [offset + i] << (i * 8);
-      }
-      return num;
-    }
-
-    static private byte[] correctEndianness(byte[] array) {
-      if (BitConverter.IsLittleEndian)
-        Array.Reverse(array);
-
-      return array;
-    }
-  }
 }
-/// @endcond
 
+/// @endcond
 #endif  // UNITY_EDITOR

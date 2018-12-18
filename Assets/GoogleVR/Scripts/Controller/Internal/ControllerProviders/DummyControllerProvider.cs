@@ -15,25 +15,51 @@
 using Gvr;
 
 /// @cond
-namespace Gvr.Internal {
-  /// Dummy controller provider.
-  /// Used in platforms that do not support controllers.
-  class DummyControllerProvider : IControllerProvider {
-    private ControllerState dummyState = new ControllerState();
-    public bool SupportsBatteryStatus {
-      get { return false; }
-    }
-    public int MaxControllerCount {
-      get { return 1; }
-    }
-    internal DummyControllerProvider() {}
-    public void Dispose() {}
-    public void ReadState(ControllerState outState,int controller_id) {
-      outState.CopyFrom(dummyState);
-    }
-    public void OnPause() {}
-    public void OnResume() {}
-  }
-}
-/// @endcond
+namespace Gvr.Internal
+{
+    /// Dummy controller provider.
+    /// Used in platforms that do not support controllers.
+    class DummyControllerProvider : IControllerProvider
+    {
+        private ControllerState dummyState = new ControllerState();
 
+        public bool SupportsBatteryStatus
+        {
+            get
+            {
+                return false;
+            }
+        }
+
+        public int MaxControllerCount
+        {
+            get
+            {
+                return 1;
+            }
+        }
+
+        internal DummyControllerProvider()
+        {
+        }
+
+        public void Dispose()
+        {
+        }
+
+        public void ReadState(ControllerState outState, int controller_id)
+        {
+            outState.CopyFrom(dummyState);
+        }
+
+        public void OnPause()
+        {
+        }
+
+        public void OnResume()
+        {
+        }
+    }
+}
+
+/// @endcond

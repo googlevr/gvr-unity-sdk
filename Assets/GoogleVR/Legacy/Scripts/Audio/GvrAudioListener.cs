@@ -25,37 +25,42 @@ using System.Collections;
 [System.Obsolete("Please upgrade to Resonance Audio (https://developers.google.com/resonance-audio/migrate).")]
 #endif  // UNITY_2017_1_OR_NEWER
 [AddComponentMenu("GoogleVR/Audio/GvrAudioListener")]
-public class GvrAudioListener : MonoBehaviour {
-  /// Global gain in decibels to be applied to the processed output.
-  public float globalGainDb = 0.0f;
+public class GvrAudioListener : MonoBehaviour
+{
+    /// Global gain in decibels to be applied to the processed output.
+    public float globalGainDb = 0.0f;
 
-  /// Global layer mask to be used in occlusion detection.
-  public LayerMask occlusionMask = -1;
+    /// Global layer mask to be used in occlusion detection.
+    public LayerMask occlusionMask = -1;
 
-  /// Audio rendering quality of the system.
-  [SerializeField]
-  private GvrAudio.Quality quality = GvrAudio.Quality.High;
+    /// Audio rendering quality of the system.
+    [SerializeField]
+    private GvrAudio.Quality quality = GvrAudio.Quality.High;
 
-  void Awake () {
+    void Awake()
+    {
 #if UNITY_EDITOR && UNITY_2017_1_OR_NEWER
     Debug.LogWarningFormat(gameObject,
         "Game object '{0}' uses deprecated {1} component.\nPlease upgrade to Resonance Audio ({2}).",
         name, GetType().Name, "https://developers.google.com/resonance-audio/migrate");
 #endif  // UNITY_EDITOR && UNITY_2017_1_OR_NEWER
-    GvrAudio.Initialize(this, quality);
-  }
+        GvrAudio.Initialize(this, quality);
+    }
 
-  void OnEnable () {
-    GvrAudio.UpdateAudioListener(globalGainDb, occlusionMask);
-  }
+    void OnEnable()
+    {
+        GvrAudio.UpdateAudioListener(globalGainDb, occlusionMask);
+    }
 
-  void OnDestroy () {
-    GvrAudio.Shutdown(this);
-  }
+    void OnDestroy()
+    {
+        GvrAudio.Shutdown(this);
+    }
 
-  void Update () {
-    GvrAudio.UpdateAudioListener(globalGainDb, occlusionMask);
-  }
+    void Update()
+    {
+        GvrAudio.UpdateAudioListener(globalGainDb, occlusionMask);
+    }
 }
 
 #pragma warning restore 0618 // Restore warnings

@@ -18,49 +18,59 @@ using System;
 using Gvr;
 
 /// @cond
-namespace Gvr.Internal {
-  class ControllerUtils {
+namespace Gvr.Internal
+{
+    class ControllerUtils
+    {
+        /// Convenience array of all hands.
+        public static readonly GvrControllerHand[] AllHands =
+        {
+            GvrControllerHand.Right,
+            GvrControllerHand.Left,
+        };
 
-    /// Convenience array of all hands.
-    public static readonly GvrControllerHand[] AllHands = {
-      GvrControllerHand.Right,
-      GvrControllerHand.Left,
-    };
+        /// Returns true while the user holds down any of buttons specified in `buttons` on
+        /// any controller.
+        public static bool AnyButton(GvrControllerButton buttons)
+        {
+            bool ret = false;
+            foreach (var hand in AllHands)
+            {
+                GvrControllerInputDevice device = GvrControllerInput.GetDevice(hand);
+                ret |= device.GetButton(buttons);
+            }
 
-    /// Returns true while the user holds down any of buttons specified in `buttons` on
-    /// any controller.
-    public static bool AnyButton(GvrControllerButton buttons) {
-      bool ret = false;
-      foreach (var hand in AllHands) {
-        GvrControllerInputDevice device = GvrControllerInput.GetDevice(hand);
-        ret |= device.GetButton(buttons);
-      }
-      return ret;
+            return ret;
+        }
+
+        /// Returns true in the frame the user starts pressing down any of buttons specified
+        /// in `buttons` on any controller.
+        public static bool AnyButtonDown(GvrControllerButton buttons)
+        {
+            bool ret = false;
+            foreach (var hand in AllHands)
+            {
+                GvrControllerInputDevice device = GvrControllerInput.GetDevice(hand);
+                ret |= device.GetButtonDown(buttons);
+            }
+
+            return ret;
+        }
+
+        /// Returns true the frame after the user stops pressing down any of buttons specified
+        /// in `buttons` on any controller.
+        public static bool AnyButtonUp(GvrControllerButton buttons)
+        {
+            bool ret = false;
+            foreach (var hand in AllHands)
+            {
+                GvrControllerInputDevice device = GvrControllerInput.GetDevice(hand);
+                ret |= device.GetButtonUp(buttons);
+            }
+
+            return ret;
+        }
     }
-
-    /// Returns true in the frame the user starts pressing down any of buttons specified
-    /// in `buttons` on any controller.
-    public static bool AnyButtonDown(GvrControllerButton buttons) {
-      bool ret = false;
-      foreach (var hand in AllHands) {
-        GvrControllerInputDevice device = GvrControllerInput.GetDevice(hand);
-        ret |= device.GetButtonDown(buttons);
-      }
-      return ret;
-    }
-
-    /// Returns true the frame after the user stops pressing down any of buttons specified
-    /// in `buttons` on any controller.
-    public static bool AnyButtonUp(GvrControllerButton buttons) {
-      bool ret = false;
-      foreach (var hand in AllHands) {
-        GvrControllerInputDevice device = GvrControllerInput.GetDevice(hand);
-        ret |= device.GetButtonUp(buttons);
-      }
-      return ret;
-    }
-
-  }
 }
-/// @endcond
 
+/// @endcond

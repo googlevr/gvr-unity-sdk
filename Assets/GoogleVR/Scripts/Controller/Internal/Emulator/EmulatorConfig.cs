@@ -15,46 +15,60 @@
 using UnityEngine;
 
 /// @cond
-namespace Gvr.Internal {
-  class EmulatorConfig : MonoBehaviour {
-    public static EmulatorConfig Instance {
-      get {
-        if (instance == null) {
-          EmulatorConfig[] configs = (EmulatorConfig[]) FindObjectsOfType(typeof(EmulatorConfig));
-          if (configs.Length == 1) {
-            instance = configs[0];
-          } else if (configs.Length > 1) {
-            Debug.LogError(
-                "Multiple PhoneRemote/Config objects in scene. Ignoring all.");
-          }
+namespace Gvr.Internal
+{
+    class EmulatorConfig : MonoBehaviour
+    {
+        public static EmulatorConfig Instance
+        {
+            get
+            {
+                if (instance == null)
+                {
+                    EmulatorConfig[] configs = (EmulatorConfig[])FindObjectsOfType(typeof(EmulatorConfig));
+                    if (configs.Length == 1)
+                    {
+                        instance = configs[0];
+                    }
+                    else if (configs.Length > 1)
+                    {
+                        Debug.LogError(
+                            "Multiple PhoneRemote/Config objects in scene. Ignoring all.");
+                    }
+                }
+
+                if (instance == null)
+                {
+                    var gameObject = new GameObject("PhoneRemoteConfig");
+                    instance = gameObject.AddComponent<EmulatorConfig>();
+                    DontDestroyOnLoad(instance);
+                }
+
+                return instance;
+            }
         }
-        if (instance == null) {
-          var gameObject = new GameObject("PhoneRemoteConfig");
-          instance = gameObject.AddComponent<EmulatorConfig>();
-          DontDestroyOnLoad(instance);
+
+        private static EmulatorConfig instance = null;
+
+        public enum Mode
+        {
+            OFF,
+            USB,
+            WIFI,
         }
-        return instance;
-      }
+
+        // Set this value to match how the PC is connected to the phone that is
+        // streaming gyro, accel, and touch events. Set to OFF if using Wifi instead.
+        public Mode PHONE_EVENT_MODE = Mode.USB;
+
+        /*----- Internal Parameters (should not require any changes). -----*/
+
+        // IP address of the phone, when connected to the PC via USB.
+        public static readonly string USB_SERVER_IP = "127.0.0.1";
+
+        // IP address of the phone, when connected to the PC via WiFi.
+        public static readonly string WIFI_SERVER_IP = "192.168.43.1";
     }
-    private static EmulatorConfig instance = null;
-
-    public enum Mode {
-      OFF,
-      USB,
-      WIFI,
-    }
-
-    // Set this value to match how the PC is connected to the phone that is
-    // streaming gyro, accel, and touch events. Set to OFF if using Wifi instead.
-    public Mode PHONE_EVENT_MODE = Mode.USB;
-
-    /*----- Internal Parameters (should not require any changes). -----*/
-
-    // IP address of the phone, when connected to the PC via USB.
-    public static readonly string USB_SERVER_IP = "127.0.0.1";
-
-    // IP address of the phone, when connected to the PC via WiFi.
-    public static readonly string WIFI_SERVER_IP = "192.168.43.1";
-  }
 }
+
 /// @endcond

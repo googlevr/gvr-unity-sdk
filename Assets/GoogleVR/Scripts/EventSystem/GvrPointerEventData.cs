@@ -18,26 +18,34 @@ using System.Collections;
 
 /// This script extends the Unity PointerEventData struct with GoogleVR
 /// specific data.
-public class GvrPointerEventData : PointerEventData {
-  public GvrPointerEventData(EventSystem eventSystem) : base(eventSystem) {}
+public class GvrPointerEventData : PointerEventData
+{
+    public GvrPointerEventData(EventSystem eventSystem) : base(eventSystem)
+    {
+    }
 
-  public GvrControllerButton gvrButtonsDown;
+    public GvrControllerButton gvrButtonsDown;
 }
 
 /// This class extends the Unity PointerEventData struct with GoogleVR
 /// data accessors.
-public static class GvrPointerEventDataExtension {
-  /// Returns the `GvrControllerButton` mask of buttons that went down to trigger the event.
-  public static GvrControllerButton GvrGetButtonsDown(this PointerEventData pointerEventData) {
-    GvrPointerEventData gped = pointerEventData as GvrPointerEventData;
-    if (gped == null) {
-      return 0;
-    }
-    return gped.gvrButtonsDown;
-  }
+public static class GvrPointerEventDataExtension
+{
+    /// Returns the `GvrControllerButton` mask of buttons that went down to trigger the event.
+    public static GvrControllerButton GvrGetButtonsDown(this PointerEventData pointerEventData)
+    {
+        GvrPointerEventData gped = pointerEventData as GvrPointerEventData;
+        if (gped == null)
+        {
+            return 0;
+        }
 
-  /// Returns the `GvrControllerInputDevice` that triggered the event.
-  public static GvrControllerInputDevice GvrGetControllerInputDevice(this PointerEventData pointerEventData) {
-    return GvrControllerInput.GetDevice((GvrControllerHand)pointerEventData.pointerId);
-  }
+        return gped.gvrButtonsDown;
+    }
+
+    /// Returns the `GvrControllerInputDevice` that triggered the event.
+    public static GvrControllerInputDevice GvrGetControllerInputDevice(this PointerEventData pointerEventData)
+    {
+        return GvrControllerInput.GetDevice((GvrControllerHand)pointerEventData.pointerId);
+    }
 }

@@ -16,72 +16,85 @@
 using System.Runtime.InteropServices;
 using UnityEngine;
 
-namespace Gvr.Internal {
-  class InstantPreviewControllerProvider {
-    /// <summary>
-    /// This is a mirror of Gvr.Internal.ControllerState, but a struct instead.
-    /// </summary>
-    private struct NativeControllerState {
-      public GvrConnectionState connectionState;
-      public Quaternion orientation;
-      public Vector3 gyro;
-      public Vector3 accel;
-      public Vector2 touchPos;
-      [MarshalAs(UnmanagedType.U1)]
-      public bool isTouching;
-      [MarshalAs(UnmanagedType.U1)]
-      public bool appButtonState;
-      [MarshalAs(UnmanagedType.U1)]
-      public bool clickButtonState;
-      public int batteryLevel;
-      [MarshalAs(UnmanagedType.U1)]
-      public bool isCharging;
-      [MarshalAs(UnmanagedType.U1)]
-      public bool isRecentered;
-      [MarshalAs(UnmanagedType.U1)]
-      public bool homeButtonState;
+namespace Gvr.Internal
+{
+    class InstantPreviewControllerProvider
+    {
+        /// <summary>
+        /// This is a mirror of Gvr.Internal.ControllerState, but a struct instead.
+        /// </summary>
+        private struct NativeControllerState
+        {
+            public GvrConnectionState connectionState;
+            public Quaternion orientation;
+            public Vector3 gyro;
+            public Vector3 accel;
+            public Vector2 touchPos;
+            [MarshalAs(UnmanagedType.U1)]
+            public bool isTouching;
+            [MarshalAs(UnmanagedType.U1)]
+            public bool appButtonState;
+            [MarshalAs(UnmanagedType.U1)]
+            public bool clickButtonState;
+            public int batteryLevel;
+            [MarshalAs(UnmanagedType.U1)]
+            public bool isCharging;
+            [MarshalAs(UnmanagedType.U1)]
+            public bool isRecentered;
+            [MarshalAs(UnmanagedType.U1)]
+            public bool homeButtonState;
+        }
+
+        private GvrControllerButton prevButtonsState;
+
+        [DllImport(InstantPreview.dllName)]
+        private static extern void ReadControllerState(out NativeControllerState nativeControllerState);
+
+        public void ReadState(ControllerState outState)
+        {
+            var nativeControllerState = new NativeControllerState();
+            ReadControllerState(out nativeControllerState);
+
+            outState.connectionState = nativeControllerState.connectionState;
+            outState.orientation = new Quaternion(
+                -nativeControllerState.orientation.y,
+                -nativeControllerState.orientation.z,
+                nativeControllerState.orientation.w,
+                nativeControllerState.orientation.x);
+
+            outState.gyro = new Vector3(
+                -nativeControllerState.gyro.x, -nativeControllerState.gyro.y, nativeControllerState.gyro.z);
+            outState.accel = new Vector3(
+                nativeControllerState.accel.x, nativeControllerState.accel.y, -nativeControllerState.accel.z);
+            outState.touchPos = nativeControllerState.touchPos;
+            outState.batteryLevel = (GvrControllerBatteryLevel)nativeControllerState.batteryLevel;
+            outState.isCharging = nativeControllerState.isCharging;
+            outState.recentered = nativeControllerState.isRecentered;
+
+            outState.buttonsState = 0;
+            if (nativeControllerState.appButtonState)
+            {
+                outState.buttonsState |= GvrControllerButton.App;
+            }
+
+            if (nativeControllerState.clickButtonState)
+            {
+                outState.buttonsState |= GvrControllerButton.TouchPadButton;
+            }
+
+            if (nativeControllerState.homeButtonState)
+            {
+                outState.buttonsState |= GvrControllerButton.System;
+            }
+
+            if (nativeControllerState.isTouching)
+            {
+                outState.buttonsState |= GvrControllerButton.TouchPadTouch;
+            }
+
+            outState.SetButtonsUpDownFromPrevious(prevButtonsState);
+            prevButtonsState = outState.buttonsState;
+        }
     }
-
-    private GvrControllerButton prevButtonsState;
-
-    [DllImport(InstantPreview.dllName)]
-    private static extern void ReadControllerState(out NativeControllerState nativeControllerState);
-
-    public void ReadState(ControllerState outState) {
-      var nativeControllerState = new NativeControllerState();
-      ReadControllerState(out nativeControllerState);
-
-      outState.connectionState = nativeControllerState.connectionState;
-      outState.orientation = new Quaternion(
-        -nativeControllerState.orientation.y,
-        -nativeControllerState.orientation.z,
-        nativeControllerState.orientation.w,
-        nativeControllerState.orientation.x);
-
-      outState.gyro = new Vector3(-nativeControllerState.gyro.x, -nativeControllerState.gyro.y, nativeControllerState.gyro.z);
-      outState.accel = new Vector3(nativeControllerState.accel.x, nativeControllerState.accel.y, -nativeControllerState.accel.z);
-      outState.touchPos = nativeControllerState.touchPos;
-      outState.batteryLevel = (GvrControllerBatteryLevel)nativeControllerState.batteryLevel;
-      outState.isCharging = nativeControllerState.isCharging;
-      outState.recentered = nativeControllerState.isRecentered;
-
-      outState.buttonsState = 0;
-      if (nativeControllerState.appButtonState) {
-        outState.buttonsState |= GvrControllerButton.App;
-      }
-      if (nativeControllerState.clickButtonState) {
-        outState.buttonsState |= GvrControllerButton.TouchPadButton;
-      }
-      if (nativeControllerState.homeButtonState) {
-        outState.buttonsState |= GvrControllerButton.System;
-      }
-      if (nativeControllerState.isTouching) {
-        outState.buttonsState |= GvrControllerButton.TouchPadTouch;
-      }
-
-      outState.SetButtonsUpDownFromPrevious(prevButtonsState);
-      prevButtonsState = outState.buttonsState;
-    }
-  }
 }
 #endif

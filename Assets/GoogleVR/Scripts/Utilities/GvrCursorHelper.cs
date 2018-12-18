@@ -15,34 +15,39 @@
 using System;
 using UnityEngine;
 
-namespace Gvr.Internal {
-  /// Manages cursor lock state while developer is using editor head and controller emulation.
-  public class GvrCursorHelper {
+namespace Gvr.Internal
+{
+    /// Manages cursor lock state while developer is using editor head and controller emulation.
+    public class GvrCursorHelper
+    {
+        // Whether MouseControllerProvider is currently tracking mouse movement.
+        private static bool cachedHeadEmulationActive;
 
-    // Whether MouseControllerProvider is currently tracking mouse movement.
-    private static bool cachedHeadEmulationActive;
+        // Whether GvrEditorEmulator is currently tracking mouse movement.
+        private static bool cachedControllerEmulationActive;
 
-    // Whether GvrEditorEmulator is currently tracking mouse movement.
-    private static bool cachedControllerEmulationActive;
+        public static bool HeadEmulationActive
+        {
+            set
+            {
+                cachedHeadEmulationActive = value;
+                UpdateCursorLockState();
+            }
+        }
 
-    public static bool HeadEmulationActive {
-      set {
-        cachedHeadEmulationActive = value;
-        UpdateCursorLockState();
-      }
+        public static bool ControllerEmulationActive
+        {
+            set
+            {
+                cachedControllerEmulationActive = value;
+                UpdateCursorLockState();
+            }
+        }
+
+        private static void UpdateCursorLockState()
+        {
+            bool active = cachedHeadEmulationActive || cachedControllerEmulationActive;
+            Cursor.lockState = active ? CursorLockMode.Locked : CursorLockMode.None;
+        }
     }
-
-    public static bool ControllerEmulationActive {
-      set {
-        cachedControllerEmulationActive = value;
-        UpdateCursorLockState();
-      }
-    }
-
-    private static void UpdateCursorLockState() {
-      bool active = cachedHeadEmulationActive || cachedControllerEmulationActive;
-      Cursor.lockState = active ? CursorLockMode.Locked : CursorLockMode.None;
-    }
-
-  }
 }

@@ -17,61 +17,73 @@ using UnityEngine.UI;
 using UnityEditor;
 
 [CustomPropertyDrawer(typeof(GvrPointerScrollInput), true)]
-public class GvrPointerScrollInputEditor : PropertyDrawer {
-  private bool isExpanded = true;
+public class GvrPointerScrollInputEditor : PropertyDrawer
+{
+    private bool isExpanded = true;
 
-  public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {
-    EditorGUI.BeginProperty(position, label, property);
+    public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
+    {
+        EditorGUI.BeginProperty(position, label, property);
 
-    int rows = GetNumRows(property);
-    float totalHeight = position.height;
-    float rowHeight = totalHeight / rows;
-    position.height = rowHeight;
+        int rows = GetNumRows(property);
+        float totalHeight = position.height;
+        float rowHeight = totalHeight / rows;
+        position.height = rowHeight;
 
-    isExpanded = EditorGUI.Foldout(position, isExpanded, label);
+        isExpanded = EditorGUI.Foldout(position, isExpanded, label);
 
-    if (isExpanded) {
-      EditorGUI.indentLevel++;
+        if (isExpanded)
+        {
+            EditorGUI.indentLevel++;
 
-      // Inertia property.
-      SerializedProperty inertia =
-        property.FindPropertyRelative(GvrPointerScrollInput.PROPERTY_NAME_INERTIA);
+            // Inertia property.
+            SerializedProperty inertia =
+                property.FindPropertyRelative(GvrPointerScrollInput.PROPERTY_NAME_INERTIA);
 
-      position.y += rowHeight;
-      EditorGUI.PropertyField(position, inertia);
+            position.y += rowHeight;
+            EditorGUI.PropertyField(position, inertia);
 
-      if (inertia.boolValue) {
-        EditorGUI.indentLevel++;
+            if (inertia.boolValue)
+            {
+                EditorGUI.indentLevel++;
 
-        // Deceleration rate property.
-        SerializedProperty decelerationRate =
-          property.FindPropertyRelative(GvrPointerScrollInput.PROPERTY_NAME_DECELERATION_RATE);
+                // Deceleration rate property.
+                SerializedProperty decelerationRate =
+                    property.FindPropertyRelative(GvrPointerScrollInput.PROPERTY_NAME_DECELERATION_RATE);
 
-        position.y += rowHeight;
-        EditorGUI.PropertyField(position, decelerationRate);
+                position.y += rowHeight;
+                EditorGUI.PropertyField(position, decelerationRate);
 
-        EditorGUI.indentLevel--;
-      }
-      EditorGUI.indentLevel--;
+                EditorGUI.indentLevel--;
+            }
+
+            EditorGUI.indentLevel--;
+        }
+
+        EditorGUI.EndProperty();
     }
 
-    EditorGUI.EndProperty();
-  }
-
-  public override float GetPropertyHeight(SerializedProperty property, GUIContent label) {
-    return base.GetPropertyHeight(property, label) * GetNumRows(property);
-  }
-
-  private int GetNumRows(SerializedProperty property) {
-    SerializedProperty inertia =
-      property.FindPropertyRelative(GvrPointerScrollInput.PROPERTY_NAME_INERTIA);
-
-    if (!isExpanded) {
-      return 1;
-    } else if (!inertia.boolValue) {
-      return 2;
-    } else {
-      return 3;
+    public override float GetPropertyHeight(SerializedProperty property, GUIContent label)
+    {
+        return base.GetPropertyHeight(property, label) * GetNumRows(property);
     }
-  }
+
+    private int GetNumRows(SerializedProperty property)
+    {
+        SerializedProperty inertia =
+            property.FindPropertyRelative(GvrPointerScrollInput.PROPERTY_NAME_INERTIA);
+
+        if (!isExpanded)
+        {
+            return 1;
+        }
+        else if (!inertia.boolValue)
+        {
+            return 2;
+        }
+        else
+        {
+            return 3;
+        }
+    }
 }

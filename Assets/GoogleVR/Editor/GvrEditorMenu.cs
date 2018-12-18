@@ -15,35 +15,41 @@
 using UnityEngine;
 using UnityEditor;
 
-public class GvrEditorMenu {
-  [MenuItem("GoogleVR/Documentation/Developers Site", false, 100)]
-  private static void OpenDocumentation() {
-    Application.OpenURL("https://developers.google.com/vr");
-  }
+public class GvrEditorMenu
+{
+    [MenuItem("GoogleVR/Documentation/Developers Site", false, 100)]
+    private static void OpenDocumentation()
+    {
+        Application.OpenURL("https://developers.google.com/vr");
+    }
 
-  [MenuItem("GoogleVR/Documentation/Unity Guide", false, 100)]
-  private static void OpenUnityGuide() {
-    Application.OpenURL("https://developers.google.com/vr/unity/guide");
-  }
+    [MenuItem("GoogleVR/Documentation/Unity Guide", false, 100)]
+    private static void OpenUnityGuide()
+    {
+        Application.OpenURL("https://developers.google.com/vr/unity/guide");
+    }
 
-  [MenuItem("GoogleVR/Documentation/Release Notes", false, 100)]
-  private static void OpenReleaseNotes() {
-    Application.OpenURL("https://developers.google.com/vr/unity/release-notes");
-  }
+    [MenuItem("GoogleVR/Documentation/Release Notes", false, 100)]
+    private static void OpenReleaseNotes()
+    {
+        Application.OpenURL("https://developers.google.com/vr/unity/release-notes");
+    }
 
-  [MenuItem("GoogleVR/Documentation/Known Issues", false, 100)]
-  private static void OpenKnownIssues() {
-    Application.OpenURL("https://developers.google.com/vr/unity/release-notes#known_issues");
-  }
+    [MenuItem("GoogleVR/Documentation/Known Issues", false, 100)]
+    private static void OpenKnownIssues()
+    {
+        Application.OpenURL("https://developers.google.com/vr/unity/release-notes#known_issues");
+    }
 
-  [MenuItem("GoogleVR/Editor Settings", false, 100)]
-  private static void OpenEditorSettings() {
-    EditorWindow.GetWindow(typeof(GvrEditorSettings));
-  }
+    [MenuItem("GoogleVR/Editor Settings", false, 100)]
+    private static void OpenEditorSettings()
+    {
+        EditorWindow.GetWindow(typeof(GvrEditorSettings));
+    }
 
-  [MenuItem("GoogleVR/Report Bug", false, 100)]
-  private static void OpenReportBug() {
-    Application.OpenURL("https://github.com/googlesamples/cardboard-unity/issues");
-  }
-
+    [MenuItem("GoogleVR/Report Bug", false, 100)]
+    private static void OpenReportBug()
+    {
+        Application.OpenURL("https://github.com/googlesamples/cardboard-unity/issues");
+    }
 }

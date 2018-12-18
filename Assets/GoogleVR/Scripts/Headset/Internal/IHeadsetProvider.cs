@@ -15,42 +15,45 @@
 using UnityEngine;
 
 /// @cond
-namespace Gvr.Internal {
-  interface IHeadsetProvider {
-    /// Returns whether the current headset supports positionally tracked, 6DOF head poses.
-    bool SupportsPositionalTracking { get; }
+namespace Gvr.Internal
+{
+    interface IHeadsetProvider
+    {
+        /// Returns whether the current headset supports positionally tracked, 6DOF head poses.
+        bool SupportsPositionalTracking { get; }
 
-    /// Polls for GVR standalone events.
-    void PollEventState(ref HeadsetState outState);
+        /// Polls for GVR standalone events.
+        void PollEventState(ref HeadsetState outState);
 
-    /// If a floor is found, populates floorHeight with the detected height.
-    /// Otherwise, leaves the value unchanged.
-    /// Returns true if value retrieval was successful, false otherwise (depends on tracking state).
-    bool TryGetFloorHeight(ref float floorHeight);
+        /// If a floor is found, populates floorHeight with the detected height.
+        /// Otherwise, leaves the value unchanged.
+        /// Returns true if value retrieval was successful, false otherwise (depends on tracking state).
+        bool TryGetFloorHeight(ref float floorHeight);
 
-    /// If the last recentering transform is available, populates position and rotation with that
-    /// transform.
-    /// Returns true if value retrieval was successful, false otherwise (unlikely).
-    bool TryGetRecenterTransform(ref Vector3 position, ref Quaternion rotation);
+        /// If the last recentering transform is available, populates position and rotation with that
+        /// transform.
+        /// Returns true if value retrieval was successful, false otherwise (unlikely).
+        bool TryGetRecenterTransform(ref Vector3 position, ref Quaternion rotation);
 
-    /// Populates safetyType with the available safety region feature on the
-    /// currently-running device.
-    /// Returns true if value retrieval was successful, false otherwise (unlikely).
-    bool TryGetSafetyRegionType(ref GvrSafetyRegionType safetyType);
+        /// Populates safetyType with the available safety region feature on the
+        /// currently-running device.
+        /// Returns true if value retrieval was successful, false otherwise (unlikely).
+        bool TryGetSafetyRegionType(ref GvrSafetyRegionType safetyType);
 
-    /// If the safety region is of type GvrSafetyRegionType.Cylinder, populates innerRadius with the
-    /// inner radius size (where fog starts appearing) of the safety cylinder in meters.
-    /// Assumes the safety region type has been previously checked by the caller.
-    /// Returns true if value retrieval was successful, false otherwise (if region type is
-    /// GvrSafetyRegionType.Invalid).
-    bool TryGetSafetyCylinderInnerRadius(ref float innerRadius);
+        /// If the safety region is of type GvrSafetyRegionType.Cylinder, populates innerRadius with the
+        /// inner radius size (where fog starts appearing) of the safety cylinder in meters.
+        /// Assumes the safety region type has been previously checked by the caller.
+        /// Returns true if value retrieval was successful, false otherwise (if region type is
+        /// GvrSafetyRegionType.Invalid).
+        bool TryGetSafetyCylinderInnerRadius(ref float innerRadius);
 
-    /// If the safety region is of type GvrSafetyRegionType.Cylinder, populates outerRadius with the
-    /// outer radius size (where fog is 100% opaque) of the safety cylinder in meters.
-    /// Assumes the safety region type has been previously checked by the caller.
-    /// Returns true if value retrieval was successful, false otherwise (if region type is
-    /// GvrSafetyRegionType.Invalid).
-    bool TryGetSafetyCylinderOuterRadius(ref float outerRadius);
-  }
+        /// If the safety region is of type GvrSafetyRegionType.Cylinder, populates outerRadius with the
+        /// outer radius size (where fog is 100% opaque) of the safety cylinder in meters.
+        /// Assumes the safety region type has been previously checked by the caller.
+        /// Returns true if value retrieval was successful, false otherwise (if region type is
+        /// GvrSafetyRegionType.Invalid).
+        bool TryGetSafetyCylinderOuterRadius(ref float outerRadius);
+    }
 }
+
 /// @endcond

@@ -12,32 +12,49 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace GoogleVR.VideoDemo {
-  using System;
-  using UnityEngine;
-  using UnityEngine.Events;
+namespace GoogleVR.VideoDemo
+{
+    using System;
+    using UnityEngine;
+    using UnityEngine.Events;
 
-  [Serializable]
-  public class Vector3Event : UnityEvent<Vector3> { }
+    [Serializable]
+    public class Vector3Event : UnityEvent<Vector3>
+    {
+    }
 
-  [Serializable]
-  public class Vector2Event : UnityEvent<Vector2> { }
+    [Serializable]
+    public class Vector2Event : UnityEvent<Vector2>
+    {
+    }
 
-  [Serializable]
-  public class FloatEvent : UnityEvent<float> { }
+    [Serializable]
+    public class FloatEvent : UnityEvent<float>
+    {
+    }
 
-  [Serializable]
-  public class BoolEvent : UnityEvent<bool> { }
+    [Serializable]
+    public class BoolEvent : UnityEvent<bool>
+    {
+    }
 
-  [Serializable]
-  public class ButtonEvent : UnityEvent { }
+    [Serializable]
+    public class ButtonEvent : UnityEvent
+    {
+    }
 
-  [Serializable]
-  public class TouchPadEvent : UnityEvent { }
+    [Serializable]
+    public class TouchPadEvent : UnityEvent
+    {
+    }
 
-  [Serializable]
-  public class TransformEvent : UnityEvent<Transform> { }
+    [Serializable]
+    public class TransformEvent : UnityEvent<Transform>
+    {
+    }
 
-  [Serializable]
-  public class GameObjectEvent : UnityEvent<GameObject> { }
+    [Serializable]
+    public class GameObjectEvent : UnityEvent<GameObject>
+    {
+    }
 }

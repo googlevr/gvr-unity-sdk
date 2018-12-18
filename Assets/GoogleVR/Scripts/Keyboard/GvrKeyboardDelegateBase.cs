@@ -17,19 +17,19 @@ using System;
 
 // This is an abstract class instead of an interface so that it can be exposed in Unity's
 // editor. It inherits from MonoBehaviour so that it can be directly used as a game object.
-public abstract class GvrKeyboardDelegateBase : MonoBehaviour {
+public abstract class GvrKeyboardDelegateBase : MonoBehaviour
+{
+    public abstract void OnKeyboardShow();
 
-  public abstract void OnKeyboardShow();
+    public abstract void OnKeyboardHide();
 
-  public abstract void OnKeyboardHide();
+    public abstract void OnKeyboardUpdate(string edit_text);
 
-  public abstract void OnKeyboardUpdate(string edit_text);
+    public abstract void OnKeyboardEnterPressed(string edit_text);
 
-  public abstract void OnKeyboardEnterPressed(string edit_text);
+    public abstract void OnKeyboardError(GvrKeyboardError errorCode);
 
-  public abstract void OnKeyboardError(GvrKeyboardError errorCode);
+    public abstract event EventHandler KeyboardHidden;
 
-  public abstract event EventHandler KeyboardHidden;
-  public abstract event EventHandler KeyboardShown;
+    public abstract event EventHandler KeyboardShown;
 }
-

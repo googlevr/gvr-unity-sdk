@@ -12,20 +12,25 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-namespace GoogleVR.Demos {
-  using UnityEngine;
+namespace GoogleVR.Demos
+{
+    using UnityEngine;
 
-  // Ensures correct app and scene setup.
-  public class DemoSceneManager : MonoBehaviour {
-    void Start() {
-      Input.backButtonLeavesApp = true;
-    }
+    // Ensures correct app and scene setup.
+    public class DemoSceneManager : MonoBehaviour
+    {
+        void Start()
+        {
+            Input.backButtonLeavesApp = true;
+        }
 
-    void Update() {
-      // Exit when (X) is tapped.
-      if (Input.GetKeyDown(KeyCode.Escape)) {
-        Application.Quit();
-      }
+        void Update()
+        {
+            // Exit when (X) is tapped.
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                Application.Quit();
+            }
+        }
     }
-  }
 }

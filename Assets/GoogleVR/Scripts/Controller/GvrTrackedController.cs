@@ -25,217 +25,269 @@ using Gvr.Internal;
 /// `GvrBaseArmModel`.  `GvrBaseArmModel`s are also propagated to all `IGvrArmModelReceiver`s
 /// underneath this object.
 [HelpURL("https://developers.google.com/vr/unity/reference/class/GvrTrackedController")]
-public class GvrTrackedController : MonoBehaviour {
-  [SerializeField]
-  [Tooltip("Arm model used to control the pose (position and rotation) of the object, " +
+public class GvrTrackedController : MonoBehaviour
+{
+    [SerializeField]
+    [Tooltip("Arm model used to control the pose (position and rotation) of the object, " +
     "and to propagate to children that implement IGvrArmModelReceiver.")]
-  private GvrBaseArmModel armModel;
-  private GvrControllerInputDevice controllerInputDevice;
+    private GvrBaseArmModel armModel;
+    private GvrControllerInputDevice controllerInputDevice;
 
-  [SerializeField]
-  [Tooltip("Is the object's active status determined by the controller connection status.")]
-  private bool isDeactivatedWhenDisconnected = true;
+    [SerializeField]
+    [Tooltip("Is the object's active status determined by the controller connection status.")]
+    private bool isDeactivatedWhenDisconnected = true;
 
-  [SerializeField]
-  [Tooltip("Controller Hand")]
-  private GvrControllerHand controllerHand = GvrControllerHand.Dominant;
+    [SerializeField]
+    [Tooltip("Controller Hand")]
+    private GvrControllerHand controllerHand = GvrControllerHand.Dominant;
 
-  public GvrControllerInputDevice ControllerInputDevice {
-    get {
-      return controllerInputDevice;
+    public GvrControllerInputDevice ControllerInputDevice
+    {
+        get
+        {
+            return controllerInputDevice;
+        }
     }
-  }
 
-  public GvrControllerHand ControllerHand {
-    get {
-      return controllerHand;
+    public GvrControllerHand ControllerHand
+    {
+        get
+        {
+            return controllerHand;
+        }
+
+        set
+        {
+            if (value != controllerHand)
+            {
+                controllerHand = value;
+                SetupControllerInputDevice();
+            }
+        }
     }
-    set {
-      if (value != controllerHand) {
-        controllerHand = value;
-        SetupControllerInputDevice();
-      }
+
+    /// Arm model used to control the pose (position and rotation) of the object, and to propagate to
+    /// children that implement IGvrArmModelReceiver.
+    public GvrBaseArmModel ArmModel
+    {
+        get
+        {
+            return armModel;
+        }
+
+        set
+        {
+            if (armModel == value)
+            {
+                return;
+            }
+
+            armModel = value;
+            PropagateControllerInputDeviceToArmModel();
+            PropagateArmModel();
+        }
     }
-  }
 
-  /// Arm model used to control the pose (position and rotation) of the object, and to propagate to
-  /// children that implement IGvrArmModelReceiver.
-  public GvrBaseArmModel ArmModel {
-    get {
-      return armModel;
+    /// Is the object's active status determined by the controller connection status.
+    public bool IsDeactivatedWhenDisconnected
+    {
+        get
+        {
+            return isDeactivatedWhenDisconnected;
+        }
+
+        set
+        {
+            if (isDeactivatedWhenDisconnected == value)
+            {
+                return;
+            }
+
+            isDeactivatedWhenDisconnected = value;
+
+            if (isDeactivatedWhenDisconnected)
+            {
+                OnControllerStateChanged(controllerInputDevice.State, controllerInputDevice.State);
+            }
+        }
     }
-    set {
-      if (armModel == value) {
-        return;
-      }
 
-      armModel = value;
-      PropagateControllerInputDeviceToArmModel();
-      PropagateArmModel();
+    [SuppressMemoryAllocationError(IsWarning = false, Reason = "Only called when ArmModel is instantiated or changed.")]
+    public void PropagateArmModel()
+    {
+        IGvrArmModelReceiver[] receivers =
+            GetComponentsInChildren<IGvrArmModelReceiver>(true);
+
+        for (int i = 0; i < receivers.Length; i++)
+        {
+            IGvrArmModelReceiver receiver = receivers[i];
+            receiver.ArmModel = armModel;
+        }
     }
-  }
 
-  /// Is the object's active status determined by the controller connection status.
-  public bool IsDeactivatedWhenDisconnected {
-    get {
-      return isDeactivatedWhenDisconnected;
+    void Awake()
+    {
+        // Adding this event handler calls it immediately.
+        GvrControllerInput.OnDevicesChanged += SetupControllerInputDevice;
     }
-    set {
-      if (isDeactivatedWhenDisconnected == value) {
-        return;
-      }
 
-      isDeactivatedWhenDisconnected = value;
+    void OnEnable()
+    {
+        // Print an error to console if no GvrControllerInput is found.
+        if (controllerInputDevice.State == GvrConnectionState.Error)
+        {
+            Debug.LogWarning(controllerInputDevice.ErrorDetails);
+        }
 
-      if (isDeactivatedWhenDisconnected) {
+        // Update the position using OnPostControllerInputUpdated.
+        // This way, the position and rotation will be correct for the entire frame
+        // so that it doesn't matter what order Updates get called in.
+        GvrControllerInput.OnPostControllerInputUpdated += OnPostControllerInputUpdated;
+
+        /// Force the pose to update immediately in case the controller isn't updated before the next
+        /// time a frame is rendered.
+        UpdatePose();
+
+        /// Check the controller state immediately whenever this script is enabled.
         OnControllerStateChanged(controllerInputDevice.State, controllerInputDevice.State);
-      }
-    }
-  }
-
-
-  [SuppressMemoryAllocationError(IsWarning=false, Reason="Only called when ArmModel is instantiated or changed.")]
-  public void PropagateArmModel() {
-    IGvrArmModelReceiver[] receivers =
-      GetComponentsInChildren<IGvrArmModelReceiver>(true);
-
-    for (int i = 0; i < receivers.Length; i++) {
-      IGvrArmModelReceiver receiver = receivers[i];
-      receiver.ArmModel = armModel;
-    }
-  }
-
-  void Awake() {
-    // Adding this event handler calls it immediately.
-    GvrControllerInput.OnDevicesChanged += SetupControllerInputDevice;
-  }
-
-  void OnEnable() {
-    // Print an error to console if no GvrControllerInput is found.
-    if (controllerInputDevice.State == GvrConnectionState.Error) {
-      Debug.LogWarning(controllerInputDevice.ErrorDetails);
     }
 
-    // Update the position using OnPostControllerInputUpdated.
-    // This way, the position and rotation will be correct for the entire frame
-    // so that it doesn't matter what order Updates get called in.
-    GvrControllerInput.OnPostControllerInputUpdated += OnPostControllerInputUpdated;
-
-    /// Force the pose to update immediately in case the controller isn't updated before the next
-    /// time a frame is rendered.
-    UpdatePose();
-
-    /// Check the controller state immediately whenever this script is enabled.
-    OnControllerStateChanged(controllerInputDevice.State, controllerInputDevice.State);
-  }
-
-  void OnDisable() {
-    GvrControllerInput.OnPostControllerInputUpdated -= OnPostControllerInputUpdated;
-  }
-
-  void Start() {
-    PropagateArmModel();
-    if (controllerInputDevice != null) {
-      PropagateControllerInputDevice();
-      OnControllerStateChanged(controllerInputDevice.State, controllerInputDevice.State);
-    }
-  }
-
-  void OnDestroy() {
-    GvrControllerInput.OnDevicesChanged -= SetupControllerInputDevice;
-    if (controllerInputDevice != null) {
-      controllerInputDevice.OnStateChanged -= OnControllerStateChanged;
-      controllerInputDevice = null;
-      PropagateControllerInputDevice();
-    }
-  }
-
-  private void PropagateControllerInputDevice() {
-    IGvrControllerInputDeviceReceiver[] receivers =
-      GetComponentsInChildren<IGvrControllerInputDeviceReceiver>(true);
-
-    foreach (var receiver in receivers) {
-      receiver.ControllerInputDevice = controllerInputDevice;
-    }
-    PropagateControllerInputDeviceToArmModel();
-  }
-
-  private void PropagateControllerInputDeviceToArmModel() {
-    // Propagate the controller input device to everything in the arm model's object's
-    // hierarchy in case it is not a child of the tracked controller.
-    if (armModel != null) {
-      IGvrControllerInputDeviceReceiver[] receivers =
-        armModel.GetComponentsInChildren<IGvrControllerInputDeviceReceiver>(true);
-
-      foreach (var receiver in receivers) {
-        receiver.ControllerInputDevice = controllerInputDevice;
-      }
-    }
-  }
-
-  private void SetupControllerInputDevice() {
-    GvrControllerInputDevice newDevice = GvrControllerInput.GetDevice(controllerHand);
-    if (controllerInputDevice == newDevice) {
-      return;
-    }
-    if (controllerInputDevice != null) {
-      controllerInputDevice.OnStateChanged -= OnControllerStateChanged;
-      controllerInputDevice = null;
+    void OnDisable()
+    {
+        GvrControllerInput.OnPostControllerInputUpdated -= OnPostControllerInputUpdated;
     }
 
-    controllerInputDevice = newDevice;
-    if (controllerInputDevice != null) {
-      controllerInputDevice.OnStateChanged += OnControllerStateChanged;
-      OnControllerStateChanged(controllerInputDevice.State, controllerInputDevice.State);
-    } else {
-      OnControllerStateChanged(GvrConnectionState.Disconnected, GvrConnectionState.Disconnected);
-    }
-    PropagateControllerInputDevice();
-  }
-
-  private void OnPostControllerInputUpdated() {
-    UpdatePose();
-  }
-
-  private void OnControllerStateChanged(GvrConnectionState state, GvrConnectionState oldState) {
-    if (isDeactivatedWhenDisconnected && enabled) {
-      gameObject.SetActive(state == GvrConnectionState.Connected);
-    }
-  }
-
-  private void UpdatePose() {
-    if (controllerInputDevice == null) {
-      return;
+    void Start()
+    {
+        PropagateArmModel();
+        if (controllerInputDevice != null)
+        {
+            PropagateControllerInputDevice();
+            OnControllerStateChanged(controllerInputDevice.State, controllerInputDevice.State);
+        }
     }
 
-    // Disable arm model if the device supports 6DoF.
-    if (controllerInputDevice.SupportsPositionalTracking) {
-      transform.localPosition = controllerInputDevice.Position;
-      transform.localRotation = controllerInputDevice.Orientation;
-    } else {
-      if (armModel == null || !controllerInputDevice.IsDominantHand) {
-        return;
-      }
-
-      transform.localPosition = ArmModel.ControllerPositionFromHead;
-      transform.localRotation = ArmModel.ControllerRotationFromHead;
+    void OnDestroy()
+    {
+        GvrControllerInput.OnDevicesChanged -= SetupControllerInputDevice;
+        if (controllerInputDevice != null)
+        {
+            controllerInputDevice.OnStateChanged -= OnControllerStateChanged;
+            controllerInputDevice = null;
+            PropagateControllerInputDevice();
+        }
     }
-  }
 
+    private void PropagateControllerInputDevice()
+    {
+        IGvrControllerInputDeviceReceiver[] receivers =
+            GetComponentsInChildren<IGvrControllerInputDeviceReceiver>(true);
+
+        foreach (var receiver in receivers)
+        {
+            receiver.ControllerInputDevice = controllerInputDevice;
+        }
+
+        PropagateControllerInputDeviceToArmModel();
+    }
+
+    private void PropagateControllerInputDeviceToArmModel()
+    {
+        // Propagate the controller input device to everything in the arm model's object's
+        // hierarchy in case it is not a child of the tracked controller.
+        if (armModel != null)
+        {
+            IGvrControllerInputDeviceReceiver[] receivers =
+                armModel.GetComponentsInChildren<IGvrControllerInputDeviceReceiver>(true);
+
+            foreach (var receiver in receivers)
+            {
+                receiver.ControllerInputDevice = controllerInputDevice;
+            }
+        }
+    }
+
+    private void SetupControllerInputDevice()
+    {
+        GvrControllerInputDevice newDevice = GvrControllerInput.GetDevice(controllerHand);
+        if (controllerInputDevice == newDevice)
+        {
+            return;
+        }
+
+        if (controllerInputDevice != null)
+        {
+            controllerInputDevice.OnStateChanged -= OnControllerStateChanged;
+            controllerInputDevice = null;
+        }
+
+        controllerInputDevice = newDevice;
+        if (controllerInputDevice != null)
+        {
+            controllerInputDevice.OnStateChanged += OnControllerStateChanged;
+            OnControllerStateChanged(controllerInputDevice.State, controllerInputDevice.State);
+        }
+        else
+        {
+            OnControllerStateChanged(GvrConnectionState.Disconnected, GvrConnectionState.Disconnected);
+        }
+
+        PropagateControllerInputDevice();
+    }
+
+    private void OnPostControllerInputUpdated()
+    {
+        UpdatePose();
+    }
+
+    private void OnControllerStateChanged(GvrConnectionState state, GvrConnectionState oldState)
+    {
+        if (isDeactivatedWhenDisconnected && enabled)
+        {
+            gameObject.SetActive(state == GvrConnectionState.Connected);
+        }
+    }
+
+    private void UpdatePose()
+    {
+        if (controllerInputDevice == null)
+        {
+            return;
+        }
+
+        // Disable arm model if the device supports 6DoF.
+        if (controllerInputDevice.SupportsPositionalTracking)
+        {
+            transform.localPosition = controllerInputDevice.Position;
+            transform.localRotation = controllerInputDevice.Orientation;
+        }
+        else
+        {
+            if (armModel == null || !controllerInputDevice.IsDominantHand)
+            {
+                return;
+            }
+
+            transform.localPosition = ArmModel.ControllerPositionFromHead;
+            transform.localRotation = ArmModel.ControllerRotationFromHead;
+        }
+    }
 #if UNITY_EDITOR
-  /// If the "armModel" serialized field is changed while the application is playing
-  /// by using the inspector in the editor, then we need to call the PropagateArmModel
-  /// to ensure all children IGvrArmModelReceiver are updated.
-  /// Outside of the editor, this can't happen because the arm model can only change when
-  /// a Setter is called that automatically calls PropagateArmModel.
-  void OnValidate() {
-    if (Application.isPlaying && isActiveAndEnabled) {
-      PropagateArmModel();
-      if (controllerInputDevice != null) {
-        OnControllerStateChanged(controllerInputDevice.State, controllerInputDevice.State);
-      }
+    /// If the "armModel" serialized field is changed while the application is playing
+    /// by using the inspector in the editor, then we need to call the PropagateArmModel
+    /// to ensure all children IGvrArmModelReceiver are updated.
+    /// Outside of the editor, this can't happen because the arm model can only change when
+    /// a Setter is called that automatically calls PropagateArmModel.
+    void OnValidate()
+    {
+        if (Application.isPlaying && isActiveAndEnabled)
+        {
+            PropagateArmModel();
+            if (controllerInputDevice != null)
+            {
+                OnControllerStateChanged(controllerInputDevice.State, controllerInputDevice.State);
+            }
+        }
     }
-  }
 #endif  // UNITY_EDITOR
-
 }

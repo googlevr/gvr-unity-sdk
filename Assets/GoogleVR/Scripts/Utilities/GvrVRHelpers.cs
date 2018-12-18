@@ -16,7 +16,6 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using System.Collections;
 using Gvr.Internal;
-
 #if UNITY_2017_2_OR_NEWER
 using UnityEngine.XR;
 #else
@@ -26,90 +25,107 @@ using XRSettings = UnityEngine.VR.VRSettings;
 #endif  // UNITY_2017_2_OR_NEWER
 
 /// Helper functions common to GVR VR applications.
-public static class GvrVRHelpers {
-  public static Vector2 GetViewportCenter() {
-    int viewportWidth = Screen.width;
-    int viewportHeight = Screen.height;
-    if (XRSettings.enabled) {
-      viewportWidth = XRSettings.eyeTextureWidth;
-      viewportHeight = XRSettings.eyeTextureHeight;
+public static class GvrVRHelpers
+{
+    public static Vector2 GetViewportCenter()
+    {
+        int viewportWidth = Screen.width;
+        int viewportHeight = Screen.height;
+        if (XRSettings.enabled)
+        {
+            viewportWidth = XRSettings.eyeTextureWidth;
+            viewportHeight = XRSettings.eyeTextureHeight;
+        }
+
+        return new Vector2(0.5f * viewportWidth, 0.5f * viewportHeight);
     }
 
-    return new Vector2(0.5f * viewportWidth, 0.5f * viewportHeight);
-  }
+    public static Vector3 GetHeadForward()
+    {
+        return GetHeadRotation() * Vector3.forward;
+    }
 
-  public static Vector3 GetHeadForward() {
-    return GetHeadRotation() * Vector3.forward;
-  }
-
-  public static Quaternion GetHeadRotation() {
+    public static Quaternion GetHeadRotation()
+    {
 #if UNITY_EDITOR
-    if (InstantPreview.Instance != null && InstantPreview.Instance.IsCurrentlyConnected) {
-      // In-editor; Instant Preview is active:
-      return Camera.main.transform.localRotation;
-    } else {
-      // In-editor; Instant Preview is not active:
-      if (GvrEditorEmulator.Instance == null) {
-        Debug.LogWarning("No GvrEditorEmulator instance was found in your scene. Please ensure that " +
-          "GvrEditorEmulator exists in your scene.");
-        return Quaternion.identity;
-      }
+        if (InstantPreview.Instance != null && InstantPreview.Instance.IsCurrentlyConnected)
+        {
+            // In-editor; Instant Preview is active:
+            return Camera.main.transform.localRotation;
+        }
+        else
+        {
+            // In-editor; Instant Preview is not active:
+            if (GvrEditorEmulator.Instance == null)
+            {
+                Debug.LogWarning("No GvrEditorEmulator instance was found in your scene. Please ensure that " +
+                "GvrEditorEmulator exists in your scene.");
+                return Quaternion.identity;
+            }
 
-      return GvrEditorEmulator.Instance.HeadRotation;
-    }
+            return GvrEditorEmulator.Instance.HeadRotation;
+        }
 #else
-    // Not running in editor:
-    return InputTracking.GetLocalRotation(XRNode.Head);
+        // Not running in editor:
+        return InputTracking.GetLocalRotation(XRNode.Head);
 #endif // UNITY_EDITOR
-  }
+    }
 
-  public static Vector3 GetHeadPosition() {
+    public static Vector3 GetHeadPosition()
+    {
 #if UNITY_EDITOR
-    if (GvrEditorEmulator.Instance == null) {
-      Debug.LogWarning("No GvrEditorEmulator instance was found in your scene. Please ensure that " +
-        "GvrEditorEmulator exists in your scene.");
-      return Vector3.zero;
-    }
+        if (GvrEditorEmulator.Instance == null)
+        {
+            Debug.LogWarning("No GvrEditorEmulator instance was found in your scene. Please ensure that " +
+            "GvrEditorEmulator exists in your scene.");
+            return Vector3.zero;
+        }
 
-    return GvrEditorEmulator.Instance.HeadPosition;
+        return GvrEditorEmulator.Instance.HeadPosition;
 #else
-    return InputTracking.GetLocalPosition(XRNode.Head);
+        return InputTracking.GetLocalPosition(XRNode.Head);
 #endif // UNITY_EDITOR
-  }
-
-  public static float GetRecommendedMaxLaserDistance(GvrBasePointer.RaycastMode mode) {
-    switch(mode) {
-      case GvrBasePointer.RaycastMode.Direct:
-        return 20.0f;
-      case GvrBasePointer.RaycastMode.Hybrid:
-        return 1.0f;
-      case GvrBasePointer.RaycastMode.Camera:
-      default:
-        return 0.75f;
     }
-  }
 
-  public static float GetRayIntersection(GvrBasePointer.RaycastMode mode) {
-    switch (mode) {
-      case GvrBasePointer.RaycastMode.Direct:
-        return 0.0f;
-      case GvrBasePointer.RaycastMode.Hybrid:
-        return 0.0f;
-      case GvrBasePointer.RaycastMode.Camera:
-      default:
-        return 2.5f;
+    public static float GetRecommendedMaxLaserDistance(GvrBasePointer.RaycastMode mode)
+    {
+        switch (mode)
+        {
+            case GvrBasePointer.RaycastMode.Direct:
+                return 20.0f;
+            case GvrBasePointer.RaycastMode.Hybrid:
+                return 1.0f;
+            case GvrBasePointer.RaycastMode.Camera:
+            default:
+                return 0.75f;
+        }
     }
-  }
 
-  public static bool GetShrinkLaser(GvrBasePointer.RaycastMode mode) {
-    switch (mode) {
-      case GvrBasePointer.RaycastMode.Direct:
-        return false;
-      case GvrBasePointer.RaycastMode.Hybrid:
-        return true;
-      case GvrBasePointer.RaycastMode.Camera:
-      default:
-        return false;
+    public static float GetRayIntersection(GvrBasePointer.RaycastMode mode)
+    {
+        switch (mode)
+        {
+            case GvrBasePointer.RaycastMode.Direct:
+                return 0.0f;
+            case GvrBasePointer.RaycastMode.Hybrid:
+                return 0.0f;
+            case GvrBasePointer.RaycastMode.Camera:
+            default:
+                return 2.5f;
+        }
     }
-  }
+
+    public static bool GetShrinkLaser(GvrBasePointer.RaycastMode mode)
+    {
+        switch (mode)
+        {
+            case GvrBasePointer.RaycastMode.Direct:
+                return false;
+            case GvrBasePointer.RaycastMode.Hybrid:
+                return true;
+            case GvrBasePointer.RaycastMode.Camera:
+            default:
+                return false;
+        }
+    }
 }

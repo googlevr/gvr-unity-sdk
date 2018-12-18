@@ -22,52 +22,60 @@ using UnityEngine;
 
 [ExecuteInEditMode]
 [HelpURL("https://developers.google.com/vr/unity/reference/class/InstantPreviewHelper")]
-public class InstantPreviewHelper : MonoBehaviour {
-  public static string AdbPath;
+public class InstantPreviewHelper : MonoBehaviour
+{
+    public static string AdbPath;
 
 #if UNITY_HAS_GOOGLEVR && UNITY_EDITOR
-  [DllImport(InstantPreview.dllName)]
-  private static extern bool SetAdbPathAndStart(string adbPath);
+    [DllImport(InstantPreview.dllName)]
+    private static extern bool SetAdbPathAndStart(string adbPath);
 
-  void Awake() {
-    // Gets android SDK root from preferences.
-    var sdkRoot = EditorPrefs.GetString("AndroidSdkRoot");
-    if (string.IsNullOrEmpty(sdkRoot)) {
-      Debug.LogError("Instant Preview requires your Unity Android SDK path to be set. Please set it under Preferences/External Tools/Android. You may need to install the Android SDK first.");
-      return;
-    }
+    void Awake()
+    {
+        // Gets android SDK root from preferences.
+        var sdkRoot = EditorPrefs.GetString("AndroidSdkRoot");
+        if (string.IsNullOrEmpty(sdkRoot))
+        {
+            Debug.LogError("Instant Preview requires your Unity Android SDK path to be set. Please set it under Preferences/External Tools/Android. You may need to install the Android SDK first.");
+            return;
+        }
 
-    // Gets adb path from known directory.
-    AdbPath = Path.Combine(Path.GetFullPath(sdkRoot), "platform-tools" + Path.DirectorySeparatorChar + "adb");
+        // Gets adb path from known directory.
+        AdbPath = Path.Combine(Path.GetFullPath(sdkRoot), "platform-tools" + Path.DirectorySeparatorChar + "adb");
 #if UNITY_EDITOR_WIN
-    AdbPath = Path.ChangeExtension(AdbPath, "exe");
+        AdbPath = Path.ChangeExtension(AdbPath, "exe");
 #endif // UNITY_EDITOR_WIN
 
-    if (!File.Exists(AdbPath)) {
-      Debug.LogErrorFormat("adb not found at \"{0}\". Please add adb to your SDK path and restart the Unity editor.", AdbPath);
-      return;
-    }
+        if (!File.Exists(AdbPath))
+        {
+            Debug.LogErrorFormat("adb not found at \"{0}\". Please add adb to your SDK path and restart the Unity editor.", AdbPath);
+            return;
+        }
 
-    // Tries to start server.
-    var started = SetAdbPathAndStart(AdbPath);
-    if (!started) {
-      Debug.LogErrorFormat("Couldn't start Instant Preview server with adb path: {0}.", AdbPath);
+        // Tries to start server.
+        var started = SetAdbPathAndStart(AdbPath);
+        if (!started)
+        {
+            Debug.LogErrorFormat("Couldn't start Instant Preview server with adb path: {0}.", AdbPath);
+        }
     }
-  }
 
 #elif UNITY_EDITOR
-  void Awake() {
-    Debug.LogWarning("Instant Preview is disabled; set target platform to Android to use it.");
-  }
+    void Awake()
+    {
+        Debug.LogWarning("Instant Preview is disabled; set target platform to Android to use it.");
+    }
 
 #endif
 }
 
 #if !UNITY_HAS_GOOGLEVR && UNITY_EDITOR
 [CustomEditor(typeof(InstantPreviewHelper))]
-public class InstantPreviewHelperEditor : Editor {
-  public override void OnInspectorGUI() {
-    EditorGUILayout.LabelField("Instant Preview is disabled; set target platform to Android to use it.");
-  }
+public class InstantPreviewHelperEditor : Editor
+{
+    public override void OnInspectorGUI()
+    {
+        EditorGUILayout.LabelField("Instant Preview is disabled; set target platform to Android to use it.");
+    }
 }
 #endif

@@ -22,97 +22,118 @@ using System.Collections;
 /// of a GvrAudioRoom object.
 [CustomEditor(typeof(GvrAudioRoom))]
 [CanEditMultipleObjects]
-public class GvrAudioRoomEditor : Editor {
-  private SerializedProperty leftWall = null;
-  private SerializedProperty rightWall = null;
-  private SerializedProperty floor = null;
-  private SerializedProperty ceiling = null;
-  private SerializedProperty backWall = null;
-  private SerializedProperty frontWall = null;
-  private SerializedProperty reflectivity = null;
-  private SerializedProperty reverbGainDb = null;
-  private SerializedProperty reverbBrightness = null;
-  private SerializedProperty reverbTime = null;
-  private SerializedProperty size = null;
+public class GvrAudioRoomEditor : Editor
+{
+    private SerializedProperty leftWall = null;
+    private SerializedProperty rightWall = null;
+    private SerializedProperty floor = null;
+    private SerializedProperty ceiling = null;
+    private SerializedProperty backWall = null;
+    private SerializedProperty frontWall = null;
+    private SerializedProperty reflectivity = null;
+    private SerializedProperty reverbGainDb = null;
+    private SerializedProperty reverbBrightness = null;
+    private SerializedProperty reverbTime = null;
+    private SerializedProperty size = null;
 
-  private GUIContent surfaceMaterialsLabel = new GUIContent("Surface Materials",
-      "Room surface materials to calculate the acoustic properties of the room.");
-  private GUIContent surfaceMaterialLabel = new GUIContent("Surface Material",
-      "Surface material used to calculate the acoustic properties of the room.");
-  private GUIContent reflectivityLabel = new GUIContent("Reflectivity",
-      "Adjusts what proportion of the direct sound is reflected back by each surface, after an " +
-      "appropriate delay. Reverberation is unaffected by this setting.");
-  private GUIContent reverbGainLabel = new GUIContent("Gain (dB)",
-      "Applies a gain adjustment to the reverberation in the room. The default value will leave " +
-      "reverb unaffected.");
-  private GUIContent reverbPropertiesLabel = new GUIContent("Reverb Properties",
-      "Parameters to adjust the reverb properties of the room.");
-  private GUIContent reverbBrightnessLabel = new GUIContent("Brightness",
-      "Adjusts the balance between high and low frequencies in the reverb.");
-  private GUIContent reverbTimeLabel = new GUIContent("Time",
-      "Adjusts the overall duration of the reverb by a positive scaling factor.");
-  private GUIContent sizeLabel = new GUIContent("Size", "Sets the room dimensions.");
+    private GUIContent surfaceMaterialsLabel = new GUIContent(
+        "Surface Materials",
+        "Room surface materials to calculate the acoustic properties of the room.");
 
-  void OnEnable () {
-    leftWall = serializedObject.FindProperty("leftWall");
-    rightWall = serializedObject.FindProperty("rightWall");
-    floor = serializedObject.FindProperty("floor");
-    ceiling = serializedObject.FindProperty("ceiling");
-    backWall = serializedObject.FindProperty("backWall");
-    frontWall = serializedObject.FindProperty("frontWall");
-    reflectivity = serializedObject.FindProperty("reflectivity");
-    reverbGainDb = serializedObject.FindProperty("reverbGainDb");
-    reverbBrightness = serializedObject.FindProperty("reverbBrightness");
-    reverbTime = serializedObject.FindProperty("reverbTime");
-    size = serializedObject.FindProperty("size");
-  }
+    private GUIContent surfaceMaterialLabel = new GUIContent(
+        "Surface Material",
+        "Surface material used to calculate the acoustic properties of the room.");
 
-  /// @cond
-  public override void OnInspectorGUI () {
-    serializedObject.Update();
+    private const string REFLECTIVITY_LABEL_DESCRIPTION =
+        "Adjusts what proportion of the direct sound is reflected back by each surface, after an appropriate delay. " +
+        "Reverberation is unaffected by this setting.";
 
-    // Add clickable script field, as would have been provided by DrawDefaultInspector()
-    MonoScript script = MonoScript.FromMonoBehaviour (target as MonoBehaviour);
-    EditorGUI.BeginDisabledGroup (true);
-    EditorGUILayout.ObjectField ("Script", script, typeof(MonoScript), false);
-    EditorGUI.EndDisabledGroup ();
+    private GUIContent reflectivityLabel = new GUIContent("Reflectivity", REFLECTIVITY_LABEL_DESCRIPTION);
 
-    EditorGUILayout.LabelField(surfaceMaterialsLabel);
-    ++EditorGUI.indentLevel;
-    DrawSurfaceMaterial(leftWall);
-    DrawSurfaceMaterial(rightWall);
-    DrawSurfaceMaterial(floor);
-    DrawSurfaceMaterial(ceiling);
-    DrawSurfaceMaterial(backWall);
-    DrawSurfaceMaterial(frontWall);
-    --EditorGUI.indentLevel;
+    private GUIContent reverbGainLabel = new GUIContent(
+        "Gain(dB)",
+        "Applies a gain adjustment to the reverberation in the room. The default value will leave reverb unaffected.");
 
-    EditorGUILayout.Separator();
+    private GUIContent reverbPropertiesLabel = new GUIContent(
+        "Reverb Properties",
+        "Parameters to adjust the reverb properties of the room.");
 
-    EditorGUILayout.Slider(reflectivity, 0.0f, GvrAudio.maxReflectivity, reflectivityLabel);
+    private GUIContent reverbBrightnessLabel = new GUIContent(
+        "Brightness",
+        "Adjusts the balance between high and low frequencies in the reverb.");
 
-    EditorGUILayout.Separator();
+    private GUIContent reverbTimeLabel = new GUIContent(
+        "Time",
+        "Adjusts the overall duration of the reverb by a positive scaling factor.");
 
-    EditorGUILayout.LabelField(reverbPropertiesLabel);
-    ++EditorGUI.indentLevel;
-    EditorGUILayout.Slider(reverbGainDb, GvrAudio.minGainDb, GvrAudio.maxGainDb, reverbGainLabel);
-    EditorGUILayout.Slider(reverbBrightness, GvrAudio.minReverbBrightness,
-                           GvrAudio.maxReverbBrightness, reverbBrightnessLabel);
-    EditorGUILayout.Slider(reverbTime, 0.0f, GvrAudio.maxReverbTime, reverbTimeLabel);
-    --EditorGUI.indentLevel;
+    private GUIContent sizeLabel = new GUIContent("Size", "Sets the room dimensions.");
 
-    EditorGUILayout.Separator();
+    void OnEnable()
+    {
+        leftWall = serializedObject.FindProperty("leftWall");
+        rightWall = serializedObject.FindProperty("rightWall");
+        floor = serializedObject.FindProperty("floor");
+        ceiling = serializedObject.FindProperty("ceiling");
+        backWall = serializedObject.FindProperty("backWall");
+        frontWall = serializedObject.FindProperty("frontWall");
+        reflectivity = serializedObject.FindProperty("reflectivity");
+        reverbGainDb = serializedObject.FindProperty("reverbGainDb");
+        reverbBrightness = serializedObject.FindProperty("reverbBrightness");
+        reverbTime = serializedObject.FindProperty("reverbTime");
+        size = serializedObject.FindProperty("size");
+    }
 
-    EditorGUILayout.PropertyField(size, sizeLabel);
+    /// @cond
+    public override void OnInspectorGUI()
+    {
+        serializedObject.Update();
 
-    serializedObject.ApplyModifiedProperties();
-  }
-  /// @endcond
+        // Add clickable script field, as would have been provided by DrawDefaultInspector()
+        MonoScript script = MonoScript.FromMonoBehaviour(target as MonoBehaviour);
+        EditorGUI.BeginDisabledGroup(true);
+        EditorGUILayout.ObjectField("Script", script, typeof(MonoScript), false);
+        EditorGUI.EndDisabledGroup();
 
-  private void DrawSurfaceMaterial (SerializedProperty surfaceMaterial) {
-    surfaceMaterialLabel.text = surfaceMaterial.displayName;
-    EditorGUILayout.PropertyField(surfaceMaterial, surfaceMaterialLabel);
-  }
+        EditorGUILayout.LabelField(surfaceMaterialsLabel);
+        ++EditorGUI.indentLevel;
+        DrawSurfaceMaterial(leftWall);
+        DrawSurfaceMaterial(rightWall);
+        DrawSurfaceMaterial(floor);
+        DrawSurfaceMaterial(ceiling);
+        DrawSurfaceMaterial(backWall);
+        DrawSurfaceMaterial(frontWall);
+        --EditorGUI.indentLevel;
+
+        EditorGUILayout.Separator();
+
+        EditorGUILayout.Slider(reflectivity, 0.0f, GvrAudio.maxReflectivity, reflectivityLabel);
+
+        EditorGUILayout.Separator();
+
+        EditorGUILayout.LabelField(reverbPropertiesLabel);
+        ++EditorGUI.indentLevel;
+        EditorGUILayout.Slider(
+            reverbGainDb, GvrAudio.minGainDb, GvrAudio.maxGainDb, reverbGainLabel);
+        EditorGUILayout.Slider(
+            reverbBrightness, GvrAudio.minReverbBrightness,
+            GvrAudio.maxReverbBrightness, reverbBrightnessLabel);
+        EditorGUILayout.Slider(reverbTime, 0.0f, GvrAudio.maxReverbTime, reverbTimeLabel);
+        --EditorGUI.indentLevel;
+
+        EditorGUILayout.Separator();
+
+        EditorGUILayout.PropertyField(size, sizeLabel);
+
+        serializedObject.ApplyModifiedProperties();
+    }
+
+    /// @endcond
+
+    private void DrawSurfaceMaterial(SerializedProperty surfaceMaterial)
+    {
+        surfaceMaterialLabel.text = surfaceMaterial.displayName;
+        EditorGUILayout.PropertyField(surfaceMaterial, surfaceMaterialLabel);
+    }
 }
 
 #pragma warning restore 0618 // Restore warnings

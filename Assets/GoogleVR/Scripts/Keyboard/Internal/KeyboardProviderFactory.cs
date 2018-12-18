@@ -14,23 +14,25 @@
 
 using UnityEngine;
 
-namespace Gvr.Internal {
-  /// Factory that provides a concrete implementation of IKeyboardProvider for the
-  /// current platform.
-  static class KeyboardProviderFactory {
-    static internal IKeyboardProvider CreateKeyboardProvider(GvrKeyboard owner)
+namespace Gvr.Internal
+{
+    /// Factory that provides a concrete implementation of IKeyboardProvider for the
+    /// current platform.
+    static class KeyboardProviderFactory
     {
+        static internal IKeyboardProvider CreateKeyboardProvider(GvrKeyboard owner)
+        {
 // Use emulator in editor.
 #if UNITY_EDITOR
-      return new EmulatorKeyboardProvider();
+            return new EmulatorKeyboardProvider();
 #elif UNITY_ANDROID
-      // Running on an Android device.
-      return new AndroidNativeKeyboardProvider();
+            // Running on an Android device.
+            return new AndroidNativeKeyboardProvider();
 #else
-      // Other platforms not supported, including iOS and Unity versions w/o the native integraiton.
-      Debug.LogWarning("GVR Keyboard not supported on " + Application.platform);
-      return new DummyKeyboardProvider();
+            // Other platforms not supported, including iOS and Unity versions w/o the native integraiton.
+            Debug.LogWarning("GVR Keyboard not supported on " + Application.platform);
+            return new DummyKeyboardProvider();
 #endif  // UNITY_EDITOR
+        }
     }
-  }
 }

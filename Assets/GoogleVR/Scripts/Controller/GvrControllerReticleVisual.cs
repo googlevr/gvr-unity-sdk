@@ -23,143 +23,167 @@ using Gvr.Internal;
 [RequireComponent(typeof(MeshRenderer))]
 [RequireComponent(typeof(MeshFilter))]
 [HelpURL("https://developers.google.com/vr/unity/reference/class/GvrControllerReticleVisual")]
-public class GvrControllerReticleVisual : MonoBehaviour {
-  [Serializable]
-  public struct FaceCameraData {
-    public bool alongXAxis;
-    public bool alongYAxis;
-    public bool alongZAxis;
+public class GvrControllerReticleVisual : MonoBehaviour
+{
+    [Serializable]
+    public struct FaceCameraData
+    {
+        public bool alongXAxis;
+        public bool alongYAxis;
+        public bool alongZAxis;
 
-    public bool IsAnyAxisOff {
-      get {
-        return !alongXAxis || !alongYAxis || !alongZAxis;
-      }
+        public bool IsAnyAxisOff
+        {
+            get
+            {
+                return !alongXAxis || !alongYAxis || !alongZAxis;
+            }
+        }
+
+        public FaceCameraData(bool startEnabled)
+        {
+            alongXAxis = startEnabled;
+            alongYAxis = startEnabled;
+            alongZAxis = startEnabled;
+        }
     }
 
-    public FaceCameraData(bool startEnabled) {
-      alongXAxis = startEnabled;
-      alongYAxis = startEnabled;
-      alongZAxis = startEnabled;
-    }
-  }
+    /// If set to false, the scale is simply set to the sizeMeters value.
+    [Tooltip("Determines if the size of the reticle is based on the distance from the camera.")]
+    public bool isSizeBasedOnCameraDistance = true;
 
-  /// If set to false, the scale is simply set to the sizeMeters value.
-  [Tooltip("Determines if the size of the reticle is based on the distance from the camera.")]
-  public bool isSizeBasedOnCameraDistance = true;
+    /// The reticle will be scaled based on the size of the mesh so that it's size matches this size.
+    [Tooltip("Final size of the reticle in meters when it is 1 meter from the camera.")]
+    public float sizeMeters = 0.1f;
 
-  /// The reticle will be scaled based on the size of the mesh so that it's size matches this size.
-  [Tooltip("Final size of the reticle in meters when it is 1 meter from the camera.")]
-  public float sizeMeters = 0.1f;
+    [Tooltip("Determines if the reticle will always face the camera and along what axes.")]
+    public FaceCameraData doesReticleFaceCamera = new FaceCameraData(true);
 
-  [Tooltip("Determines if the reticle will always face the camera and along what axes.")]
-  public FaceCameraData doesReticleFaceCamera = new FaceCameraData(true);
+    /// Sorting order to use for the reticle's renderer.
+    /// Range values come from https://docs.unity3d.com/ScriptReference/Renderer-sortingOrder.html.
+    [Range(-32767, 32767)]
+    public int sortingOrder = 0;
 
-  /// Sorting order to use for the reticle's renderer.
-  /// Range values come from https://docs.unity3d.com/ScriptReference/Renderer-sortingOrder.html.
-  [Range(-32767, 32767)]
-  public int sortingOrder = 0;
+    /// The size of the reticle's mesh in meters.
+    public float ReticleMeshSizeMeters { get; private set; }
 
-  /// The size of the reticle's mesh in meters.
-  public float ReticleMeshSizeMeters { get; private set; }
+    /// The ratio of the reticleMeshSizeMeters to 1 meter.
+    /// If reticleMeshSizeMeters is 10, then reticleMeshSizeRatio is 0.1.
+    public float ReticleMeshSizeRatio { get; private set; }
 
-  /// The ratio of the reticleMeshSizeMeters to 1 meter.
-  /// If reticleMeshSizeMeters is 10, then reticleMeshSizeRatio is 0.1.
-  public float ReticleMeshSizeRatio { get; private set; }
+    protected MeshRenderer meshRenderer;
+    protected MeshFilter meshFilter;
 
-  protected MeshRenderer meshRenderer;
-  protected MeshFilter meshFilter;
+    private Vector3 preRenderLocalScale;
+    private Quaternion preRenderLocalRotation;
 
-  private Vector3 preRenderLocalScale;
-  private Quaternion preRenderLocalRotation;
+    [SuppressMemoryAllocationError(IsWarning = true, Reason = "Pending documentation.")]
+    public void RefreshMesh()
+    {
+        ReticleMeshSizeMeters = 1.0f;
+        ReticleMeshSizeRatio = 1.0f;
 
-  [SuppressMemoryAllocationError(IsWarning=true, Reason="Pending documentation.")]
-  public void RefreshMesh() {
-    ReticleMeshSizeMeters = 1.0f;
-    ReticleMeshSizeRatio = 1.0f;
+        if (meshFilter != null && meshFilter.mesh != null)
+        {
+            ReticleMeshSizeMeters = meshFilter.mesh.bounds.size.x;
+            if (ReticleMeshSizeMeters != 0.0f)
+            {
+                ReticleMeshSizeRatio = 1.0f / ReticleMeshSizeMeters;
+            }
+        }
 
-    if (meshFilter != null && meshFilter.mesh != null) {
-      ReticleMeshSizeMeters = meshFilter.mesh.bounds.size.x;
-      if (ReticleMeshSizeMeters != 0.0f) {
-        ReticleMeshSizeRatio = 1.0f / ReticleMeshSizeMeters;
-      }
-    }
-
-    if (meshRenderer != null) {
-      meshRenderer.sortingOrder = sortingOrder;
-    }
-  }
-
-  protected virtual void Awake() {
-    meshRenderer = GetComponent<MeshRenderer>();
-    meshFilter = GetComponent<MeshFilter>();
-  }
-
-  protected virtual void OnEnable() {
-    RefreshMesh();
-  }
-
-  protected virtual void OnWillRenderObject() {
-    preRenderLocalScale = transform.localScale;
-    preRenderLocalRotation = transform.localRotation;
-
-    Camera camera = Camera.current;
-    UpdateReticleSize(camera);
-    UpdateReticleOrientation(camera);
-  }
-
-  protected virtual void OnRenderObject() {
-    // It is possible for paired calls to OnWillRenderObject/OnRenderObject to be nested if
-    // Camera.Render is explicitly called for any special effects. To avoid the reticle being
-    // rotated/scaled incorrectly in that case, the reticle is reset to it's pre-OnWillRenderObject
-    // after a render has finished.
-    transform.localScale = preRenderLocalScale;
-    transform.localRotation = preRenderLocalRotation;
-  }
-
-  protected virtual void UpdateReticleSize(Camera camera) {
-    if (camera == null) {
-      return;
+        if (meshRenderer != null)
+        {
+            meshRenderer.sortingOrder = sortingOrder;
+        }
     }
 
-    float scale = sizeMeters;
-
-    if (isSizeBasedOnCameraDistance) {
-      float reticleDistanceFromCamera = (transform.position - camera.transform.position).magnitude;
-      scale *= ReticleMeshSizeRatio * reticleDistanceFromCamera;
+    protected virtual void Awake()
+    {
+        meshRenderer = GetComponent<MeshRenderer>();
+        meshFilter = GetComponent<MeshFilter>();
     }
 
-    transform.localScale = new Vector3(scale, scale, scale);
-  }
-
-  protected virtual void UpdateReticleOrientation(Camera camera) {
-    if (camera == null) {
-      return;
+    protected virtual void OnEnable()
+    {
+        RefreshMesh();
     }
 
-    Vector3 direction = transform.position - camera.transform.position;
-    transform.rotation = Quaternion.LookRotation(direction, Vector3.up);
+    protected virtual void OnWillRenderObject()
+    {
+        preRenderLocalScale = transform.localScale;
+        preRenderLocalRotation = transform.localRotation;
 
-    if (doesReticleFaceCamera.IsAnyAxisOff) {
-      Vector3 euler = transform.localEulerAngles;
-      if (!doesReticleFaceCamera.alongXAxis) {
-        euler.x = 0.0f;
-      }
-
-      if (!doesReticleFaceCamera.alongYAxis) {
-        euler.y = 0.0f;
-      }
-
-      if (!doesReticleFaceCamera.alongZAxis) {
-        euler.z = 0.0f;
-      }
-
-      transform.localEulerAngles = euler;
+        Camera camera = Camera.current;
+        UpdateReticleSize(camera);
+        UpdateReticleOrientation(camera);
     }
-  }
 
-  protected virtual void OnValidate() {
-    if (Application.isPlaying && isActiveAndEnabled) {
-      RefreshMesh();
+    protected virtual void OnRenderObject()
+    {
+        // It is possible for paired calls to OnWillRenderObject/OnRenderObject to be nested if
+        // Camera.Render is explicitly called for any special effects. To avoid the reticle being
+        // rotated/scaled incorrectly in that case, the reticle is reset to it's pre-OnWillRenderObject
+        // after a render has finished.
+        transform.localScale = preRenderLocalScale;
+        transform.localRotation = preRenderLocalRotation;
     }
-  }
+
+    protected virtual void UpdateReticleSize(Camera camera)
+    {
+        if (camera == null)
+        {
+            return;
+        }
+
+        float scale = sizeMeters;
+
+        if (isSizeBasedOnCameraDistance)
+        {
+            float reticleDistanceFromCamera = (transform.position - camera.transform.position).magnitude;
+            scale *= ReticleMeshSizeRatio * reticleDistanceFromCamera;
+        }
+
+        transform.localScale = new Vector3(scale, scale, scale);
+    }
+
+    protected virtual void UpdateReticleOrientation(Camera camera)
+    {
+        if (camera == null)
+        {
+            return;
+        }
+
+        Vector3 direction = transform.position - camera.transform.position;
+        transform.rotation = Quaternion.LookRotation(direction, Vector3.up);
+
+        if (doesReticleFaceCamera.IsAnyAxisOff)
+        {
+            Vector3 euler = transform.localEulerAngles;
+            if (!doesReticleFaceCamera.alongXAxis)
+            {
+                euler.x = 0.0f;
+            }
+
+            if (!doesReticleFaceCamera.alongYAxis)
+            {
+                euler.y = 0.0f;
+            }
+
+            if (!doesReticleFaceCamera.alongZAxis)
+            {
+                euler.z = 0.0f;
+            }
+
+            transform.localEulerAngles = euler;
+        }
+    }
+
+    protected virtual void OnValidate()
+    {
+        if (Application.isPlaying && isActiveAndEnabled)
+        {
+            RefreshMesh();
+        }
+    }
 }
