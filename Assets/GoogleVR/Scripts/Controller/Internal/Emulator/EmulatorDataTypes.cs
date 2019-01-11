@@ -1,3 +1,5 @@
+//-----------------------------------------------------------------------
+// <copyright file="EmulatorDataTypes.cs" company="Google Inc.">
 // Copyright 2016 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 using System;
 using System.Collections;
@@ -61,7 +65,7 @@ namespace Gvr.Internal
             kActionPointerUp = 6,
             kActionHoverMove = 7,
             kActionHoverEnter = 9,
-            kActionHoverExit = 10,
+            kActionHoverExit = 10
         }
 
         // Use getActionMasked() and getActionPointer() instead.
@@ -93,8 +97,8 @@ namespace Gvr.Internal
         {
             action = proto.Action;
             relativeTimestamp =
-          (Action)(proto.Action & ACTION_MASK) == Action.kActionDown
-          ? 0 : (int)(proto.Timestamp - lastDownTimeMs);
+                (Action)(proto.Action & ACTION_MASK) == Action.kActionDown ?
+                    0 : (int)(proto.Timestamp - lastDownTimeMs);
             pointers = new List<Pointer>();
             foreach (PhoneEvent.Types.MotionEvent.Types.Pointer pointer in
                      proto.PointersList)
@@ -105,7 +109,7 @@ namespace Gvr.Internal
         }
 
         public EmulatorTouchEvent(Action action, int pointerId, int relativeTimestamp,
-                                    List<Pointer> pointers)
+                                  List<Pointer> pointers)
         {
             int fingerIndex = 0;
             if (action == Action.kActionPointerDown
@@ -114,8 +118,8 @@ namespace Gvr.Internal
                 fingerIndex = findPointerIndex(pointerId, pointers);
                 if (fingerIndex == -1)
                 {
-                    Debug.LogWarning("Could not find specific fingerId " + pointerId
-                    + " in the supplied list of pointers.");
+                    Debug.LogWarning("Could not find specific fingerId " + pointerId +
+                        " in the supplied list of pointers.");
                     fingerIndex = 0;
                 }
             }

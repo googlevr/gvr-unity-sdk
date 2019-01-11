@@ -1,3 +1,5 @@
+//-----------------------------------------------------------------------
+// <copyright file="DemoInputManager.cs" company="Google Inc.">
 // Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 #if UNITY_ANDROID && !UNITY_EDITOR
 #define RUNNING_ON_ANDROID_DEVICE
@@ -24,7 +28,6 @@ namespace GoogleVR.Demos
 
 #if UNITY_2017_2_OR_NEWER
     using UnityEngine.XR;
-
 #else
     using XRSettings = UnityEngine.VR.VRSettings;
 #endif  // UNITY_2017_2_OR_NEWER
@@ -34,17 +37,17 @@ namespace GoogleVR.Demos
         private const string MESSAGE_CANVAS_NAME = "MessageCanvas";
         private const string MESSAGE_TEXT_NAME = "MessageText";
         private const string LASER_GAMEOBJECT_NAME = "Laser";
-        private const string CONTROLLER_CONNECTING_MESSAGE = "Controller connecting...";
-        private const string CONTROLLER_DISCONNECTED_MESSAGE = "Controller disconnected";
-        private const string CONTROLLER_SCANNING_MESSAGE = "Controller scanning...";
+        private const string CONTROLLER_CONNECTING_MESSAGE = "Daydream controller connecting...";
+        private const string CONTROLLER_DISCONNECTED_MESSAGE = "Daydream controller not connected";
+        private const string CONTROLLER_SCANNING_MESSAGE = "Scanning for Daydream controller...";
         private const string NON_GVR_PLATFORM =
-            "Please select a supported Google VR platform via 'Build Settings > Android | iOS > Switch Platform'\n";
+        "Please select a supported Google VR platform via 'Build Settings > Android | iOS > Switch Platform'\n";
 
         private const string VR_SUPPORT_NOT_CHECKED =
-            "Please make sure 'Player Settings > Virtual Reality Supported' is checked\n";
+        "Please make sure 'Player Settings > Virtual Reality Supported' is checked\n";
 
         private const string EMPTY_VR_SDK_WARNING_MESSAGE =
-            "Please add 'Daydream' or 'Cardboard' under 'Player Settings > Virtual Reality SDKs'\n";
+        "Please add 'Daydream' or 'Cardboard' under 'Player Settings > Virtual Reality SDKs'\n";
 
         // Java class, method, and field constants.
         private const int ANDROID_MIN_DAYDREAM_API = 24;
@@ -63,10 +66,10 @@ namespace GoogleVR.Demos
 
         // Buttons that can trigger pointer switching.
         private const GvrControllerButton pointerButtonMask =
-            GvrControllerButton.App |
-            GvrControllerButton.TouchPadButton |
-            GvrControllerButton.Trigger |
-            GvrControllerButton.Grip;
+                GvrControllerButton.App |
+                GvrControllerButton.TouchPadButton |
+                GvrControllerButton.Trigger |
+                GvrControllerButton.Grip;
 
         [Tooltip("Reference to GvrControllerMain")]
         public GameObject controllerMain;
@@ -120,8 +123,8 @@ namespace GoogleVR.Demos
                 // The list is populated with valid VR SDK(s), pick the first one.
                 gvrEmulatedPlatformType =
                     (XRSettings.supportedDevices[0] == GvrSettings.VR_SDK_DAYDREAM) ?
-                    EmulatedPlatformType.Daydream :
-                    EmulatedPlatformType.Cardboard;
+                        EmulatedPlatformType.Daydream :
+                        EmulatedPlatformType.Cardboard;
             }
             isDaydream = (gvrEmulatedPlatformType == EmulatedPlatformType.Daydream);
 #else
@@ -134,17 +137,17 @@ namespace GoogleVR.Demos
             if (vrDeviceName != GvrSettings.VR_SDK_CARDBOARD &&
                 vrDeviceName != GvrSettings.VR_SDK_DAYDREAM)
             {
-              Debug.LogErrorFormat("Loaded device was '{0}', must be one of '{1}' or '{2}'",
+                Debug.LogErrorFormat("Loaded device was '{0}', must be one of '{1}' or '{2}'",
                     vrDeviceName, GvrSettings.VR_SDK_DAYDREAM, GvrSettings.VR_SDK_CARDBOARD);
-              return;
+                return;
             }
 
             // On a non-Daydream ready phone, fall back to Cardboard if it's present in the list of
             // enabled VR SDKs.
             // On a Daydream-ready phone, go into Cardboard mode if it's the currently-paired viewer.
             if ((!IsDeviceDaydreamReady() && playerSettingsHasCardboard()) ||
-               (IsDeviceDaydreamReady() && playerSettingsHasCardboard() &&
-                 GvrSettings.ViewerPlatform == GvrSettings.ViewerPlatformType.Cardboard))
+                (IsDeviceDaydreamReady() && playerSettingsHasCardboard() &&
+                    GvrSettings.ViewerPlatform == GvrSettings.ViewerPlatformType.Cardboard))
             {
                 vrDeviceName = GvrSettings.VR_SDK_CARDBOARD;
             }
@@ -195,7 +198,7 @@ namespace GoogleVR.Demos
 #if !RUNNING_ON_ANDROID_DEVICE
             UpdateEmulatedPlatformIfPlayerSettingsChanged();
             if ((isDaydream && gvrEmulatedPlatformType == EmulatedPlatformType.Daydream) ||
-                    (!isDaydream && gvrEmulatedPlatformType == EmulatedPlatformType.Cardboard))
+                (!isDaydream && gvrEmulatedPlatformType == EmulatedPlatformType.Cardboard))
             {
                 return;
             }
@@ -235,7 +238,7 @@ namespace GoogleVR.Demos
                 element => element.Equals(GvrSettings.VR_SDK_CARDBOARD));
         }
 
-        #if !RUNNING_ON_ANDROID_DEVICE
+#if !RUNNING_ON_ANDROID_DEVICE
         private void UpdateEmulatedPlatformIfPlayerSettingsChanged()
         {
             if (!playerSettingsHasDaydream() && !playerSettingsHasCardboard())
@@ -246,51 +249,51 @@ namespace GoogleVR.Demos
             // Player Settings > VR SDK list may have changed at runtime. The emulated platform
             // may not have been manually updated if that's the case.
             if (gvrEmulatedPlatformType == EmulatedPlatformType.Daydream &&
-                   !playerSettingsHasDaydream())
+                !playerSettingsHasDaydream())
             {
                 gvrEmulatedPlatformType = EmulatedPlatformType.Cardboard;
             }
             else if (gvrEmulatedPlatformType == EmulatedPlatformType.Cardboard &&
-                     !playerSettingsHasCardboard())
+                    !playerSettingsHasCardboard())
             {
                 gvrEmulatedPlatformType = EmulatedPlatformType.Daydream;
             }
         }
-        #endif  // !RUNNING_ON_ANDROID_DEVICE
+#endif  // !RUNNING_ON_ANDROID_DEVICE
 
-        #if RUNNING_ON_ANDROID_DEVICE
-    // Running on an Android device.
-    private static bool IsDeviceDaydreamReady()
-    {
-        // Check API level.
-        using (var version = new AndroidJavaClass(PACKAGE_BUILD_VERSION))
+#if RUNNING_ON_ANDROID_DEVICE
+        // Running on an Android device.
+        private static bool IsDeviceDaydreamReady()
         {
-              if (version.GetStatic<int>(FIELD_SDK_INT) < ANDROID_MIN_DAYDREAM_API)
-              {
+            // Check API level.
+            using (var version = new AndroidJavaClass(PACKAGE_BUILD_VERSION))
+            {
+                if (version.GetStatic<int>(FIELD_SDK_INT) < ANDROID_MIN_DAYDREAM_API)
+                {
+                    return false;
+                }
+            }
+
+            // API level > 24, check whether the device is Daydream-ready..
+            AndroidJavaObject androidActivity = null;
+            try
+            {
+                androidActivity = GvrActivityHelper.GetActivity();
+            }
+            catch (AndroidJavaException e)
+            {
+                Debug.LogError("Exception while connecting to the Activity: " + e);
                 return false;
-              }
-          }
+            }
 
-          // API level > 24, check whether the device is Daydream-ready..
-          AndroidJavaObject androidActivity = null;
-          try
-          {
-              androidActivity = GvrActivityHelper.GetActivity();
-          }
-          catch (AndroidJavaException e)
-          {
-              Debug.LogError("Exception while connecting to the Activity: " + e);
-              return false;
-          }
+            AndroidJavaClass daydreamApiClass = new AndroidJavaClass(PACKAGE_DAYDREAM_API_CLASS);
+            if (daydreamApiClass == null || androidActivity == null)
+            {
+                return false;
+            }
 
-          AndroidJavaClass daydreamApiClass = new AndroidJavaClass(PACKAGE_DAYDREAM_API_CLASS);
-          if (daydreamApiClass == null || androidActivity == null)
-          {
-              return false;
-          }
-
-          return daydreamApiClass.CallStatic<bool>(METHOD_IS_DAYDREAM_READY, androidActivity);
-    }
+            return daydreamApiClass.CallStatic<bool>(METHOD_IS_DAYDREAM_READY, androidActivity);
+        }
 #endif  // RUNNING_ON_ANDROID_DEVICE
 
         private void UpdateStatusMessage()
@@ -329,7 +332,7 @@ namespace GoogleVR.Demos
             string vrSdkWarningMessage = isVrSdkListEmpty ? EMPTY_VR_SDK_WARNING_MESSAGE : "";
             string controllerMessage = "";
             GvrPointerGraphicRaycaster graphicRaycaster =
-              messageCanvas.GetComponent<GvrPointerGraphicRaycaster>();
+                messageCanvas.GetComponent<GvrPointerGraphicRaycaster>();
             GvrControllerInputDevice dominantDevice = GvrControllerInput.GetDevice(GvrControllerHand.Dominant);
             GvrConnectionState connectionState = dominantDevice.State;
 
@@ -370,7 +373,7 @@ namespace GoogleVR.Demos
             messageCanvas.SetActive(isVrSdkListEmpty ||
                                     (connectionState != GvrConnectionState.Connected));
 #endif  // !UNITY_ANDROID && !UNITY_IOS
-        }
+    }
 
         private void SetVRInputMechanism()
         {

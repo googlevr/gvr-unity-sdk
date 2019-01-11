@@ -1,3 +1,5 @@
+//-----------------------------------------------------------------------
+// <copyright file="EmulatorClientSocket.cs" company="Google Inc.">
 // Copyright 2016 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 // This class is only used in the Editor, so make sure to only compile it on that platform.
 // Additionally, If this class is compiled on Android then Unity will insert the INTERNET permission

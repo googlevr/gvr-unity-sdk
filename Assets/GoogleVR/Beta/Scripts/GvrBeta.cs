@@ -1,3 +1,5 @@
+//-----------------------------------------------------------------------
+// <copyright file="GvrBeta.cs" company="Google Inc.">
 // Copyright 2018 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 /// Daydream Beta API.  This API surface is for experimental purposes and may
 /// change or be removed in any future release without forewarning.

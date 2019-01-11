@@ -1,4 +1,6 @@
-﻿// Copyright 2016 Google Inc. All rights reserved.
+//-----------------------------------------------------------------------
+// <copyright file="GvrPointerGraphicRaycaster.cs" company="Google Inc.">
+// Copyright 2016 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 using System.Collections.Generic;
 using UnityEngine;
@@ -29,6 +33,7 @@ using Gvr.Internal;
 [HelpURL("https://developers.google.com/vr/unity/reference/class/GvrPointerGraphicRaycaster")]
 public class GvrPointerGraphicRaycaster : GvrBasePointerRaycaster
 {
+    /// <summary>Blocking object types.</summary>
     public enum BlockingObjects
     {
         None = 0,
@@ -39,8 +44,13 @@ public class GvrPointerGraphicRaycaster : GvrBasePointerRaycaster
 
     private const int NO_EVENT_MASK_SET = -1;
 
+    /// <summary>Flag for ignoring reversed graphics direction.</summary>
     public bool ignoreReversedGraphics = true;
+
+    /// <summary>The type of objects blocking raycasts.</summary>
     public BlockingObjects blockingObjects = BlockingObjects.ThreeD;
+
+    /// <summary>The blocking layer mask to use when raycasting.</summary>
     public LayerMask blockingMask = NO_EVENT_MASK_SET;
 
     private Canvas targetCanvas;
@@ -49,6 +59,7 @@ public class GvrPointerGraphicRaycaster : GvrBasePointerRaycaster
 
     private static readonly List<Graphic> sortedGraphics = new List<Graphic>();
 
+    /// <summary>The camera to use when raycasting.</summary>
     public override Camera eventCamera
     {
         [SuppressMemoryAllocationError(IsWarning = true, Reason = "A getter for a Camera should not allocate.")]
@@ -89,6 +100,11 @@ public class GvrPointerGraphicRaycaster : GvrBasePointerRaycaster
     {
     }
 
+    /// <summary>Perform raycast on the scene.</summary>
+    /// <param name="pointerRay">The ray to use for the operation.</param>
+    /// <param name="radius">The radius of the ray to use when testing for hits.</param>
+    /// <param name="eventData">The pointer event data.</param>
+    /// <param name="resultAppendList">The list to append the results to.</param>
     protected override bool PerformRaycast(GvrBasePointer.PointerRay pointerRay, float radius,
                                            PointerEventData eventData, List<RaycastResult> resultAppendList)
     {

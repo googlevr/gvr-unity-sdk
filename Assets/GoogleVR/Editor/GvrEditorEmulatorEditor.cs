@@ -1,4 +1,6 @@
-﻿// Copyright 2017 Google Inc. All rights reserved.
+//-----------------------------------------------------------------------
+// <copyright file="GvrEditorEmulatorEditor.cs" company="Google Inc.">
+// Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 using UnityEngine;
 using UnityEditor;
@@ -38,6 +42,6 @@ public class GvrEditorEmulatorEditor : Editor
         DrawDefaultInspector();
 
         Rect rect = EditorGUILayout.GetControlRect(false, infoHeight);
-        GvrInfoDrawer.Draw(rect, INFO_TEXT);
+        GvrInfoDrawer.Draw(rect, INFO_TEXT, MessageType.None);
     }
 }

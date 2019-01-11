@@ -1,3 +1,5 @@
+//-----------------------------------------------------------------------
+// <copyright file="IGvrControllerInputDeviceReceiver.cs" company="Google Inc.">
 // Copyright 2018 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,12 +13,16 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>Interface declaring the need for the controller input device.</summary>
 public interface IGvrControllerInputDeviceReceiver
 {
+    /// <summary>Sets the reference to the controller input device.</summary>
     GvrControllerInputDevice ControllerInputDevice { set; }
 }

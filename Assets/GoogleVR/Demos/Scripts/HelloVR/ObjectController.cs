@@ -1,3 +1,5 @@
+//-----------------------------------------------------------------------
+// <copyright file="ObjectController.cs" company="Google Inc.">
 // Copyright 2014 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace GoogleVR.HelloVR
 {
@@ -87,7 +91,10 @@ namespace GoogleVR.HelloVR
             GameObject randomSib = transform.parent.GetChild(sibIdx).gameObject;
 
             // Move to random new location ±90˚ horzontal.
-            Vector3 direction = Quaternion.Euler(0, Random.Range(-90, 90), 0) * Vector3.forward;
+            Vector3 direction = Quaternion.Euler(
+                0,
+                Random.Range(-90, 90),
+                0) * Vector3.forward;
 
             // New location between 1.5m and 3.5m.
             float distance = 2 * Random.value + 1.5f;

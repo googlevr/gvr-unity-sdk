@@ -1,3 +1,5 @@
+//-----------------------------------------------------------------------
+// <copyright file="EmulatorConfig.cs" company="Google Inc.">
 // Copyright 2016 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 using UnityEngine;
 
@@ -59,7 +63,7 @@ namespace Gvr.Internal
 
         // Set this value to match how the PC is connected to the phone that is
         // streaming gyro, accel, and touch events. Set to OFF if using Wifi instead.
-        public Mode PHONE_EVENT_MODE = Mode.USB;
+        public Mode PHONE_EVENT_MODE = Mode.OFF;
 
         /*----- Internal Parameters (should not require any changes). -----*/
 

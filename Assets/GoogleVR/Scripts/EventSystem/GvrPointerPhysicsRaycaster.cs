@@ -1,6 +1,8 @@
-﻿// Copyright 2016 Google Inc. All rights reserved.
+//-----------------------------------------------------------------------
+// <copyright file="GvrPointerPhysicsRaycaster.cs" company="Google Inc.">
+// Copyright 2016 Google Inc. All rights reserved.
 //
-// Licensed under the Apache License, Version 2.0 +(the "License");
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -62,6 +66,14 @@ public class GvrPointerPhysicsRaycaster : GvrBasePointerRaycaster
     /// Used to sort the hits by distance.
     private HitComparer hitComparer = new HitComparer();
 
+    /// <summary>The maximum number of hits that the raycaster can detect at once.</summary>
+    /// <remarks>
+    /// They are NOT guaranteed to be ordered by distance. This value should be set to a higher number
+    /// than the number of objects the pointer is expected to intersect with in a single frame.
+    ///
+    /// This functionality is used to prevent unnecessary memory allocation to improve performance.
+    /// https://docs.unity3d.com/ScriptReference/Physics.SphereCastNonAlloc.html
+    /// </remarks>
     public int MaxRaycastHits
     {
         get
@@ -123,12 +135,20 @@ public class GvrPointerPhysicsRaycaster : GvrBasePointerRaycaster
     {
     }
 
+    /// @cond
     protected override void Awake()
     {
         base.Awake();
         hits = new RaycastHit[maxRaycastHits];
     }
 
+    /// @endcond
+
+    /// <summary>Perform raycast on the scene.</summary>
+    /// <param name="pointerRay">The ray to use for the operation.</param>
+    /// <param name="radius">The radius of the ray to use when testing for hits.</param>
+    /// <param name="eventData">The pointer event data.</param>
+    /// <param name="resultAppendList">The results are appended to this list</param>
     protected override bool PerformRaycast(GvrBasePointer.PointerRay pointerRay, float radius,
                                             PointerEventData eventData, List<RaycastResult> resultAppendList)
     {

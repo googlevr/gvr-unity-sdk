@@ -1,4 +1,6 @@
-﻿// Copyright 2017 Google Inc. All rights reserved.
+//-----------------------------------------------------------------------
+// <copyright file="GvrVRHelpers.cs" company="Google Inc.">
+// Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -24,9 +28,10 @@ using XRNode = UnityEngine.VR.VRNode;
 using XRSettings = UnityEngine.VR.VRSettings;
 #endif  // UNITY_2017_2_OR_NEWER
 
-/// Helper functions common to GVR VR applications.
+/// <summary>Helper functions common to GVR VR applications.</summary>
 public static class GvrVRHelpers
 {
+    /// <summary>Returns the center of the viewport.</summary>
     public static Vector2 GetViewportCenter()
     {
         int viewportWidth = Screen.width;
@@ -40,11 +45,13 @@ public static class GvrVRHelpers
         return new Vector2(0.5f * viewportWidth, 0.5f * viewportHeight);
     }
 
+    /// <summary>Returns the forward vector relative to the head rotation.</summary>
     public static Vector3 GetHeadForward()
     {
         return GetHeadRotation() * Vector3.forward;
     }
 
+    /// <summary>Returns the head rotation.</summary>
     public static Quaternion GetHeadRotation()
     {
 #if UNITY_EDITOR
@@ -71,6 +78,7 @@ public static class GvrVRHelpers
 #endif // UNITY_EDITOR
     }
 
+    /// <summary>Returns the head position.</summary>
     public static Vector3 GetHeadPosition()
     {
 #if UNITY_EDITOR
@@ -87,6 +95,7 @@ public static class GvrVRHelpers
 #endif // UNITY_EDITOR
     }
 
+    /// <summary>Returns the recommended maximum laser distance for the given mode.</summary>
     public static float GetRecommendedMaxLaserDistance(GvrBasePointer.RaycastMode mode)
     {
         switch (mode)
@@ -101,6 +110,7 @@ public static class GvrVRHelpers
         }
     }
 
+    /// <summary>Returns the distance of the ray intersection for the given mode.</summary>
     public static float GetRayIntersection(GvrBasePointer.RaycastMode mode)
     {
         switch (mode)
@@ -115,6 +125,7 @@ public static class GvrVRHelpers
         }
     }
 
+    /// <summary>Returns true if the laser should be shrunk based on the given mode.</summary>
     public static bool GetShrinkLaser(GvrBasePointer.RaycastMode mode)
     {
         switch (mode)

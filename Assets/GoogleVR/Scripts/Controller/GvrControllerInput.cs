@@ -1,3 +1,5 @@
+//-----------------------------------------------------------------------
+// <copyright file="GvrControllerInput.cs" company="Google Inc.">
 // Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 using UnityEngine;
 using System;
@@ -221,6 +225,7 @@ public class GvrControllerInput : MonoBehaviour
         }
     }
 
+    /// <summary>Controller Emulatuor connection modes.</summary>
     public enum EmulatorConnectionMode
     {
         OFF,
@@ -228,18 +233,21 @@ public class GvrControllerInput : MonoBehaviour
         WIFI,
     }
 
-    /// Indicates how we connect to the controller emulator.
+#if UNITY_EDITOR
     [GvrInfo("Hold Shift to use the Mouse as the dominant controller.\n\n" +
-    "Controls:  Shift +\n" +
-    "   • Move Mouse = Change Orientation\n" +
-    "   • Left Mouse Button = ClickButton\n" +
-    "   • Right Mouse Button = AppButton\n" +
-    "   • Middle Mouse Button = HomeButton/Recenter\n" +
-    "   • Ctrl = IsTouching\n" +
-    "   • Ctrl + Move Mouse = Change TouchPos", 8)]
+             "Controls:  Shift +\n" +
+             "   • Move Mouse = Change Orientation\n" +
+             "   • Left Mouse Button = ClickButton\n" +
+             "   • Right Mouse Button = AppButton\n" +
+             "   • Middle Mouse Button = HomeButton/Recenter\n" +
+             "   • Ctrl = IsTouching\n" +
+             "   • Ctrl + Move Mouse = Change TouchPos", 8, UnityEditor.MessageType.None)]
     [Tooltip("How to connect to the emulator: USB cable (recommended) or WIFI.")]
 
-    public EmulatorConnectionMode emulatorConnectionMode = EmulatorConnectionMode.USB;
+    [GvrInfo("Controller Emulator is now Deprecated", 2, UnityEditor.MessageType.Warning)]
+#endif  // UNITY_EDITOR
+    /// Indicates how we connect to the controller emulator.
+    public EmulatorConnectionMode emulatorConnectionMode = EmulatorConnectionMode.OFF;
 
     /// Returns a controller device for the specified hand.
     public static GvrControllerInputDevice GetDevice(GvrControllerHand hand)
@@ -479,6 +487,7 @@ public class GvrControllerInput : MonoBehaviour
         }
     }
 
+    /// @deprecated Use Recentered to detect when user has completed the recenter gesture.
     [System.Obsolete("Use Recentered to detect when user has completed the recenter gesture.")]
     public static bool Recentering
     {

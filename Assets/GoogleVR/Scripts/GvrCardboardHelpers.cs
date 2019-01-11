@@ -1,3 +1,5 @@
+//-----------------------------------------------------------------------
+// <copyright file="GvrCardboardHelpers.cs" company="Google Inc.">
 // Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,13 +13,15 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 using UnityEngine;
 
 using System;
 using System.Runtime.InteropServices;
 
-// General Cardboard helper methods.
+/// <summary>General Cardboard helper methods.</summary>
 public class GvrCardboardHelpers
 {
     /// Manual recenter for Cardboard apps. After recentering the camera's orientation will be given
@@ -66,7 +70,8 @@ public class GvrCardboardHelpers
     private static extern void gvr_reset_tracking(IntPtr gvr_context);
 
     [DllImport(GvrActivityHelper.GVR_DLL_NAME)]
-    private static extern void gvr_set_default_viewer_profile(IntPtr gvr_context,
-                                                              [MarshalAs(UnmanagedType.LPStr)] string viewer_profile_uri);
+    private static extern void gvr_set_default_viewer_profile(
+        IntPtr gvr_context,
+        [MarshalAs(UnmanagedType.LPStr)] string viewer_profile_uri);
 #endif  // (UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR
 }

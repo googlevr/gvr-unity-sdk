@@ -1,3 +1,5 @@
+//-----------------------------------------------------------------------
+// <copyright file="SwitchVideos.cs" company="Google Inc.">
 // Copyright (C) 2016 Google Inc. All Rights Reserved.
 //
 //  Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,6 +13,8 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //    limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace GoogleVR.VideoDemo
 {
@@ -36,7 +40,7 @@ namespace GoogleVR.VideoDemo
             videoSamples[2] = panoVideoSample;
 
             string NATIVE_LIBS_MISSING_MESSAGE = "Video Support libraries not found or could not be loaded!\n" +
-                                                 "Please add the <b>GVRVideoPlayer.unitypackage</b>\n to this project";
+                "Please add the <b>GVRVideoPlayer.unitypackage</b>\n to this project";
 
             if (missingLibText != null)
             {

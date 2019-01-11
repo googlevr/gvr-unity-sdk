@@ -1,4 +1,6 @@
-﻿// Copyright 2017 Google Inc. All rights reserved.
+//-----------------------------------------------------------------------
+// <copyright file="GvrPointerInputModuleImpl.cs" company="Google Inc.">
+// Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the MIT License, you may not use this file except in
 // compliance with the License. You may obtain a copy of the License at
@@ -10,6 +12,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 using System;
 using UnityEngine;
@@ -70,6 +74,7 @@ public class GvrPointerInputModuleImpl
     // Active state
     private bool isActive = false;
 
+    /// <summary>Returns true if the module should be activated.</summary>
     [SuppressMemoryAllocationError(IsWarning = true, Reason = "Pending documentation.")]
     public bool ShouldActivateModule()
     {
@@ -86,6 +91,7 @@ public class GvrPointerInputModuleImpl
         return activeState;
     }
 
+    /// <summary>Deactivates this input module.</summary>
     [SuppressMemoryAllocationError(IsWarning = true, Reason = "Pending documentation.")]
     public void DeactivateModule()
     {
@@ -101,6 +107,8 @@ public class GvrPointerInputModuleImpl
         ModuleController.eventSystem.SetSelectedGameObject(null, ModuleController.GetBaseEventData());
     }
 
+    /// <summary>Returns true if the pointer is over a game object.</summary>
+    /// <param name="pointerId">The pointer id to check.</param>
     public bool IsPointerOverGameObject(int pointerId)
     {
         return (CurrentEventData != null &&
@@ -108,6 +116,7 @@ public class GvrPointerInputModuleImpl
                 CurrentEventData.pointerId == pointerId);
     }
 
+    /// <summary>Process the input for the current frame.</summary>
     [SuppressMemoryAllocationError(IsWarning = true, Reason = "Pending documentation.")]
     public void Process()
     {

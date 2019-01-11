@@ -1,29 +1,37 @@
+//-----------------------------------------------------------------------
+// <copyright file="GvrActivityHelper.cs" company="Google Inc.">
 // Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//         http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 using UnityEngine;
 
-// Simple static class to abstract out several jni calls that need to be shared
-// between different classes.
+/// <summary>Simple static class to abstract out several JNI calls that need to be shared
+/// between different classes.</summary>
 public static class GvrActivityHelper
 {
+    /// @cond
 #if UNITY_IOS
     public const string GVR_DLL_NAME = "__Internal";
 #else
     public const string GVR_DLL_NAME = "gvr";
     public const string GVR_SHIM_DLL_NAME = "gvrshim";
 #endif // UNITY_IOS
+    /// @endcond
+
+    /// <summary>Package name for the Android Unity player class.</summary>
     public const string PACKAGE_UNITY_PLAYER = "com.unity3d.player.UnityPlayer";
 
 #if UNITY_ANDROID && !UNITY_EDITOR

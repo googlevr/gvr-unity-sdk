@@ -1,3 +1,5 @@
+//-----------------------------------------------------------------------
+// <copyright file="GvrReticlePointer.cs" company="Google Inc.">
 // Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -47,26 +51,31 @@ public class GvrReticlePointer : GvrBasePointer
     [Range(-32767, 32767)]
     public int reticleSortingOrder = 32767;
 
+    /// <summary>The material used to render the reticle.</summary>
     public Material MaterialComp { private get; set; }
 
-    // Current inner angle of the reticle (in degrees).
-    // Exposed for testing.
+    /// <summary>Current inner angle of the reticle (in degrees).</summary>
+    /// <remarks>Exposed for testing.</remarks>
     public float ReticleInnerAngle { get; private set; }
 
-    // Current outer angle of the reticle (in degrees).
-    // Exposed for testing.
+    /// <summary>Current outer angle of the reticle (in degrees).</summary>
+    /// <remarks>Exposed for testing.</remarks>
     public float ReticleOuterAngle { get; private set; }
 
-    // Current distance of the reticle (in meters).
-    // Getter exposed for testing.
+    /// <summary>Current distance of the reticle (in meters).</summary>
+    /// <remarks>Getter exposed for testing.</remarks>
     public float ReticleDistanceInMeters { get; private set; }
 
-    // Current inner and outer diameters of the reticle, before distance multiplication.
-    // Getters exposed for testing.
+    /// <summary>Current inner and outer diameters of the reticle,
+    ///   before distance multiplication. </summary>
+    /// <remarks>Getters exposed for testing.</remarks>
     public float ReticleInnerDiameter { get; private set; }
 
+    /// <summary>Current outer diameter of the reticle (in meters).</summary>
     public float ReticleOuterDiameter { get; private set; }
 
+    /// <summary>Returns the max distance from the pointer that
+    /// raycast hits will be detected.</summary>
     public override float MaxPointerDistance
     {
         get { return maxReticleDistance; }
@@ -106,6 +115,7 @@ public class GvrReticlePointer : GvrBasePointer
         exitRadius = 2.0f * Mathf.Tan(max_inner_angle_radians);
     }
 
+    /// <summary>Updates the material based on the reticle properties.</summary>
     public void UpdateDiameters()
     {
         ReticleDistanceInMeters =
@@ -143,6 +153,7 @@ public class GvrReticlePointer : GvrBasePointer
         ReticleOuterAngle = RETICLE_MIN_OUTER_ANGLE;
     }
 
+    /// @cond
     protected override void Start()
     {
         base.Start();
@@ -154,6 +165,8 @@ public class GvrReticlePointer : GvrBasePointer
 
         CreateReticleVertices();
     }
+
+    /// @endcond
 
     void Update()
     {

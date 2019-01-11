@@ -1,4 +1,6 @@
-﻿// Copyright 2017 Google Inc. All rights reserved.
+//-----------------------------------------------------------------------
+// <copyright file="GvrLaserVisual.cs" company="Google Inc.">
+// Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 using System;
 using UnityEngine;
@@ -84,23 +88,38 @@ public class GvrLaserVisual : MonoBehaviour, IGvrArmModelReceiver
 
     private const float LERP_CLAMP_THRESHOLD = 0.02f;
 
+    /// <summary> The arm model used to control the visual.</summary>
     public GvrBaseArmModel ArmModel { get; set; }
 
     /// Reference to the laser's line renderer.
     public LineRenderer Laser { get; private set; }
 
-    /// Optional delegate for customizing how the currentPosition is calculated based on the distance.
+    /// <summary>Delegate for customizing how the currentPosition is calculated based on the distance.</summary>
+    /// <remarks>
     /// If not set, the currentPosition is determined based on the distance multiplied by the forward
     /// direction of the transform added to the position of the transform.
-  public delegate Vector3 GetPointForDistanceDelegate(float distance);
+    /// </remarks>
+    public delegate Vector3 GetPointForDistanceDelegate(float distance);
 
+    /// <summary>The function to use for determining the point at a distance.</summary>
     public GetPointForDistanceDelegate GetPointForDistanceFunction { get; set; }
 
+    /// <summary>Ratio to shrink the visual by.</summary>
     protected float shrinkRatio;
+
+    /// <summary>Distance to the target object.</summary>
     protected float targetDistance;
+
+    /// <summary>Current distance to the visual</summary>
     protected float currentDistance;
+
+    /// <summary>Current world position of the visual.</summary>
     protected Vector3 currentPosition;
+
+    /// <summary>Current local position of the visual.</summary>
     protected Vector3 currentLocalPosition;
+
+    /// <summary>Current local rotation of the visual.</summary>
     protected Quaternion currentLocalRotation;
 
     /// Set the distance of the laser.
@@ -122,16 +141,21 @@ public class GvrLaserVisual : MonoBehaviour, IGvrArmModelReceiver
         }
     }
 
+    /// <summary>Current distance to the visual.</summary>
     public float CurrentDistance
     {
         get { return currentDistance; }
     }
 
+    /// @cond
     protected virtual void Awake()
     {
         Laser = GetComponent<LineRenderer>();
     }
 
+    /// @endcond
+
+    /// @cond
     protected virtual void LateUpdate()
     {
         UpdateCurrentPosition();
@@ -141,6 +165,9 @@ public class GvrLaserVisual : MonoBehaviour, IGvrArmModelReceiver
         UpdateLaserAlpha();
     }
 
+    /// @endcond
+
+    /// <summary>Updates the current position of the visual.</summary>
     protected virtual void UpdateCurrentPosition()
     {
         if (currentDistance != targetDistance)
@@ -168,6 +195,8 @@ public class GvrLaserVisual : MonoBehaviour, IGvrArmModelReceiver
         currentLocalRotation = Quaternion.FromToRotation(Vector3.forward, currentLocalPosition);
     }
 
+    /// <summary>Updates the rotation of  the controller based on the current
+    /// local rotation.</summary>
     protected virtual void UpdateControllerOrientation()
     {
         if (controller == null)
@@ -178,6 +207,7 @@ public class GvrLaserVisual : MonoBehaviour, IGvrArmModelReceiver
         controller.localRotation = currentLocalRotation;
     }
 
+    /// <summary> Updates the position of the reticle to the current position.</summary>
     protected virtual void UpdateReticlePosition()
     {
         if (reticle == null)
@@ -188,6 +218,7 @@ public class GvrLaserVisual : MonoBehaviour, IGvrArmModelReceiver
         reticle.transform.position = currentPosition;
     }
 
+    /// <summary>Updates the endpoint of the laser based on max distance.</summary>
     protected virtual void UpdateLaserEndPoint()
     {
         if (Laser == null)
@@ -237,6 +268,7 @@ public class GvrLaserVisual : MonoBehaviour, IGvrArmModelReceiver
         Laser.SetPosition(1, laserEndPoint);
     }
 
+    /// <summary>Updates the alpha of the laser beam.</summary>
     protected virtual void UpdateLaserAlpha()
     {
         float alpha = ArmModel != null ? ArmModel.PreferredAlpha : 1.0f;
@@ -257,6 +289,7 @@ public class GvrLaserVisual : MonoBehaviour, IGvrArmModelReceiver
         Laser.endColor = finalEndColor;
     }
 
+    /// <summary>Speed of the moving pointer visual.</summary>
     protected virtual float GetSpeed()
     {
         return lerpSpeed > 0.0f ? lerpSpeed * Time.unscaledDeltaTime : 1.0f;

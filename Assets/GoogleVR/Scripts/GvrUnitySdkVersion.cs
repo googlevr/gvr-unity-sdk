@@ -1,3 +1,5 @@
+//-----------------------------------------------------------------------
+// <copyright file="GvrUnitySdkVersion.cs" company="Google Inc.">
 // Copyright 2016 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 using UnityEngine;
 
@@ -19,7 +23,8 @@ using UnityEngine;
 /// </summary>
 public class GvrUnitySdkVersion
 {
-    public const string GVR_SDK_VERSION = "1.180.0";
+    /// <summary>The version of the SDK.</summary>
+    public const string GVR_SDK_VERSION = "1.190.0";
 
 // Google VR SDK supports Unity 5.6 or newer.
 #if !UNITY_5_6_OR_NEWER

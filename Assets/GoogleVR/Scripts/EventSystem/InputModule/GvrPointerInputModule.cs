@@ -1,3 +1,5 @@
+//-----------------------------------------------------------------------
+// <copyright file="GvrPointerInputModule.cs" company="Google Inc.">
 // Copyright 2016 Google Inc. All rights reserved.
 //
 // Licensed under the MIT License, you may not use this file except in
@@ -10,6 +12,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 using System.Collections.Generic;
 using UnityEngine;
@@ -58,13 +62,17 @@ public class GvrPointerInputModule : BaseInputModule, IGvrInputModuleController
     [Tooltip("Whether Pointer input is active in VR Mode only (true), or all the time (false).")]
     public bool vrModeOnly = false;
 
+    /// <summary>Manages scroll events for the input module.</summary>
     [Tooltip("Manages scroll events for the input module.")]
     public GvrPointerScrollInput scrollInput = new GvrPointerScrollInput();
 
+    /// <summary>The implementation object of this module.</summary>
     public GvrPointerInputModuleImpl Impl { get; private set; }
 
+    /// <summary>The executor this module uses to process events.</summary>
     public GvrEventExecutor EventExecutor { get; private set; }
 
+    /// <summary>The event system reference.</summary>
     public new EventSystem eventSystem
     {
         get
@@ -73,6 +81,7 @@ public class GvrPointerInputModule : BaseInputModule, IGvrInputModuleController
         }
     }
 
+    /// <summary>List of raycast results used as a cache.</summary>
     public List<RaycastResult> RaycastResultCache
     {
         get
@@ -81,6 +90,7 @@ public class GvrPointerInputModule : BaseInputModule, IGvrInputModuleController
         }
     }
 
+    /// <summary>Static access to the GvrBasePointer.</summary>
     public static GvrBasePointer Pointer
     {
         get
@@ -188,23 +198,28 @@ public class GvrPointerInputModule : BaseInputModule, IGvrInputModuleController
         }
     }
 
+    /// <summary>Returns true if the module should be activated.</summary>
     [SuppressMemoryAllocationError(IsWarning = true, Reason = "Pending documentation.")]
     public override bool ShouldActivateModule()
     {
         return Impl.ShouldActivateModule();
     }
 
+    /// <summary>Deactivates this input module.</summary>
     [SuppressMemoryAllocationError(IsWarning = true, Reason = "Pending documentation.")]
     public override void DeactivateModule()
     {
         Impl.DeactivateModule();
     }
 
+    /// <summary>Returns true if the pointer is over a game object.</summary>
+    /// <param name="pointerId">The pointer id to check.</param>
     public override bool IsPointerOverGameObject(int pointerId)
     {
         return Impl.IsPointerOverGameObject(pointerId);
     }
 
+    /// <summary>Processes input events.</summary>
     [SuppressMemoryAllocationError(IsWarning = true, Reason = "Pending documentation.")]
     public override void Process()
     {
@@ -212,6 +227,7 @@ public class GvrPointerInputModule : BaseInputModule, IGvrInputModuleController
         Impl.Process();
     }
 
+    /// @cond
     protected override void Awake()
     {
         base.Awake();
@@ -219,6 +235,8 @@ public class GvrPointerInputModule : BaseInputModule, IGvrInputModuleController
         EventExecutor = new GvrEventExecutor();
         UpdateImplProperties();
     }
+
+    /// @endcond
 
     [SuppressMemoryAllocationError(IsWarning = true, Reason = "Pending documentation.")]
     public bool ShouldActivate()

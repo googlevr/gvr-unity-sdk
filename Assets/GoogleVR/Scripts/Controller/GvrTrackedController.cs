@@ -1,3 +1,5 @@
+//-----------------------------------------------------------------------
+// <copyright file="GvrTrackedController.cs" company="Google Inc.">
 // Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 using UnityEngine;
 using System.Collections;
@@ -41,6 +45,7 @@ public class GvrTrackedController : MonoBehaviour
     [Tooltip("Controller Hand")]
     private GvrControllerHand controllerHand = GvrControllerHand.Dominant;
 
+    /// <summary>The controller input device for this tracked object.</summary>
     public GvrControllerInputDevice ControllerInputDevice
     {
         get
@@ -49,6 +54,7 @@ public class GvrTrackedController : MonoBehaviour
         }
     }
 
+    /// <summary>The controller hand used for this tracked object.</summary>
     public GvrControllerHand ControllerHand
     {
         get
@@ -66,8 +72,8 @@ public class GvrTrackedController : MonoBehaviour
         }
     }
 
-    /// Arm model used to control the pose (position and rotation) of the object, and to propagate to
-    /// children that implement IGvrArmModelReceiver.
+    /// <summary>Arm model used to control the pose (position and rotation) of the object, and to propagate to
+    /// children that implement IGvrArmModelReceiver.</summary>
     public GvrBaseArmModel ArmModel
     {
         get
@@ -88,7 +94,7 @@ public class GvrTrackedController : MonoBehaviour
         }
     }
 
-    /// Is the object's active status determined by the controller connection status.
+    /// <summary>Is the object's active status determined by the controller connection status.</summary>
     public bool IsDeactivatedWhenDisconnected
     {
         get
@@ -112,6 +118,7 @@ public class GvrTrackedController : MonoBehaviour
         }
     }
 
+    /// <summary>Called when arm model is instantiated or changed.</summary>
     [SuppressMemoryAllocationError(IsWarning = false, Reason = "Only called when ArmModel is instantiated or changed.")]
     public void PropagateArmModel()
     {

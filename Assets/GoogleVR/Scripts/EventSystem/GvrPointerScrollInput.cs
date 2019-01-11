@@ -1,4 +1,6 @@
-﻿// Copyright 2017 Google Inc. All rights reserved.
+//-----------------------------------------------------------------------
+// <copyright file="GvrPointerScrollInput.cs" company="Google Inc.">
+// Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -25,7 +29,10 @@ using Gvr.Internal;
 [System.Serializable]
 public class GvrPointerScrollInput
 {
+    /// <summary>Property name for accessing inertia.</summary>
     public const string PROPERTY_NAME_INERTIA = "inertia";
+
+    /// <summary>Property name for accessing deceleration rate.</summary>
     public const string PROPERTY_NAME_DECELERATION_RATE = "decelerationRate";
 
     private class ScrollInfo
@@ -75,6 +82,11 @@ public class GvrPointerScrollInput
     private Dictionary<GameObject, ScrollInfo> scrollHandlers = new Dictionary<GameObject, ScrollInfo>();
     private List<GameObject> scrollingObjects = new List<GameObject>();
 
+    /// <summary>Handle scrolling</summary>
+    /// <param name="currentGameObject">The game object having the IScrollHandler component.</param>
+    /// <param name="pointerData">The pointer event data.</param>
+    /// <param name="pointer">The pointer object.</param>
+    /// <param name="eventExecutor">The executor to use to process the event.</param>
     [SuppressMemoryAllocationError(IsWarning = true, Reason = "Pending documentation.")]
     public void HandleScroll(GameObject currentGameObject, PointerEventData pointerData,
                               GvrBasePointer pointer, IGvrEventExecutor eventExecutor)

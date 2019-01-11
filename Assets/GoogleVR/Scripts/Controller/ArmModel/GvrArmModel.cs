@@ -1,3 +1,5 @@
+//-----------------------------------------------------------------------
+// <copyright file="GvrArmModel.cs" company="Google Inc.">
 // Copyright 2016 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 using UnityEngine;
 using System.Collections;
@@ -144,16 +148,34 @@ public class GvrArmModel : GvrBaseArmModel, IGvrControllerInputDeviceReceiver
         get { return wristRotation; }
     }
 
+    /// <summary>The controller input device.</summary>
     public GvrControllerInputDevice ControllerInputDevice { get; set; }
 
+    /// <summary>The neck position based on this arm model.</summary>
     protected Vector3 neckPosition;
+
+    /// <summary>The elbow position based on this arm model.</summary>
     protected Vector3 elbowPosition;
+
+    /// <summary>The elbow rotation based on this arm model.</summary>
     protected Quaternion elbowRotation;
+
+    /// <summary>The wrist position based on this arm model.</summary>
     protected Vector3 wristPosition;
+
+    /// <summary>The wrist rotation based on this arm model.</summary>
     protected Quaternion wristRotation;
+
+    /// <summary>The controller position based on this arm model.</summary>
     protected Vector3 controllerPosition;
+
+    /// <summary>The controller rotation based on this arm model.</summary>
     protected Quaternion controllerRotation;
+
+    /// <summary>The preferred alpha.</summary>
     protected float preferredAlpha;
+
+    /// <summary>The tooltip alpha value.</summary>
     protected float tooltipAlphaValue;
 
     /// Multiplier for handedness such that 1 = Right, 0 = Center, -1 = left.
@@ -166,11 +188,31 @@ public class GvrArmModel : GvrBaseArmModel, IGvrControllerInputDeviceReceiver
     protected Quaternion torsoRotation;
 
     // Default values for tuning variables.
+
+    /// @cond
     public static readonly Vector3 DEFAULT_ELBOW_REST_POSITION = new Vector3(0.195f, -0.5f, 0.005f);
+
+    /// @endcond
+
+    /// @cond
     public static readonly Vector3 DEFAULT_WRIST_REST_POSITION = new Vector3(0.0f, 0.0f, 0.25f);
+
+    /// @endcond
+
+    /// @cond
     public static readonly Vector3 DEFAULT_CONTROLLER_REST_POSITION = new Vector3(0.0f, 0.0f, 0.05f);
+
+    /// @endcond
+
+    /// @cond
     public static readonly Vector3 DEFAULT_ARM_EXTENSION_OFFSET = new Vector3(-0.13f, 0.14f, 0.08f);
+
+    /// @endcond
+
+    /// @cond
     public const float DEFAULT_ELBOW_BEND_RATIO = 0.6f;
+
+    /// @endcond
 
     /// Increases elbow bending as the controller moves up (unitless).
     protected const float EXTENSION_WEIGHT = 0.4f;
@@ -184,10 +226,27 @@ public class GvrArmModel : GvrBaseArmModel, IGvrControllerInputDeviceReceiver
     /// Amount of normalized alpha transparency to change per second.
     protected const float DELTA_ALPHA = 4.0f;
 
-    /// Angle ranges the for arm extension offset to start and end (degrees).
+    /// <summary>Minimum angle in degrees of the controller the for arm extension
+    /// offset to start.</summary>
+    /// <remarks>This is the range of controller X-axis values in which the modeled arm
+    /// rotates with the controller, outside of which the modeled arm doesn't
+    /// rotate with the controller, only the controller rotates.
+    /// below this value, the wrist is primarily responsible for controller
+    /// rotation, not the arm.
+    /// </remarks>
     protected const float MIN_EXTENSION_ANGLE = 7.0f;
+
+    /// <summary>Maximum angle in degrees of the controller the for arm extension offset
+    /// to end.</summary>
+    /// <remarks>This is the range of controller X-axis values in which the modeled arm
+    /// rotates with the controller, outside of which the modeled arm doesn't
+    /// rotate with the controller, only the controller rotates.
+    /// above this value, the wrist is primarily responsible for controller
+    /// rotation, not the arm.
+    /// </remarks>
     protected const float MAX_EXTENSION_ANGLE = 60.0f;
 
+    /// @cond
     protected virtual void OnEnable()
     {
         // Register the controller update listener.
@@ -202,11 +261,17 @@ public class GvrArmModel : GvrBaseArmModel, IGvrControllerInputDeviceReceiver
         OnControllerInputUpdated();
     }
 
+    /// @endcond
+
+    /// @cond
     protected virtual void OnDisable()
     {
         GvrControllerInput.OnControllerInputUpdated -= OnControllerInputUpdated;
     }
 
+    /// @endcond
+
+    /// <summary>Updates the arm model when the controller input changes.</summary>
     protected virtual void OnControllerInputUpdated()
     {
         UpdateHandedness();
@@ -216,6 +281,7 @@ public class GvrArmModel : GvrBaseArmModel, IGvrControllerInputDeviceReceiver
         UpdateTransparency();
     }
 
+    /// <summary>Updates the arm model handedness.</summary>
     protected virtual void UpdateHandedness()
     {
         // Update user handedness if the setting has changed.
@@ -236,6 +302,9 @@ public class GvrArmModel : GvrBaseArmModel, IGvrControllerInputDeviceReceiver
         }
     }
 
+    /// <summary>Updates the arm model torso direction.</summary>
+    /// <param name="forceImmediate">If true, uses the gaze direction, otherwise uses
+    /// slerp to update the direction smoothly.</param>
     protected virtual void UpdateTorsoDirection(bool forceImmediate)
     {
         // Determine the gaze direction horizontally.
@@ -260,6 +329,7 @@ public class GvrArmModel : GvrBaseArmModel, IGvrControllerInputDeviceReceiver
         torsoRotation = Quaternion.FromToRotation(Vector3.forward, torsoDirection);
     }
 
+    /// <summary>Updates the neck position in the arm model.</summary>
     protected virtual void UpdateNeckPosition()
     {
         if (isLockedToNeck)
@@ -279,6 +349,7 @@ public class GvrArmModel : GvrBaseArmModel, IGvrControllerInputDeviceReceiver
         }
     }
 
+    /// <summary>Applies the arm model parameters to update the orientation and position.</summary>
     protected virtual void ApplyArmModel()
     {
         // Set the starting positions of the joints before they are transformed by the arm model.

@@ -1,3 +1,5 @@
+//-----------------------------------------------------------------------
+// <copyright file="GvrBetaControllerVisualMulti.cs" company="Google Inc.">
 // Copyright 2018 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace GoogleVR.Beta
 {
@@ -49,7 +53,7 @@ namespace GoogleVR.Beta
 
             int controllerVisualIndex = 0;
             if (ControllerInputDevice != null &&
-                    ControllerInputDevice.GetConfigurationType() ==
+                ControllerInputDevice.GetConfigurationType() ==
                     GvrBetaControllerInput.Configuration.Is6DoF)
             {
                 controllerVisualIndex = 1;

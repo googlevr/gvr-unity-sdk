@@ -1,3 +1,5 @@
+//-----------------------------------------------------------------------
+// <copyright file="EmulatorControllerProvider.cs" company="Google Inc.">
 // Copyright 2016 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 // This class is only used in the Editor, so make sure to only compile it on that platform.
 // Additionally, it depends on EmulatorManager which is only compiled in the editor.
@@ -35,6 +39,7 @@ namespace Gvr.Internal
         /// The last (uncorrected) orientation received from the emulator.
         private Quaternion lastRawOrientation = Quaternion.identity;
         private GvrControllerButton lastButtonsState;
+        private GvrControllerInput.EmulatorConnectionMode emulatorConnectionMode;
 
         public bool SupportsBatteryStatus
         {
@@ -49,6 +54,7 @@ namespace Gvr.Internal
         /// Creates a new EmulatorControllerProvider with the specified settings.
         internal EmulatorControllerProvider(GvrControllerInput.EmulatorConnectionMode connectionMode)
         {
+            emulatorConnectionMode = connectionMode;
             if (connectionMode == GvrControllerInput.EmulatorConnectionMode.USB)
             {
                 EmulatorConfig.Instance.PHONE_EVENT_MODE = EmulatorConfig.Mode.USB;
@@ -59,7 +65,7 @@ namespace Gvr.Internal
             }
             else
             {
-                EmulatorConfig.Instance.PHONE_EVENT_MODE = EmulatorConfig.Mode.OFF;
+                return;
             }
 
             EmulatorManager.Instance.touchEventListeners += HandleTouchEvent;
@@ -75,6 +81,11 @@ namespace Gvr.Internal
 
         public void ReadState(ControllerState outState, int controller_id)
         {
+            if (emulatorConnectionMode == GvrControllerInput.EmulatorConnectionMode.OFF)
+            {
+                return;
+            }
+
             if (controller_id != 0)
             {
                 return;

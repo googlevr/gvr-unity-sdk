@@ -1,3 +1,5 @@
+//-----------------------------------------------------------------------
+// <copyright file="GvrHeadset.cs" company="Google Inc.">
 // Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 using UnityEngine;
 using System;
@@ -55,6 +59,7 @@ public class GvrHeadset : MonoBehaviour
                                          Quaternion recenteredOrientation);
 
 #region DELEGATE_HANDLERS
+    /// <summary>Event handlers for `OnSafetyRegionChange`.</summary>
     public static event OnSafetyRegionEvent OnSafetyRegionChange
     {
         add
@@ -74,6 +79,7 @@ public class GvrHeadset : MonoBehaviour
         }
     }
 
+    /// <summary>Event handlers for `OnRecenter`.</summary>
     public static event OnRecenterEvent OnRecenter
     {
         add
@@ -95,7 +101,7 @@ public class GvrHeadset : MonoBehaviour
 #endregion  // DELEGATE_HANDLERS
 
 #region GVR_HEADSET_PROPERTIES
-    /// Returns |true| if the current headset supports positionally tracked, 6DOF head poses.
+    /// Returns |true| if the current headset supports positionally tracked, 6DoF head poses.
     /// Returns |false| if only rotation-based head poses are supported.
     public static bool SupportsPositionalTracking
     {

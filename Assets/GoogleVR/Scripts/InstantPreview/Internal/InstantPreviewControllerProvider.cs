@@ -1,4 +1,6 @@
-﻿// Copyright 2017 Google Inc. All rights reserved.
+//-----------------------------------------------------------------------
+// <copyright file="InstantPreviewControllerProvider.cs" company="Google Inc.">
+// Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,8 +13,10 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
-#if UNITY_HAS_GOOGLEVR && UNITY_EDITOR
+#if UNITY_ANDROID && UNITY_EDITOR
 using System.Runtime.InteropServices;
 using UnityEngine;
 
@@ -20,6 +24,8 @@ namespace Gvr.Internal
 {
     class InstantPreviewControllerProvider
     {
+        internal const int MAX_NUM_CONTROLLERS = 2;
+
         /// <summary>
         /// This is a mirror of Gvr.Internal.ControllerState, but a struct instead.
         /// </summary>
@@ -43,33 +49,45 @@ namespace Gvr.Internal
             public bool isRecentered;
             [MarshalAs(UnmanagedType.U1)]
             public bool homeButtonState;
+            public Vector3 position;
+            [MarshalAs(UnmanagedType.U1)]
+            public bool triggerButtonState;
+            [MarshalAs(UnmanagedType.U1)]
+            public bool gripButtonState;
         }
 
-        private GvrControllerButton prevButtonsState;
+        private GvrControllerButton[] prevButtonsState = new GvrControllerButton[MAX_NUM_CONTROLLERS];
+        private NativeControllerState nativeControllerState;
 
         [DllImport(InstantPreview.dllName)]
-        private static extern void ReadControllerState(out NativeControllerState nativeControllerState);
+        private static extern void ReadControllerState(out NativeControllerState nativeControllerState, int controller_id);
 
-        public void ReadState(ControllerState outState)
+        public void ReadState(ControllerState outState, int controller_id)
         {
-            var nativeControllerState = new NativeControllerState();
-            ReadControllerState(out nativeControllerState);
+            if (controller_id >= MAX_NUM_CONTROLLERS)
+            {
+                return;
+            }
+
+            ReadControllerState(out nativeControllerState, controller_id);
 
             outState.connectionState = nativeControllerState.connectionState;
+            outState.gyro = new Vector3(-nativeControllerState.gyro.x, -nativeControllerState.gyro.y, nativeControllerState.gyro.z);
+            outState.accel = new Vector3(nativeControllerState.accel.x, nativeControllerState.accel.y, -nativeControllerState.accel.z);
+            outState.touchPos = nativeControllerState.touchPos;
+            outState.batteryLevel = (GvrControllerBatteryLevel)nativeControllerState.batteryLevel;
+            outState.isCharging = nativeControllerState.isCharging;
+            outState.recentered = nativeControllerState.isRecentered;
+
             outState.orientation = new Quaternion(
                 -nativeControllerState.orientation.y,
                 -nativeControllerState.orientation.z,
                 nativeControllerState.orientation.w,
                 nativeControllerState.orientation.x);
-
-            outState.gyro = new Vector3(
-                -nativeControllerState.gyro.x, -nativeControllerState.gyro.y, nativeControllerState.gyro.z);
-            outState.accel = new Vector3(
-                nativeControllerState.accel.x, nativeControllerState.accel.y, -nativeControllerState.accel.z);
-            outState.touchPos = nativeControllerState.touchPos;
-            outState.batteryLevel = (GvrControllerBatteryLevel)nativeControllerState.batteryLevel;
-            outState.isCharging = nativeControllerState.isCharging;
-            outState.recentered = nativeControllerState.isRecentered;
+            outState.position = new Vector3(nativeControllerState.position.x,
+                                            nativeControllerState.position.y,
+                                            -nativeControllerState.position.z);
+            outState.is6DoF = outState.position != Vector3.zero;
 
             outState.buttonsState = 0;
             if (nativeControllerState.appButtonState)
@@ -92,8 +110,18 @@ namespace Gvr.Internal
                 outState.buttonsState |= GvrControllerButton.TouchPadTouch;
             }
 
-            outState.SetButtonsUpDownFromPrevious(prevButtonsState);
-            prevButtonsState = outState.buttonsState;
+            if (nativeControllerState.triggerButtonState)
+            {
+              outState.buttonsState |= GvrControllerButton.Trigger;
+            }
+
+            if (nativeControllerState.gripButtonState)
+            {
+              outState.buttonsState |= GvrControllerButton.Grip;
+            }
+
+            outState.SetButtonsUpDownFromPrevious(prevButtonsState[controller_id]);
+            prevButtonsState[controller_id] = outState.buttonsState;
         }
     }
 }

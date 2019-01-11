@@ -1,4 +1,6 @@
-﻿// Copyright 2017 Google Inc. All rights reserved.
+//-----------------------------------------------------------------------
+// <copyright file="MouseControllerProvider.cs" company="Google Inc.">
+// Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 using Gvr;
 using UnityEngine;
@@ -41,53 +45,36 @@ namespace Gvr.Internal
         private const float ROTATE_SENSITIVITY = 4.5f;
         private const float TOUCH_SENSITIVITY = .12f;
         private static readonly Vector3 INVERT_Y = new Vector3(1, -1, 1);
+        private static readonly ControllerState dummyState = new ControllerState();
 
         public static bool IsMouseAvailable
         {
-            get
-            {
-                return Input.mousePresent && IsActivateButtonPressed;
-            }
+            get { return Input.mousePresent && IsActivateButtonPressed; }
         }
 
         public static bool IsActivateButtonPressed
         {
-            get
-            {
-                return Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift);
-            }
+            get { return Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift); }
         }
 
         public static bool IsClickButtonPressed
         {
-            get
-            {
-                return Input.GetMouseButton(0);
-            }
+            get { return Input.GetMouseButton(0); }
         }
 
         public static bool IsAppButtonPressed
         {
-            get
-            {
-                return Input.GetMouseButton(1);
-            }
+            get { return Input.GetMouseButton(1); }
         }
 
         public static bool IsHomeButtonPressed
         {
-            get
-            {
-                return Input.GetMouseButton(2);
-            }
+            get { return Input.GetMouseButton(2); }
         }
 
         public static bool IsTouching
         {
-            get
-            {
-                return Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl);
-            }
+            get { return Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl); }
         }
 
         public bool SupportsBatteryStatus
@@ -112,6 +99,7 @@ namespace Gvr.Internal
         {
             if (controller_id != 0)
             {
+                outState.CopyFrom(dummyState);
                 return;
             }
 

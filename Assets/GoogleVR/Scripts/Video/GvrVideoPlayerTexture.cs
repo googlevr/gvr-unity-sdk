@@ -1,3 +1,5 @@
+//-----------------------------------------------------------------------
+// <copyright file="GvrVideoPlayerTexture.cs" company="Google Inc.">
 // Copyright 2016 Google Inc. All Rights Reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 using UnityEngine;
 using UnityEngine.UI;
@@ -70,7 +74,7 @@ public class GvrVideoPlayerTexture : MonoBehaviour
 
     private readonly static Queue<Action> ExecuteOnMainThread = new Queue<Action>();
 
-    // Attach a text component to get some debug status info.
+    /// <summary>Attach a text component to get some debug status info.</summary>
     public Text statusText;
 
     /// <summary>
@@ -83,6 +87,10 @@ public class GvrVideoPlayerTexture : MonoBehaviour
         Other = 3,
     }
 
+    /// <summary>
+    /// Video resolutions which can be selected as the initial resolution when streaming begins.
+    /// See `initialResolution` for more information.
+    /// </summary>
     public enum VideoResolution
     {
         Lowest = 1,
@@ -104,6 +112,7 @@ public class GvrVideoPlayerTexture : MonoBehaviour
         Ended = 5,
     }
 
+    /// <summary>Video events</summary>
     public enum VideoEvents
     {
         VideoReady = 1,
@@ -113,6 +122,7 @@ public class GvrVideoPlayerTexture : MonoBehaviour
         VideoSizeChanged = 5,
     }
 
+    /// <summary>Stereo mode formats.</summary>
     public enum StereoMode
     {
         NoValue = -1,
@@ -144,10 +154,28 @@ public class GvrVideoPlayerTexture : MonoBehaviour
     /// </summary>
     public VideoType videoType;
 
+    /// <summary>
+    /// The video URL.
+    /// </summary>
     public string videoURL;
+
+    /// <summary>
+    /// The video content ID.
+    /// </summary>
     public string videoContentID;
+
+    /// <summary>
+    /// The video provider ID.
+    /// </summary>
     public string videoProviderId;
 
+    /// <summary>The video resolution used when streaming begins.</summary>
+    /// <remarks>For multi-rate streams like Dash and HLS, the stream used at
+    ///  the beginning of playback is selected such that its vertical
+    ///  resolution is greater than or equal to this value.  After streaming
+    ///  begins, the player auto-selects the highest rate stream the network
+    ///  connection is capable of delivering.
+    /// </remarks>
     public VideoResolution initialResolution = VideoResolution.Highest;
 
     /// <summary>
@@ -160,6 +188,9 @@ public class GvrVideoPlayerTexture : MonoBehaviour
     /// </summary>
     public bool useSecurePath;
 
+    /// <summary>
+    /// Returns true when the video is ready to be played.
+    /// </summary>
     public bool VideoReady
     {
         get
@@ -168,6 +199,9 @@ public class GvrVideoPlayerTexture : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// The current position in seconds in the video stream.
+    /// </summary>
     public long CurrentPosition
     {
         get
@@ -189,26 +223,41 @@ public class GvrVideoPlayerTexture : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// The duration in seconds of the video stream.
+    /// </summary>
     public long VideoDuration
     {
         get { return videoPlayerPtr != IntPtr.Zero ? GetDuration(videoPlayerPtr) : 0; }
     }
 
+    /// <summary>
+    /// The buffered position in seconds of the video stream.
+    /// </summary>
     public long BufferedPosition
     {
         get { return videoPlayerPtr != IntPtr.Zero ? GetBufferedPosition(videoPlayerPtr) : 0; }
     }
 
+    /// <summary>
+    /// The buffered percentage of the video stream.
+    /// </summary>
     public int BufferedPercentage
     {
         get { return videoPlayerPtr != IntPtr.Zero ? GetBufferedPercentage(videoPlayerPtr) : 0; }
     }
 
+    /// <summary>
+    /// True if the video is paused.
+    /// </summary>
     public bool IsPaused
     {
         get { return !initialized || videoPlayerPtr == IntPtr.Zero || IsVideoPaused(videoPlayerPtr); }
     }
 
+    /// <summary>
+    /// Returns the player state.
+    /// </summary>
     public VideoPlayerState PlayerState
     {
         get
@@ -217,17 +266,26 @@ public class GvrVideoPlayerTexture : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Returns the maximum volume value which can be set.
+    /// </summary>
     public int MaxVolume
     {
         get { return videoPlayerPtr != IntPtr.Zero ? GetMaxVolume(videoPlayerPtr) : 0; }
     }
 
+    /// <summary>
+    /// Returns the current volume setting.
+    /// </summary>
     public int CurrentVolume
     {
         get { return videoPlayerPtr != IntPtr.Zero ? GetCurrentVolume(videoPlayerPtr) : 0; }
         set { SetCurrentVolume(value); }
     }
 
+    /// <summary>
+    /// Returns the current stereo mode.
+    /// </summary>
     public StereoMode CurrentStereoMode
     {
         get
@@ -236,11 +294,17 @@ public class GvrVideoPlayerTexture : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Returns true if the video has a projection.
+    /// </summary>
     public bool HasProjection
     {
         get { return videoPlayerPtr != IntPtr.Zero ? HasProjectionData(videoPlayerPtr) : false; }
     }
 
+    /// <summary>
+    /// The renderer for the video texture.
+    /// </summary>
     public Renderer Screen
     {
         get
@@ -269,21 +333,33 @@ public class GvrVideoPlayerTexture : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Returns the current frame texture.
+    /// </summary>
     public Texture CurrentFrameTexture
     {
         get { return surfaceTexture; }
     }
 
+    /// <summary>
+    /// Returns the width of the texture.
+    /// </summary>
     public int Width
     {
         get { return texWidth; }
     }
 
+    /// <summary>
+    /// Returns the height of the texture.
+    /// </summary>
     public int Height
     {
         get { return texHeight; }
     }
 
+    /// <summary>
+    /// Returns the aspect ratio of the texture.
+    /// </summary>
     public float AspectRatio
     {
         get
@@ -346,7 +422,7 @@ public class GvrVideoPlayerTexture : MonoBehaviour
     /// Sets the display texture.
     /// </summary>
     /// <param name="texture">Texture to display.
-    ////  If null, the initial texture of the renderer is used.</param>
+    /// If null, the initial texture of the renderer is used.</param>
     public void SetDisplayTexture(Texture texture)
     {
         if (texture == null)
@@ -365,6 +441,9 @@ public class GvrVideoPlayerTexture : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Cleans up the current video player and texture.
+    /// </summary>
     public void CleanupVideo()
     {
         Debug.Log("Cleaning Up video!");
@@ -386,6 +465,9 @@ public class GvrVideoPlayerTexture : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Reinitializes the current video player or creates one if there is no player.
+    /// </summary>
     public void ReInitializeVideo()
     {
         if (screen != null)
@@ -513,6 +595,7 @@ public class GvrVideoPlayerTexture : MonoBehaviour
         lastVideoTimestamp = -1;
     }
 
+    /// <summary>Set the volume level</summary>
     public void SetCurrentVolume(int val)
     {
         SetCurrentVolume(videoPlayerPtr, val);
@@ -556,6 +639,7 @@ public class GvrVideoPlayerTexture : MonoBehaviour
         return videoPlayerPtr != IntPtr.Zero;
     }
 
+    /// <summary>Play the video.</summary>
     public bool Play()
     {
         if (!initialized)
@@ -574,6 +658,7 @@ public class GvrVideoPlayerTexture : MonoBehaviour
         }
     }
 
+    /// <summary>Pauses video playback.</summary>
     public bool Pause()
     {
         if (!initialized)
@@ -691,6 +776,7 @@ public class GvrVideoPlayerTexture : MonoBehaviour
         }
     }
 
+    /// <summary>Removes the callback for exceptions.</summary>
     public void RemoveOnVideoEventCallback(Action<int> callback)
     {
         if (onEventCallbacks != null)
@@ -699,6 +785,7 @@ public class GvrVideoPlayerTexture : MonoBehaviour
         }
     }
 
+    /// <summary>Sets the callback for video events.</summary>
     public void SetOnVideoEventCallback(Action<int> callback)
     {
         if (onEventCallbacks == null)
@@ -761,6 +848,7 @@ public class GvrVideoPlayerTexture : MonoBehaviour
         }
     }
 
+    /// <summary>Sets the callback for exceptions.</summary>
     public void SetOnExceptionCallback(Action<string, string> callback)
     {
         if (onExceptionCallbacks == null)
@@ -1001,18 +1089,24 @@ public class GvrVideoPlayerTexture : MonoBehaviour
         return -1;
     }
 
-    // Make this public so we can test the loading of the DLL.
+    /// @cond
+    /// <summary>Make this public so we can test the loading of the DLL.</summary>
     public static IntPtr CreateVideoPlayer()
     {
         Debug.Log(NOT_IMPLEMENTED_MSG);
         return IntPtr.Zero;
     }
 
-    // Make this public so we can test the loading of the DLL.
+    /// @endcond
+
+    /// @cond
+    /// <summary>Make this public so we can test the loading of the DLL.</summary>
     public static void DestroyVideoPlayer(IntPtr videoPlayerPtr)
     {
         Debug.Log(NOT_IMPLEMENTED_MSG);
     }
+
+    /// @endcond
 
     private static int GetVideoPlayerEventBase(IntPtr videoPlayerPtr)
     {

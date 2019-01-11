@@ -1,4 +1,6 @@
-﻿// Copyright 2017 Google Inc. All rights reserved.
+//-----------------------------------------------------------------------
+// <copyright file="GvrIntent.cs" company="Google Inc.">
+// Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 using UnityEngine;
 
@@ -26,9 +30,10 @@ public static class GvrIntent
 
     private const string EXTRA_VR_LAUNCH = "android.intent.extra.VR_LAUNCH";
 
-    // Returns the string representation of the data URI on which this activity's intent is
-    // operating. See Intent.getDataString() in the Android documentation.
-    public static string GetData()
+  /// <summary>Returns the string representation of the data URI on which
+  ///  this activity's intent is operating.</summary>
+  /// <remarks>See Intent.getDataString() in the Android documentation.</remarks>
+  public static string GetData()
     {
 #if UNITY_EDITOR || !UNITY_ANDROID
         return null;
@@ -44,7 +49,7 @@ public static class GvrIntent
 #endif  // UNITY_EDITOR || !UNITY_ANDROID
     }
 
-    // Returns true if the intent category contains "android.intent.extra.VR_LAUNCH".
+    /// <summary>Returns true if the intent category contains "android.intent.extra.VR_LAUNCH".</summary>
     public static bool IsLaunchedFromVr()
     {
 #if UNITY_EDITOR || !UNITY_ANDROID
@@ -61,8 +66,9 @@ public static class GvrIntent
 #endif  // UNITY_EDITOR || !UNITY_ANDROID
     }
 
-    // Returns the hash code of the Java intent object.  Useful for discerning whether
-    // you have a new intent on un-pause.
+    /// <summary>Returns the hash code of the Java intent object.</summary>
+    /// <remarks>Useful for discerning whether you have a new intent on un-pause.
+    /// </remarks>
     public static int GetIntentHashCode()
     {
 #if UNITY_EDITOR || !UNITY_ANDROID

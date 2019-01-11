@@ -1,3 +1,5 @@
+//-----------------------------------------------------------------------
+// <copyright file="InstantPreviewHelper.cs" company="Google Inc.">
 // Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 using System.IO;
 using System.Runtime.InteropServices;
@@ -20,15 +24,31 @@ using UnityEditor;
 #endif
 using UnityEngine;
 
+/// <summary>Helper methods for Instant preview.</summary>
 [ExecuteInEditMode]
 [HelpURL("https://developers.google.com/vr/unity/reference/class/InstantPreviewHelper")]
 public class InstantPreviewHelper : MonoBehaviour
 {
+    /// <summary>Path to `adb` executable.</summary>
     public static string AdbPath;
 
-#if UNITY_HAS_GOOGLEVR && UNITY_EDITOR
+    /// <summary>Path to `aapt` executable.</summary>
+    public static string AaptPath;
+
+#if UNITY_ANDROID && UNITY_EDITOR
     [DllImport(InstantPreview.dllName)]
     private static extern bool SetAdbPathAndStart(string adbPath);
+#if UNITY_WINDOWS
+    private static string CHECK_ANDROID_SDK_PATH =
+        "Verify that your Android SDK path is configured correctly" +
+        " (Edit > Preferences > External Tools > Android SDK).\n" +
+        "See https://docs.unity3d.com/Manual/android-sdksetup.html for more information.";
+#else
+    private static string CHECK_ANDROID_SDK_PATH =
+        "Verify that your Android SDK path is configured correctly" +
+        " (Unity > Preferences > External Tools > Android SDK).\n" +
+        "See https://docs.unity3d.com/Manual/android-sdksetup.html for more information.";
+#endif // UNITY_WINDOWS
 
     void Awake()
     {
@@ -36,27 +56,47 @@ public class InstantPreviewHelper : MonoBehaviour
         var sdkRoot = EditorPrefs.GetString("AndroidSdkRoot");
         if (string.IsNullOrEmpty(sdkRoot))
         {
-            Debug.LogError("Instant Preview requires your Unity Android SDK path to be set. Please set it under Preferences/External Tools/Android. You may need to install the Android SDK first.");
+            Debug.LogError(CHECK_ANDROID_SDK_PATH);
             return;
         }
 
         // Gets adb path from known directory.
         AdbPath = Path.Combine(Path.GetFullPath(sdkRoot), "platform-tools" + Path.DirectorySeparatorChar + "adb");
+
+        // Gets latest build-tools subdirectory.
+        string LatestBuildToolsDir = GetLatestBuildToolsDir(sdkRoot);
+        if (LatestBuildToolsDir != null)
+        {
+            // Gets aapt path from known directory.
+            AaptPath = Path.Combine(Path.GetFullPath(LatestBuildToolsDir), "aapt");
+        }
+        else
+        {
+            Debug.LogError(string.Format("build-tools not found in \"{0}\". Please add build-tools to your SDK path and restart the Unity editor.", Path.GetFullPath(sdkRoot)));
+            return;
+        }
 #if UNITY_EDITOR_WIN
         AdbPath = Path.ChangeExtension(AdbPath, "exe");
+        AaptPath = Path.ChangeExtension(AaptPath, "exe");
 #endif // UNITY_EDITOR_WIN
 
         if (!File.Exists(AdbPath))
         {
-            Debug.LogErrorFormat("adb not found at \"{0}\". Please add adb to your SDK path and restart the Unity editor.", AdbPath);
+            Debug.LogErrorFormat("\"{0}\" not found. {1}", AdbPath, CHECK_ANDROID_SDK_PATH);
             return;
         }
 
-        // Tries to start server.
+        if (!File.Exists(AaptPath))
+        {
+            Debug.LogError(string.Format("aapt not found at \"{0}\". Please add aapt to your SDK path and restart the Unity editor.", AaptPath));
+            return;
+        }
+
+        // Try to start server.
         var started = SetAdbPathAndStart(AdbPath);
         if (!started)
         {
-            Debug.LogErrorFormat("Couldn't start Instant Preview server with adb path: {0}.", AdbPath);
+            Debug.LogErrorFormat("Couldn't start Instant Preview server using \"{0}\".", AdbPath);
         }
     }
 
@@ -67,9 +107,61 @@ public class InstantPreviewHelper : MonoBehaviour
     }
 
 #endif
+
+    // Split vesion directory paths (eg "Path/To/Build-Tools/23.0.2") into an array of ints (eg [23, 0, 2]).
+    int[] GetIntValuesFromString(string DirPath)
+    {
+        string DirName = Path.GetFileName(DirPath);
+        string[] VersionValues = DirName.Split('.');
+        int[] VersionInts = new int[VersionValues.Length];
+        for (int j = 0; j < VersionValues.Length; ++j)
+        {
+            if (!int.TryParse(VersionValues[j], out VersionInts[j]))
+            {
+                VersionInts[j] = 0;
+            }
+        }
+
+        return VersionInts;
+    }
+
+    // Get the numerically latest subdirectory within build-tools subdirectories, (eg select 101.0.1 rather than 99.5.3).
+    // Returns the full path (eg /path/to/build-tools/101.0.1).
+    string GetLatestBuildToolsDir(string sdkRoot)
+    {
+        string[] BuildToolsDirs = Directory.GetDirectories(Path.Combine(Path.GetFullPath(sdkRoot), string.Format("build-tools")));
+        if (BuildToolsDirs.Length == 0)
+        {
+            return null;
+        }
+
+        string LatestBuildToolsDir = BuildToolsDirs[0];
+        int[] LatestVersionInts = GetIntValuesFromString(LatestBuildToolsDir);
+        for (int i = 1; i < BuildToolsDirs.Length; ++i)
+        {
+            int[] CurrentVersionInts = GetIntValuesFromString(BuildToolsDirs[i]);
+
+            // Compare ints sequentially.
+            for (int j = 0; j < Mathf.Min(LatestVersionInts.Length, CurrentVersionInts.Length); ++j)
+            {
+                if (LatestVersionInts[j] > CurrentVersionInts[j])
+                {
+                    break;
+                }
+                else if (CurrentVersionInts[j] > LatestVersionInts[j] || j == LatestVersionInts.Length - 1)
+                {
+                    // If one string version string has more elements than the other and leading digits are the same, it's probably newer.
+                    LatestVersionInts = CurrentVersionInts;
+                    LatestBuildToolsDir = BuildToolsDirs[i];
+                }
+            }
+        }
+
+        return LatestBuildToolsDir;
+    }
 }
 
-#if !UNITY_HAS_GOOGLEVR && UNITY_EDITOR
+#if !UNITY_ANDROID && UNITY_EDITOR
 [CustomEditor(typeof(InstantPreviewHelper))]
 public class InstantPreviewHelperEditor : Editor
 {

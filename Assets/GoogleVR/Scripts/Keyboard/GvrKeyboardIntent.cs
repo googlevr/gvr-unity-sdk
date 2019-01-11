@@ -1,4 +1,6 @@
-﻿// Copyright 2017 Google Inc. All rights reserved.
+//-----------------------------------------------------------------------
+// <copyright file="GvrKeyboardIntent.cs" company="Google Inc.">
+// Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,10 +13,13 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 using UnityEngine;
 using System;
 
+/// <summary>Class for handling the Keyboard intent.</summary>
 public class GvrKeyboardIntent
 {
 #if UNITY_ANDROID && !UNITY_EDITOR
@@ -76,6 +81,7 @@ public class GvrKeyboardIntent
 #endif  // !UNITY_ANDROID || UNITY_EDITOR
     }
 
+    /// <summary>Start the intent to launch the Play Store.</summary>
     public void LaunchPlayStore()
     {
 #if !UNITY_ANDROID || UNITY_EDITOR

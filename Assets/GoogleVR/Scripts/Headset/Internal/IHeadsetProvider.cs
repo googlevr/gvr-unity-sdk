@@ -1,3 +1,5 @@
+//-----------------------------------------------------------------------
+// <copyright file="IHeadsetProvider.cs" company="Google Inc.">
 // Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 using UnityEngine;
 
@@ -19,7 +23,7 @@ namespace Gvr.Internal
 {
     interface IHeadsetProvider
     {
-        /// Returns whether the current headset supports positionally tracked, 6DOF head poses.
+        /// Returns whether the current headset supports positionally tracked, 6DoF head poses.
         bool SupportsPositionalTracking { get; }
 
         /// Polls for GVR standalone events.

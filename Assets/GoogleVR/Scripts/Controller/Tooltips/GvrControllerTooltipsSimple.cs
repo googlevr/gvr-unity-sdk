@@ -1,4 +1,6 @@
-﻿// Copyright 2017 Google Inc. All rights reserved.
+//-----------------------------------------------------------------------
+// <copyright file="GvrControllerTooltipsSimple.cs" company="Google Inc.">
+// Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 // The controller is not available for versions of Unity without the
 // GVR native integration.
@@ -25,6 +29,7 @@ public class GvrControllerTooltipsSimple : MonoBehaviour, IGvrArmModelReceiver
 {
     private MeshRenderer tooltipRenderer;
 
+    /// <summary>Arm model used to position the controller.</summary>
     public GvrBaseArmModel ArmModel { get; set; }
 
     private MaterialPropertyBlock materialPropertyBlock;
@@ -74,6 +79,7 @@ public class GvrControllerTooltipsSimple : MonoBehaviour, IGvrArmModelReceiver
         OnVisualUpdate();
     }
 
+    /// <summary>Updates the tooltip visualation based on the arm model.</summary>
     protected void OnVisualUpdate()
     {
         float alpha = ArmModel != null ? ArmModel.TooltipAlphaValue : 1.0f;

@@ -1,3 +1,5 @@
+//-----------------------------------------------------------------------
+// <copyright file="HeadsetDemoManager.cs" company="Google Inc.">
 // Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,13 +13,15 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace GoogleVR.HelloVR
 {
     using UnityEngine;
     using System.Collections;
 
-    /// Demonstrates the use of GvrHeadset events and APIs.
+  /// Demonstrates the use of GvrHeadset events and APIs.
     public class HeadsetDemoManager : MonoBehaviour
     {
         public GameObject safetyRing;
@@ -28,7 +32,10 @@ namespace GoogleVR.HelloVR
 
         public void OnSafetyRegionEvent(bool enter)
         {
-            Debug.Log("SafetyRegionEvent: " + (enter ? "enter" : "exit"));
+            if (enableDebugLog)
+            {
+                Debug.Log("SafetyRegionEvent: " + (enter ? "enter" : "exit"));
+            }
         }
 
         public void OnRecenterEvent(GvrRecenterEventType recenterType,
@@ -36,17 +43,22 @@ namespace GoogleVR.HelloVR
                                     Vector3 recenteredPosition,
                                     Quaternion recenteredOrientation)
         {
-            Debug.Log(string.Format("RecenterEvent: Type {0}, flags {1}\nPosition: {2}, " +
-            "Rotation: {3}", recenterType, recenterFlags, recenteredPosition, recenteredOrientation));
+            if (enableDebugLog)
+            {
+                Debug.Log(string.Format("RecenterEvent: Type {0}, flags {1}\nPosition: {2}, " +
+                    "Rotation: {3}", recenterType, recenterFlags, recenteredPosition, recenteredOrientation));
+            }
         }
-
 #endregion  // STANDALONE_DELEGATES
 
         public void FindFloorHeight()
         {
             float floorHeight = 0.0f;
             bool success = GvrHeadset.TryGetFloorHeight(ref floorHeight);
-            Debug.Log("Floor height success " + success + "; value " + floorHeight);
+            if (enableDebugLog)
+            {
+                Debug.Log("Floor height success " + success + "; value " + floorHeight);
+            }
         }
 
         public void FindRecenterTransform()
@@ -54,21 +66,30 @@ namespace GoogleVR.HelloVR
             Vector3 position = Vector3.zero;
             Quaternion rotation = Quaternion.identity;
             bool success = GvrHeadset.TryGetRecenterTransform(ref position, ref rotation);
-            Debug.Log("Recenter transform success " + success + "; value " + position + "; " + rotation);
+            if (enableDebugLog)
+            {
+                Debug.Log("Recenter transform success " + success + "; value " + position + "; " + rotation);
+            }
         }
 
         public void FindSafetyRegionType()
         {
             GvrSafetyRegionType safetyType = GvrSafetyRegionType.None;
             bool success = GvrHeadset.TryGetSafetyRegionType(ref safetyType);
-            Debug.Log("Safety region type success " + success + "; value " + safetyType);
+            if (enableDebugLog)
+            {
+                Debug.Log("Safety region type success " + success + "; value " + safetyType);
+            }
         }
 
         public void FindSafetyInnerRadius()
         {
             float innerRadius = -1.0f;
             bool success = GvrHeadset.TryGetSafetyCylinderInnerRadius(ref innerRadius);
-            Debug.Log("Safety region inner radius success " + success + "; value " + innerRadius);
+            if (enableDebugLog)
+            {
+                Debug.Log("Safety region inner radius success " + success + "; value " + innerRadius);
+            }
 
             // Don't activate the safety cylinder visual until the radius is a reasonable value.
             if (innerRadius > 0.1f && safetyRing != null)
@@ -82,7 +103,10 @@ namespace GoogleVR.HelloVR
         {
             float outerRadius = -1.0f;
             bool success = GvrHeadset.TryGetSafetyCylinderOuterRadius(ref outerRadius);
-            Debug.Log("Safety region outer radius success " + success + "; value " + outerRadius);
+            if (enableDebugLog)
+            {
+                Debug.Log("Safety region outer radius success " + success + "; value " + outerRadius);
+            }
         }
 
         void OnEnable()
@@ -118,9 +142,9 @@ namespace GoogleVR.HelloVR
 
         void Start()
         {
-            if (GvrHeadset.SupportsPositionalTracking)
+            if (enableDebugLog)
             {
-                Debug.Log("Device supports positional tracking!");
+                Debug.Log("Device supports positional tracking: " + GvrHeadset.SupportsPositionalTracking);
             }
         }
 

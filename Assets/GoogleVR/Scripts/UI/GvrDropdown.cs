@@ -1,4 +1,6 @@
-﻿// Copyright 2017 Google Inc. All rights reserved.
+//-----------------------------------------------------------------------
+// <copyright file="GvrDropdown.cs" company="Google Inc.">
+// Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0(the "License");
 // you may not use this file except in compliance with the License.
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 using UnityEngine;
 using UnityEngine.UI;
@@ -25,12 +29,24 @@ public class GvrDropdown : Dropdown
 {
     private GameObject currentBlocker;
 
+    /// <summary>Handles the pointer click on the dropdown.</summary>
+    /// <remarks>
+    /// [Unity's OnPointerClick](https://docs.unity3d.com/ScriptReference/UI.Dropdown.OnPointerClick.html)
+    /// reference for more information.
+    /// </remarks>
+    /// <param name="eventData">The current event.</param>
     public override void OnPointerClick(PointerEventData eventData)
     {
         base.OnPointerClick(eventData);
         FixTemplateAndBlockerRaycasters();
     }
 
+    /// <summary>Handles the submission of the selection on the dropdown.</summary>
+    /// <remarks>
+    /// [Unity's OnSubmit](https://docs.unity3d.com/ScriptReference/UI.Dropdown.OnSubmit.html)
+    /// reference for more information.
+    /// </remarks>
+    /// <param name="eventData">The current event.</param>
     public override void OnSubmit(BaseEventData eventData)
     {
         base.OnSubmit(eventData);
@@ -47,12 +63,24 @@ public class GvrDropdown : Dropdown
         FixRaycaster(currentBlocker, true);
     }
 
+    /// <summary>Creates the blocker object</summary>
+    /// <remarks>
+    /// [Unity's CreateBlocker](https://docs.unity3d.com/ScriptReference/UI.Dropdown.CreateBlocker.html)
+    /// reference for more information.
+    /// </remarks>
+    /// <param name="rootCanvas">The root canvas the dropdown is under.</param>
     protected override GameObject CreateBlocker(Canvas rootCanvas)
     {
         currentBlocker = base.CreateBlocker(rootCanvas);
         return currentBlocker;
     }
 
+    /// <summary>Creates the dropdown list</summary>
+    /// <remarks>
+    /// [Unity's CreateDropdownList](https://docs.unity3d.com/ScriptReference/UI.Dropdown.CreateDropdownList.html)
+    /// reference for more information.
+    /// </remarks>
+    /// <param name="template">The template to create the dropdown list from.</param>
     protected override GameObject CreateDropdownList(GameObject template)
     {
         GameObject dropdown = base.CreateDropdownList(template);

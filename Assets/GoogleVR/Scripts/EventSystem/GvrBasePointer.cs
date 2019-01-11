@@ -1,4 +1,6 @@
-﻿// Copyright 2017 Google Inc. All rights reserved.
+//-----------------------------------------------------------------------
+// <copyright file="GvrBasePointer.cs" company="Google Inc.">
+// Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -54,6 +58,7 @@ public abstract class GvrBasePointer : MonoBehaviour, IGvrControllerInputDeviceR
 
     private int lastUpdateFrame;
 
+    /// <summary>Raycast mode values.</summary>
     public enum RaycastMode
     {
         /// Casts a ray from the camera through the target of the pointer.
@@ -135,12 +140,10 @@ public abstract class GvrBasePointer : MonoBehaviour, IGvrControllerInputDeviceR
     /// Convenience function to access what the pointer is currently hitting.
     public RaycastResult CurrentRaycastResult
     {
-        get
-        {
-            return GvrPointerInputModule.CurrentRaycastResult;
-        }
+        get { return GvrPointerInputModule.CurrentRaycastResult; }
     }
 
+    /// @deprecated Replaced by `CurrentRaycastResult.worldPosition`
     [System.Obsolete("Replaced by CurrentRaycastResult.worldPosition")]
     public Vector3 PointerIntersection
     {
@@ -151,6 +154,7 @@ public abstract class GvrBasePointer : MonoBehaviour, IGvrControllerInputDeviceR
         }
     }
 
+    /// @deprecated Replaced by `CurrentRaycastResult.gameObject != null`
     [System.Obsolete("Replaced by CurrentRaycastResult.gameObject != null")]
     public bool IsPointerIntersecting
     {
@@ -165,8 +169,8 @@ public abstract class GvrBasePointer : MonoBehaviour, IGvrControllerInputDeviceR
     /// It is set by GvrPointerInputModule and doesn't need to be controlled manually.
     public bool ShouldUseExitRadiusForRaycast { get; set; }
 
-    /// If ShouldUseExitRadiusForRaycast is true, returns the exitRadius.
-    /// Otherwise, returns the enterRadius.
+    /// If ShouldUseExitRadiusForRaycast is true, returns the exit radius.
+    /// Otherwise, returns the enter radius.
     public float CurrentPointerRadius
     {
         get
@@ -188,12 +192,10 @@ public abstract class GvrBasePointer : MonoBehaviour, IGvrControllerInputDeviceR
     /// It is used by GvrBasePointerRaycaster as the origin of the ray.
     public virtual Transform PointerTransform
     {
-        get
-        {
-            return transform;
-        }
+        get { return transform; }
     }
 
+    /// <summary>The reference to the controller input device.</summary>
     public GvrControllerInputDevice ControllerInputDevice { get; set; }
 
     private void OnEnable()
@@ -331,10 +333,7 @@ public abstract class GvrBasePointer : MonoBehaviour, IGvrControllerInputDeviceR
 
     internal GvrControllerButton ControllerButtonDown
     {
-        get
-        {
-            return triggerButton;
-        }
+        get { return triggerButton; }
     }
 
     /// If true, the user just started touching the touchpad. This is an event flag (it is true
@@ -461,12 +460,10 @@ public abstract class GvrBasePointer : MonoBehaviour, IGvrControllerInputDeviceR
     /// where the ray from the pointer will intersect with the ray from the camera.
     public virtual float CameraRayIntersectionDistance
     {
-        get
-        {
-            return MaxPointerDistance;
-        }
+        get { return MaxPointerDistance; }
     }
 
+    /// <summary>The camera used as the pointer.</summary>
     public Camera PointerCamera
     {
         get
@@ -643,10 +640,13 @@ public abstract class GvrBasePointer : MonoBehaviour, IGvrControllerInputDeviceR
         return result;
     }
 
+    /// @cond
     protected virtual void Start()
     {
         GvrPointerInputModule.OnPointerCreated(this);
     }
+
+    /// @endcond
 
     #if UNITY_EDITOR
     protected virtual void OnDrawGizmos()
@@ -656,35 +656,35 @@ public abstract class GvrBasePointer : MonoBehaviour, IGvrControllerInputDeviceR
             switch (raycastMode)
             {
                 case RaycastMode.Camera:
-              // Camera line.
+                    // Camera line.
                     Gizmos.color = Color.green;
                     PointerRay pointerRay = CalculateRay(this, RaycastMode.Camera);
                     Gizmos.DrawLine(pointerRay.ray.origin, pointerRay.ray.GetPoint(pointerRay.distance));
                     Camera camera = PointerCamera;
 
-              // Pointer to intersection dotted line.
+                    // Pointer to intersection dotted line.
                     Vector3 intersection =
                         PointerTransform.position + (PointerTransform.forward * CameraRayIntersectionDistance);
                     UnityEditor.Handles.DrawDottedLine(PointerTransform.position, intersection, 1.0f);
                     break;
                 case RaycastMode.Direct:
-              // Direct line.
+                    // Direct line.
                     Gizmos.color = Color.blue;
                     pointerRay = CalculateRay(this, RaycastMode.Direct);
                     Gizmos.DrawLine(pointerRay.ray.origin, pointerRay.ray.GetPoint(pointerRay.distance));
                     break;
                 case RaycastMode.Hybrid:
-              // Direct line.
+                    // Direct line.
                     Gizmos.color = Color.blue;
                     pointerRay = CalculateHybridRay(this, RaycastMode.Direct);
                     Gizmos.DrawLine(pointerRay.ray.origin, pointerRay.ray.GetPoint(pointerRay.distance));
 
-              // Camera line.
+                    // Camera line.
                     Gizmos.color = Color.green;
                     pointerRay = CalculateHybridRay(this, RaycastMode.Camera);
                     Gizmos.DrawLine(pointerRay.ray.origin, pointerRay.ray.GetPoint(pointerRay.distance));
 
-              // Camera to intersection dotted line.
+                    // Camera to intersection dotted line.
                     camera = PointerCamera;
                     if (camera != null)
                     {

@@ -1,3 +1,5 @@
+//-----------------------------------------------------------------------
+// <copyright file="GvrSettings.cs" company="Google Inc.">
 // Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 using UnityEngine;
 using System;
@@ -43,7 +47,7 @@ public static class GvrSettings
     private const string METHOD_RUN_ON_UI_THREAD = "runOnUiThread";
     private const string METHOD_SET_SUSTAINED_PERFORMANCE_MODE = "setSustainedPerformanceMode";
 
-    // Viewer type.
+    /// <summary>Viewer type.</summary>
     public enum ViewerPlatformType
     {
         Error = -1,
@@ -53,6 +57,8 @@ public static class GvrSettings
         Daydream
     }
 
+    /// <summary>Viewer platform type setting.</summary>
+    /// <remarks> In the editor this can be set for devlopment testing. </remarks>
     public static ViewerPlatformType ViewerPlatform
     {
 // Expose a setter only for the editor emulator, for development testing purposes.
@@ -91,9 +97,12 @@ public static class GvrSettings
         ViewerPlatformType.Daydream;
 #endif  // UNITY_EDITOR
 
-    // The developer is expected to remember whether sustained performance mode is set
-    // at runtime, via the checkbox in Player Settings.
-    // This state may be recorded here in a future release.
+    /// <summary> Sustained performance mode setting. </summary>
+    /// <remarks>
+    /// The developer is expected to remember whether sustained performance mode is set
+    /// at runtime, via the checkbox in Player Settings.
+    /// This state may be recorded here in a future release.
+    /// </remarks>
     public static bool SustainedPerformanceMode
     {
         set
@@ -102,7 +111,7 @@ public static class GvrSettings
         }
     }
 
-    // Handedness preference.
+    /// Handedness preference values.
     public enum UserPrefsHandedness
     {
         Error = -1,
@@ -112,6 +121,7 @@ public static class GvrSettings
         Left
     }
 
+    /// <summary>Handedness preference value.</summary>
     public static UserPrefsHandedness Handedness
     {
 #if UNITY_EDITOR

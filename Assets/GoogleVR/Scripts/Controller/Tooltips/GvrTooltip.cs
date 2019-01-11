@@ -1,4 +1,6 @@
-﻿// Copyright 2017 Google Inc. All rights reserved.
+//-----------------------------------------------------------------------
+// <copyright file="GvrTooltip.cs" company="Google Inc.">
+// Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,17 +13,23 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
 
+/// <summary>
 /// A tooltip for displaying control schemes overlaying the controller visual using a Unity Canvas.
+/// </summary>
+/// <remarks>
 /// Automatically changes what side of the controller the tooltip is shown on depending
 /// on the handedness setting for the player.
 /// Automatically fades out when the controller visual is too close or too far
 /// away from the player's head.
 /// Look at the prefab GvrControllerPointer to see an example of how to use this script.
+/// </remarks>
 [RequireComponent(typeof(CanvasGroup))]
 [RequireComponent(typeof(RectTransform))]
 [ExecuteInEditMode]
@@ -83,6 +91,7 @@ public class GvrTooltip : MonoBehaviour, IGvrArmModelReceiver
         get { return text; }
     }
 
+    /// <summary>Arm model reference.</summary>
     public GvrBaseArmModel ArmModel { get; set; }
 
     void Awake()
@@ -135,7 +144,7 @@ public class GvrTooltip : MonoBehaviour, IGvrArmModelReceiver
     }
 #endif  // UNITY_EDITOR
 
-    /// Returns true if this tooltip is set to display on the inside of the controller.
+    /// <summary>Returns true if this tooltip is set to display on the inside of the controller.</summary>
     public bool IsTooltipInside()
     {
         switch (location)
@@ -182,6 +191,7 @@ public class GvrTooltip : MonoBehaviour, IGvrArmModelReceiver
         }
     }
 
+    /// <summary>Helper method to return meters to canvas scale.</summary>
     protected float GetMetersToCanvasScale()
     {
         return GvrUIHelpers.GetMetersToCanvasScale(transform);

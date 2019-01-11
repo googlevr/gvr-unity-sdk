@@ -1,3 +1,5 @@
+//-----------------------------------------------------------------------
+// <copyright file="GvrEditorEmulator.cs" company="Google Inc.">
 // Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 using UnityEngine;
 using System;
@@ -136,6 +140,29 @@ public class GvrEditorEmulator : MonoBehaviour
         }
     }
 
+    void Start()
+    {
+        UpdateAllCameras();
+        for (int i = 0; i < Camera.allCamerasCount; ++i)
+        {
+            Camera cam = AllCameras[i];
+
+            // Only check camera if it is an enabled VR Camera.
+            if (cam && cam.enabled && cam.stereoTargetEye != StereoTargetEyeMask.None)
+            {
+                if (cam.nearClipPlane > 0.1
+                    && GvrSettings.ViewerPlatform == GvrSettings.ViewerPlatformType.Daydream)
+                {
+                    Debug.LogWarningFormat(
+                        "Camera \"{0}\" has Near clipping plane set to {1} meters, which might " +
+                        "cause the rendering of the Daydream controller to clip unexpectedly.\n" +
+                        "Suggest using a lower value, 0.1 meters or less.",
+                        cam.name, cam.nearClipPlane);
+                }
+            }
+        }
+    }
+
     void Update()
     {
         // GvrControllerInput automatically updates GvrEditorEmulator.
@@ -180,20 +207,7 @@ public class GvrEditorEmulator : MonoBehaviour
 
     private void ApplyHeadOrientationToVRCameras()
     {
-        // Get all Cameras in the scene using persistent data structures.
-        if (Camera.allCamerasCount > AllCameras.Length)
-        {
-            int newAllCamerasSize = Camera.allCamerasCount;
-            while (Camera.allCamerasCount > newAllCamerasSize)
-            {
-                newAllCamerasSize *= 2;
-            }
-
-            AllCameras = new Camera[newAllCamerasSize];
-        }
-
-        // The GetAllCameras method doesn't allocate memory (Camera.allCameras does).
-        Camera.GetAllCameras(AllCameras);
+        UpdateAllCameras();
 
         // Update all VR cameras using Head position and rotation information.
         for (int i = 0; i < Camera.allCamerasCount; ++i)
@@ -208,5 +222,25 @@ public class GvrEditorEmulator : MonoBehaviour
             }
         }
     }
+
+    // Avoids per-frame allocations. Allocates only when AllCameras array is resized.
+    private void UpdateAllCameras()
+    {
+        // Get all Cameras in the scene using persistent data structures.
+        if (Camera.allCamerasCount > AllCameras.Length)
+        {
+            int newAllCamerasSize = Camera.allCamerasCount;
+            while (Camera.allCamerasCount > newAllCamerasSize)
+            {
+                newAllCamerasSize *= 2;
+            }
+
+            AllCameras = new Camera[newAllCamerasSize];
+        }
+
+        // The GetAllCameras method doesn't allocate memory (Camera.allCameras does).
+        Camera.GetAllCameras(AllCameras);
+    }
+
 #endif  // UNITY_EDITOR
 }

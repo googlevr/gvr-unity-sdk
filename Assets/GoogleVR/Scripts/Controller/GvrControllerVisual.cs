@@ -1,3 +1,5 @@
+//-----------------------------------------------------------------------
+// <copyright file="GvrControllerVisual.cs" company="Google Inc.">
 // Copyright 2016 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 // The controller is not available for versions of Unity without the
 // GVR native integration.
@@ -24,15 +28,29 @@ using Gvr.Internal;
 [HelpURL("https://developers.google.com/vr/unity/reference/class/GvrControllerVisual")]
 public class GvrControllerVisual : MonoBehaviour, IGvrArmModelReceiver, IGvrControllerInputDeviceReceiver
 {
+    /// <summary>The controller display state data structure.</summary>
     [System.Serializable]
     public struct ControllerDisplayState
     {
+        /// <summary>The current battery level.</summary>
         public GvrControllerBatteryLevel batteryLevel;
+
+        /// <summary>True if the battery is charging.</summary>
         public bool batteryCharging;
+
+        /// <summary>True if the touch pad button is down.</summary>
         public bool clickButton;
+
+        /// <summary>True if the app button is down.</summary>
         public bool appButton;
+
+        /// <summary>True if the system button is down.</summary>
         public bool homeButton;
+
+        /// <summary>True if the controller is registering a touch.</summary>
         public bool touching;
+
+        /// <summary>The touch position.</summary>
         public Vector2 touchPos;
     }
 
@@ -40,8 +58,11 @@ public class GvrControllerVisual : MonoBehaviour, IGvrArmModelReceiver, IGvrCont
     [System.Serializable]
     public struct VisualAssets
     {
+        /// @cond
         public Mesh mesh;
         public Material material;
+
+        /// @endcond
     }
 
     /// An array of prefabs that will be instantiated and added as children
@@ -75,10 +96,13 @@ public class GvrControllerVisual : MonoBehaviour, IGvrArmModelReceiver, IGvrCont
     [Range(0.0f, 1.0f)]
     public float maximumAlpha = 1.0f;
 
+    /// <summary>The arm model used to position the controller.</summary>
     public GvrBaseArmModel ArmModel { get; set; }
 
+    /// <summary>The controller device reference.</summary>
     public GvrControllerInputDevice ControllerInputDevice { get; set; }
 
+    /// <summary>The preferred alpha value for the controller.</summary>
     public virtual float PreferredAlpha
     {
         get
@@ -87,6 +111,7 @@ public class GvrControllerVisual : MonoBehaviour, IGvrArmModelReceiver, IGvrCont
         }
     }
 
+    /// <summary>The touchpad color.</summary>
     public Color TouchPadColor
     {
         get
@@ -104,6 +129,7 @@ public class GvrControllerVisual : MonoBehaviour, IGvrArmModelReceiver, IGvrCont
         }
     }
 
+    /// <summary>The app button color.</summary>
     public Color AppButtonColor
     {
         get
@@ -121,6 +147,7 @@ public class GvrControllerVisual : MonoBehaviour, IGvrArmModelReceiver, IGvrCont
         }
     }
 
+    /// <summary>The system button color.</summary>
     public Color SystemButtonColor
     {
         get
@@ -160,17 +187,29 @@ public class GvrControllerVisual : MonoBehaviour, IGvrArmModelReceiver, IGvrCont
     private Vector4 controllerShaderData2;
     private Color currentBatteryColor;
 
-    // These values control animation times for the controller buttons
+    /// <summary>App button animation duration when pressed.</summary>
     public const float APP_BUTTON_ACTIVE_DURATION_SECONDS = 0.111f;
+
+    /// <summary>App button animation duration when released.</summary>
     public const float APP_BUTTON_RELEASE_DURATION_SECONDS = 0.0909f;
 
+    /// <summary>System button animation duration when pressed.</summary>
     public const float SYSTEM_BUTTON_ACTIVE_DURATION_SECONDS = 0.111f;
+
+    /// <summary>System button animation duration when released.</summary>
     public const float SYSTEM_BUTTON_RELEASE_DURATION_SECONDS = 0.0909f;
 
+    /// <summary>Touchpad animation duration when pressed.</summary>
     public const float TOUCHPAD_CLICK_DURATION_SECONDS = 0.111f;
+
+    /// <summary>Touchpad animation duration when released.</summary>
     public const float TOUCHPAD_RELEASE_DURATION_SECONDS = 0.0909f;
 
+    /// @deprecated
     public const float TOUCHPAD_CLICK_SCALE_DURATION_SECONDS = 0.075f;
+
+    /// <summary>Duration of the visual bubble on the controller
+    /// to grow to its full size when clicked.</summary>
     public const float TOUCHPAD_POINT_SCALE_DURATION_SECONDS = 0.15f;
 
     // These values are used by the shader to control battery display
@@ -437,6 +476,7 @@ public class GvrControllerVisual : MonoBehaviour, IGvrArmModelReceiver, IGvrCont
         }
     }
 
+    /// <summary>Sets the controller texture.</summary>
     [SuppressMemoryAllocationError(IsWarning = true, Reason = "Pending documentation.")]
     public void SetControllerTexture(Texture newTexture)
     {

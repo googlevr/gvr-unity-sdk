@@ -1,3 +1,5 @@
+//-----------------------------------------------------------------------
+// <copyright file="GvrKeyboard.cs" company="Google Inc.">
 // Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -19,8 +23,8 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-// Events to update the keyboard.
-// These values depend on C API keyboard values
+/// <summary>Events to update the keyboard.</summary>
+/// <remarks>These values depend on C API keyboard values.</remarks>
 public enum GvrKeyboardEvent
 {
     /// Unknown error.
@@ -47,27 +51,29 @@ public enum GvrKeyboardEvent
     GVR_KEYBOARD_TEXT_UPDATED = 6,
 
     /// Text has been committed.
-    GVR_KEYBOARD_TEXT_COMMITTED = 7,
+    GVR_KEYBOARD_TEXT_COMMITTED = 7
 }
 
-// These values depend on C API keyboard values.
+/// <summary>Keyboard error codes.</summary>
+/// <remarks>These values depend on C API keyboard values.</remarks>
 public enum GvrKeyboardError
 {
     UNKNOWN = 0,
     SERVICE_NOT_CONNECTED = 1,
     NO_LOCALES_FOUND = 2,
-    SDK_LOAD_FAILED = 3,
+    SDK_LOAD_FAILED = 3
 }
 
-// These values depend on C API keyboard values.
+/// <summary>The keyboard input modes.</summary>
+/// <remarks>These values depend on C API keyboard values.</remarks>
 public enum GvrKeyboardInputMode
 {
     DEFAULT = 0,
-    NUMERIC = 1,
+    NUMERIC = 1
 }
 
-// Handles keyboard state management such as hiding and displaying
-// the keyboard, directly modifying text and stereoscopic rendering.
+/// <summary>Handles keyboard state management such as hiding and displaying
+/// the keyboard, directly modifying text and stereoscopic rendering.</summary>
 [HelpURL("https://developers.google.com/vr/unity/reference/class/GvrKeyboard")]
 public class GvrKeyboard : MonoBehaviour
 {
@@ -77,13 +83,16 @@ public class GvrKeyboard : MonoBehaviour
     private KeyboardState keyboardState = new KeyboardState();
     private IEnumerator keyboardUpdate;
 
-    // Keyboard delegate types.
+    /// <summary>Standard keyboard delegate type.</summary>
     public delegate void StandardCallback();
 
+    /// <summary>Edit text keyboard delegate type.</summary>
     public delegate void EditTextCallback(string edit_text);
 
+    /// <summary>Keyboard error delegate type.</summary>
     public delegate void ErrorCallback(GvrKeyboardError err);
 
+    /// <summary>Keyboard delegate type.</summary>
     public delegate void KeyboardCallback(IntPtr closure, GvrKeyboardEvent evt);
 
     // Private data and callbacks.
@@ -108,15 +117,19 @@ public class GvrKeyboard : MonoBehaviour
 
     private static System.Object callbacksLock = new System.Object();
 
-    // Public parameters.
+    /// <summary>Delegate to handle keyboard events and input.</summary>
     public GvrKeyboardDelegateBase keyboardDelegate = null;
 
+    /// <summary>The input mode of the keyboard.</summary>
     public GvrKeyboardInputMode inputMode = GvrKeyboardInputMode.DEFAULT;
 
+    /// <summary>Flag to use the recommended world matrix for the keyboard.</summary>
     public bool useRecommended = true;
 
+    /// <summary>The distance to the keyboard.</summary>
     public float distance = 0;
 
+    /// <summary>The text being affected by this keyboard.</summary>
     public string EditorText
     {
         get
@@ -130,6 +143,7 @@ public class GvrKeyboard : MonoBehaviour
         }
     }
 
+    /// <summary>Returns the current input mode of the keyboard.</summary>
     public GvrKeyboardInputMode Mode
     {
         get
@@ -138,6 +152,7 @@ public class GvrKeyboard : MonoBehaviour
         }
     }
 
+    /// <summary>Returns true if this keyboard instance is valid.</summary>
     public bool IsValid
     {
         get
@@ -146,6 +161,7 @@ public class GvrKeyboard : MonoBehaviour
         }
     }
 
+    /// <summary>Returns true if the keyboard is ready.</summary>
     public bool IsReady
     {
         get
@@ -154,6 +170,7 @@ public class GvrKeyboard : MonoBehaviour
         }
     }
 
+    /// <summary> The world matrix of the keyboard.</summary>
     public Matrix4x4 WorldMatrix
     {
         get
@@ -271,7 +288,7 @@ public class GvrKeyboard : MonoBehaviour
 #endif  // !UNITY_ANDROID
     }
 
-    // Resets keyboard text.
+    /// <summary>Resets keyboard text.</summary>
     public void ClearText()
     {
         if (keyboardProvider != null)
@@ -280,6 +297,7 @@ public class GvrKeyboard : MonoBehaviour
         }
     }
 
+    /// <summary>Shows the keyboard.</summary>
     public void Show()
     {
         if (keyboardProvider == null)
@@ -289,7 +307,7 @@ public class GvrKeyboard : MonoBehaviour
 
         // Get user matrix.
         Quaternion fixRot = new Quaternion(transform.rotation.x * -1, transform.rotation.y * -1,
-                                transform.rotation.z, transform.rotation.w);
+                                           transform.rotation.z, transform.rotation.w);
 
         // Need to convert from left handed to right handed for the Keyboard coordinates.
         Vector3 fixPos = new Vector3(transform.position.x, transform.position.y, transform.position.z * -1);
@@ -314,6 +332,7 @@ public class GvrKeyboard : MonoBehaviour
         keyboardProvider.Show(mat, useRecommended, distance, modelMatrix);
     }
 
+    /// <summary>Hides the keyboard.</summary>
     public void Hide()
     {
         if (keyboardProvider != null)
@@ -322,6 +341,7 @@ public class GvrKeyboard : MonoBehaviour
         }
     }
 
+    /// <summary>Handle a pointer click on the keyboard.</summary>
     public void OnPointerClick(BaseEventData data)
     {
         if (isKeyboardHidden)

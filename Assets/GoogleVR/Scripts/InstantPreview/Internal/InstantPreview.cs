@@ -1,16 +1,20 @@
-﻿// Copyright 2017 Google Inc. All rights reserved.
+//-----------------------------------------------------------------------
+// <copyright file="InstantPreview.cs" company="Google Inc.">
+// Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//         http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 using UnityEngine;
 using System.Runtime.InteropServices;
@@ -19,6 +23,7 @@ using System.Text;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
+using System.Text.RegularExpressions;
 
 namespace Gvr.Internal
 {
@@ -92,7 +97,70 @@ namespace Gvr.Internal
             public UnityRect rightEyeViewSize;
         }
 
-#if UNITY_HAS_GOOGLEVR && UNITY_EDITOR
+        public struct UnityFloatAtom
+        {
+            public float value;
+            public bool isValid;
+        }
+
+        public struct UnityIntAtom
+        {
+            public int value;
+            public bool isValid;
+        }
+
+        public struct UnityGvrMat4fAtom
+        {
+            public Matrix4x4 value;
+            public bool isValid;
+        }
+
+        struct UnityGlobalGvrProperties
+        {
+            internal UnityFloatAtom floorHeight;
+            internal UnityGvrMat4fAtom recenterTransform;
+            internal UnityIntAtom safetyRegionType;
+            internal UnityFloatAtom safetyCylinderEnterRadius;
+            internal UnityFloatAtom safetyCylinderExitRadius;
+        }
+
+        public enum GvrEventType
+        {
+            GVR_EVENT_NONE,
+            GVR_EVENT_RECENTER,
+            GVR_EVENT_SAFETY_REGION_EXIT,
+            GVR_EVENT_SAFETY_REGION_ENTER,
+            GVR_EVENT_HEAD_TRACKING_RESUMED,
+            GVR_EVENT_HEAD_TRACKING_PAUSED,
+        }
+
+        public enum GvrRecenterEventType
+        {
+            GVR_RECENTER_EVENT_NONE,
+            GVR_RECENTER_EVENT_RESTART,
+            GVR_RECENTER_EVENT_ALIGNED,
+            GVR_RECENTER_EVENT_DON,
+        }
+
+        internal struct UnityGvrRecenterEventData
+        {
+            internal GvrRecenterEventType recenter_type;
+            internal uint recenter_event_flags;
+            internal Matrix4x4 start_space_from_tracking_space_transform;
+        }
+
+        internal struct UnityGvrEvent
+        {
+            // Timestamp in nanos.
+            internal long timestamp;
+            internal GvrEventType type;
+            internal uint flags;
+
+            // Not null iff event type is GVR_EVENT_RECENTER.
+            internal UnityGvrRecenterEventData gvr_recenter_event_data;
+        }
+
+#if UNITY_EDITOR
         static ResolutionSize[] resolutionSizes = new ResolutionSize[]
         {
             new ResolutionSize()
@@ -138,6 +206,12 @@ namespace Gvr.Internal
         private static extern bool GetEyeViews(out UnityEyeViews outputEyeViews);
 
         [DllImport(dllName)]
+        private static extern bool GetGlobalGvrProperties(ref UnityGlobalGvrProperties outputProperties);
+
+        [DllImport(dllName)]
+        private static extern bool GetGvrEvent(ref UnityGvrEvent outputEvent);
+
+        [DllImport(dllName)]
         private static extern IntPtr GetRenderEventFunc();
 
         [DllImport(dllName)]
@@ -163,10 +237,20 @@ namespace Gvr.Internal
         }
 
         Dictionary<Camera, EyeCamera> eyeCameras = new Dictionary<Camera, EyeCamera>();
-
         List<Camera> camerasLastFrame = new List<Camera>();
-
         private bool connected;
+
+        public UnityFloatAtom floorHeight { get; private set; }
+
+        public UnityGvrMat4fAtom recenterTransform { get; private set; }
+
+        public UnityIntAtom safetyRegionType { get; private set; }
+
+        public UnityFloatAtom safetyCylinderEnterRadius { get; private set; }
+
+        public UnityFloatAtom safetyCylinderExitRadius { get; private set; }
+
+        internal Queue<UnityGvrEvent> events = new Queue<UnityGvrEvent>();
 
         void Awake()
         {
@@ -188,8 +272,8 @@ namespace Gvr.Internal
             // Gets local version name and prints it out.
             var sb = new StringBuilder(256);
             GetVersionString(sb, (uint)sb.Capacity);
-            var localVersionName = sb.ToString();
-            Debug.Log("Instant Preview Version: " + localVersionName);
+            var pluginIPVersionName = sb.ToString();
+            Debug.Log("Instant Preview Version: " + pluginIPVersionName);
 
             // Tries to install Instant Preview apk if set to do so.
             if (InstallApkOnRun)
@@ -205,19 +289,21 @@ namespace Gvr.Internal
                 var apkPath = Path.GetFullPath(UnityEditor.AssetDatabase.GetAssetPath(InstantPreviewApk));
                 if (File.Exists(apkPath))
                 {
-                    new Thread(() =>
+                    new Thread(
+                    () =>
                     {
                         string output;
                         string errors;
+                        string deviceIPVersionName = null;
+                        string unityAPKVersionName = null;
 
-                        // Gets version of installed apk.
+                        // Gets version of apk installed on device (to remove, if dated).
                         RunCommand(InstantPreviewHelper.AdbPath,
-                            "shell dumpsys package com.google.instantpreview | grep versionName",
-                            out output, out errors);
-                        string installedVersionName = null;
+                                "shell dumpsys package com.google.instantpreview | grep versionName",
+                                out output, out errors);
                         if (!string.IsNullOrEmpty(output) && string.IsNullOrEmpty(errors))
                         {
-                            installedVersionName = output.Substring(output.IndexOf('=') + 1);
+                            deviceIPVersionName = output.Substring(output.IndexOf('=') + 1);
                         }
 
                         // Early outs if no device is connected.
@@ -233,29 +319,63 @@ namespace Gvr.Internal
                             return;
                         }
 
-                        // Determines if app is installed.
-                        if (installedVersionName != localVersionName)
+                        // Gets version of Unity's local .apk version (to install, if needed).
+                        RunCommand(InstantPreviewHelper.AaptPath,
+                                string.Format("dump badging {0}", apkPath),
+                                out output, out errors);
+                        if (!string.IsNullOrEmpty(output) && string.IsNullOrEmpty(errors))
                         {
-                            if (installedVersionName == null)
+                            string unityAPKVersionInfoDump = output;
+
+                            // Finds (versionName='), captures any alphaNumerics separated by periods, and selects them until (').
+                            System.Text.RegularExpressions.Match unityAPKVersionNameRegex = Regex.Match(
+                                unityAPKVersionInfoDump, "versionName=\'([^']*)\'");
+                            if (unityAPKVersionNameRegex.Groups.Count > 1)
+                            {
+                                unityAPKVersionName = unityAPKVersionNameRegex.Groups[1].Value;
+                            }
+                            else
+                            {
+                                Debug.Log(string.Format("Failed to extract version from: {0}", unityAPKVersionInfoDump));
+                            }
+                        }
+                        else
+                        {
+                            Debug.Log(string.Format("Failed to run: {0} dump badging {1}", InstantPreviewHelper.AaptPath, apkPath));
+                        }
+
+                        // Determines if Unity plugin and Unity's local .apk IP file are the same version, and exits if not.
+                        if (pluginIPVersionName != unityAPKVersionName)
+                        {
+                            Debug.LogWarning(string.Format(
+                                "Unity Instant Preview plugin version ({0}) does not match Unity Instant Preview .apk version ({1})."
+                                + "  This may cause unpredictable behavior.",
+                                pluginIPVersionName, unityAPKVersionName));
+                        }
+
+                        // Determines if app is installed, and installs it if not.
+                        if (deviceIPVersionName != unityAPKVersionName)
+                        {
+                            if (deviceIPVersionName == null)
                             {
                                 Debug.Log(string.Format(
-                                    "Instant Preview: app not found on device, attempting to install it from {0}.",
-                                    apkPath));
+                                "Instant Preview: app not found on device, attempting to install it from {0}.",
+                                apkPath));
                             }
                             else
                             {
                                 Debug.Log(string.Format(
-                                    "Instant Preview: installed version \"{0}\" does not match local version \"{1}\", attempting upgrade.",
-                                    installedVersionName, localVersionName));
+                                "Instant Preview: installed version \"{0}\" does not match local version \"{1}\", attempting upgrade.",
+                                deviceIPVersionName, unityAPKVersionName));
                             }
 
                             RunCommand(InstantPreviewHelper.AdbPath,
-                                string.Format("uninstall com.google.instantpreview", apkPath),
-                                out output, out errors);
+                                        string.Format("uninstall com.google.instantpreview", apkPath),
+                                        out output, out errors);
 
                             RunCommand(InstantPreviewHelper.AdbPath,
-                                string.Format("install \"{0}\"", apkPath),
-                                out output, out errors);
+                                        string.Format("install \"{0}\"", apkPath),
+                                        out output, out errors);
 
                             // Prints any output from trying to install.
                             if (!string.IsNullOrEmpty(output))
@@ -282,10 +402,7 @@ namespace Gvr.Internal
             }
             else
             {
-                new Thread(() =>
-                {
-                    StartInstantPreviewActivity(InstantPreviewHelper.AdbPath);
-                }).Start();
+                new Thread(() => { StartInstantPreviewActivity(InstantPreviewHelper.AdbPath); }).Start();
             }
         }
 
@@ -338,7 +455,8 @@ namespace Gvr.Internal
                         }
                     }
                     else
-                    { // OutputResolution == Resolutions.WindowSized
+                    {
+                        // OutputResolution == Resolutions.WindowSized
                         var screenAspectRatio = (float)Screen.width / Screen.height;
 
                         var eyeViewsWidth =
@@ -379,13 +497,36 @@ namespace Gvr.Internal
                 }
             }
             else
-            { // !connected
+            {
+                // !connected
                 SetEditorEmulatorsEnabled(true);
 
                 if (renderTexture.width != Screen.width || renderTexture.height != Screen.height)
                 {
                     ResizeRenderTexture(Screen.width, Screen.height);
                 }
+            }
+        }
+
+        void UpdateProperties()
+        {
+            UnityGlobalGvrProperties unityGlobalGvrProperties = new UnityGlobalGvrProperties();
+            if (GetGlobalGvrProperties(ref unityGlobalGvrProperties))
+            {
+                floorHeight = unityGlobalGvrProperties.floorHeight;
+                recenterTransform = unityGlobalGvrProperties.recenterTransform;
+                safetyRegionType = unityGlobalGvrProperties.safetyRegionType;
+                safetyCylinderEnterRadius = unityGlobalGvrProperties.safetyCylinderEnterRadius;
+                safetyCylinderExitRadius = unityGlobalGvrProperties.safetyCylinderExitRadius;
+            }
+        }
+
+        void UpdateEvents()
+        {
+            UnityGvrEvent unityGvrEvent = new UnityGvrEvent();
+            while (GetGvrEvent(ref unityGvrEvent))
+            {
+                events.Enqueue(unityGvrEvent);
             }
         }
 
@@ -412,6 +553,9 @@ namespace Gvr.Internal
             {
                 UpdateCamera(eyeCamera.Key);
             }
+
+            UpdateProperties();
+            UpdateEvents();
         }
 
         void OnPostRender()
@@ -448,10 +592,8 @@ namespace Gvr.Internal
                 eyeCameras.Add(camera, eyeCamera);
             }
 
-            EnsureEyeCamera(
-                camera, ":Instant Preview Left", new Rect(0.0f, 0.0f, 0.5f, 1.0f), ref eyeCamera.leftEyeCamera);
-            EnsureEyeCamera(
-                camera, ":Instant Preview Right", new Rect(0.5f, 0.0f, 0.5f, 1.0f), ref eyeCamera.rightEyeCamera);
+            EnsureEyeCamera(camera, ":Instant Preview Left", new Rect(0.0f, 0.0f, 0.5f, 1.0f), ref eyeCamera.leftEyeCamera);
+            EnsureEyeCamera(camera, ":Instant Preview Right", new Rect(0.5f, 0.0f, 0.5f, 1.0f), ref eyeCamera.rightEyeCamera);
         }
 
         private void CheckRemoveCameras(List<Camera> cameras)
@@ -695,7 +837,6 @@ namespace Gvr.Internal
                 yield return camera;
             }
         }
-
 #else
         public bool IsCurrentlyConnected
         {

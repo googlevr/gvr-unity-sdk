@@ -1,3 +1,5 @@
+//-----------------------------------------------------------------------
+// <copyright file="AndroidNativeHeadsetProvider.cs" company="Google Inc.">
 // Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 // This provider is only available on an Android device.
 #if UNITY_ANDROID && !UNITY_EDITOR
@@ -44,8 +48,6 @@ namespace Gvr.Internal
         /// Used only as a temporary placeholder to avoid allocations.
         /// Do not use this for storing state.
         private MutablePose3D transientRecenteredPose3d = new MutablePose3D();
-
-        private readonly Matrix4x4 MATRIX4X4_IDENTITY = Matrix4x4.identity;
 
         public bool SupportsPositionalTracking
         {
@@ -217,21 +219,9 @@ namespace Gvr.Internal
         {
             state.recenterEventType = (GvrRecenterEventType)eventData.recenter_event_type;
             state.recenterEventFlags = eventData.recenter_event_flags;
-
-            Matrix4x4 poseTransform = MATRIX4X4_IDENTITY;
-            float[] poseRaw = eventData.pose_transform;
-            for (int i = 0; i < 4; i++)
-            {
-                int j = i * 4;
-                Vector4 row = new Vector4(poseRaw[j], poseRaw[j + 1], poseRaw[j + 2], poseRaw[j + 3]);
-                poseTransform.SetRow(i, row);
-            }
-
-            // Invert the matrix to go from row-major (GVR) to column-major (Unity),
-            // and change from LHS to RHS coordinates.
-            transientRecenteredPose3d.SetRightHanded(poseTransform.transpose);
-            state.recenteredPosition = transientRecenteredPose3d.Position;
-            state.recenteredRotation = transientRecenteredPose3d.Orientation;
+            Matrix4x4 gvrMatrix = GvrMathHelpers.ConvertFloatArrayToMatrix(eventData.pose_transform);
+            GvrMathHelpers.GvrMatrixToUnitySpace(
+                gvrMatrix, out state.recenteredPosition, out state.recenteredRotation);
         }
 #endregion  // PRIVATE_HELPERS
 

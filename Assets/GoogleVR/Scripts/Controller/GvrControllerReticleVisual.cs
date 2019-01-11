@@ -1,4 +1,6 @@
-﻿// Copyright 2017 Google Inc. All rights reserved.
+//-----------------------------------------------------------------------
+// <copyright file="GvrControllerReticleVisual.cs" company="Google Inc.">
+// Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,27 +13,36 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 using System;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Gvr.Internal;
 
-/// Visualizes a reticle using a Quad.
-/// Provides tuning options to control how the reticle scales and rotates based
-/// on distance from the camera.
+/// <summary>Visualizes a reticle using a Quad.</summary>
+/// <remarks>Provides tuning options to control how the reticle scales and rotates based
+/// on distance from the camera.</remarks>
 [RequireComponent(typeof(MeshRenderer))]
 [RequireComponent(typeof(MeshFilter))]
 [HelpURL("https://developers.google.com/vr/unity/reference/class/GvrControllerReticleVisual")]
 public class GvrControllerReticleVisual : MonoBehaviour
 {
+    /// <summary>Camera facing positioning data.</summary>
     [Serializable]
     public struct FaceCameraData
     {
+        /// <summary>True if aligned on X axis.</summary>
         public bool alongXAxis;
+
+        /// <summary>True if aligned on Y axis.</summary>
         public bool alongYAxis;
+
+        /// <summary>True if aligned on Z axis.</summary>
         public bool alongZAxis;
 
+        /// <summary>Returns true if not along any axis.</summary>
         public bool IsAnyAxisOff
         {
             get
@@ -40,6 +51,7 @@ public class GvrControllerReticleVisual : MonoBehaviour
             }
         }
 
+        /// <summary>Constructs a new FaceCameraData object.</summary>
         public FaceCameraData(bool startEnabled)
         {
             alongXAxis = startEnabled;
@@ -56,6 +68,7 @@ public class GvrControllerReticleVisual : MonoBehaviour
     [Tooltip("Final size of the reticle in meters when it is 1 meter from the camera.")]
     public float sizeMeters = 0.1f;
 
+    /// <summary>Determines if the reticle will always face the camera and along what axes.</summary>
     [Tooltip("Determines if the reticle will always face the camera and along what axes.")]
     public FaceCameraData doesReticleFaceCamera = new FaceCameraData(true);
 
@@ -71,12 +84,16 @@ public class GvrControllerReticleVisual : MonoBehaviour
     /// If reticleMeshSizeMeters is 10, then reticleMeshSizeRatio is 0.1.
     public float ReticleMeshSizeRatio { get; private set; }
 
+    /// <summary>The mesh renderer for the reticle.</summary>
     protected MeshRenderer meshRenderer;
+
+    /// <summary>The mesh filter for the reticle.</summary>
     protected MeshFilter meshFilter;
 
     private Vector3 preRenderLocalScale;
     private Quaternion preRenderLocalRotation;
 
+    /// <summary>Updates the mesh dimensions.</summary>
     [SuppressMemoryAllocationError(IsWarning = true, Reason = "Pending documentation.")]
     public void RefreshMesh()
     {
@@ -98,17 +115,24 @@ public class GvrControllerReticleVisual : MonoBehaviour
         }
     }
 
+    /// @cond
     protected virtual void Awake()
     {
         meshRenderer = GetComponent<MeshRenderer>();
         meshFilter = GetComponent<MeshFilter>();
     }
 
+    /// @endcond
+
+    /// @cond
     protected virtual void OnEnable()
     {
         RefreshMesh();
     }
 
+    /// @endcond
+
+    /// @cond
     protected virtual void OnWillRenderObject()
     {
         preRenderLocalScale = transform.localScale;
@@ -119,6 +143,9 @@ public class GvrControllerReticleVisual : MonoBehaviour
         UpdateReticleOrientation(camera);
     }
 
+    /// @endcond
+
+    /// @cond
     protected virtual void OnRenderObject()
     {
         // It is possible for paired calls to OnWillRenderObject/OnRenderObject to be nested if
@@ -129,6 +156,9 @@ public class GvrControllerReticleVisual : MonoBehaviour
         transform.localRotation = preRenderLocalRotation;
     }
 
+    /// @endcond
+
+    /// <summary>Update the recticle size based on the distance.</summary>
     protected virtual void UpdateReticleSize(Camera camera)
     {
         if (camera == null)
@@ -147,6 +177,7 @@ public class GvrControllerReticleVisual : MonoBehaviour
         transform.localScale = new Vector3(scale, scale, scale);
     }
 
+    /// <summary>Updates the reticle position and orientation based on the camera.</summary>
     protected virtual void UpdateReticleOrientation(Camera camera)
     {
         if (camera == null)
@@ -179,6 +210,7 @@ public class GvrControllerReticleVisual : MonoBehaviour
         }
     }
 
+    /// @cond
     protected virtual void OnValidate()
     {
         if (Application.isPlaying && isActiveAndEnabled)
@@ -186,4 +218,6 @@ public class GvrControllerReticleVisual : MonoBehaviour
             RefreshMesh();
         }
     }
+
+    /// @endcond
 }

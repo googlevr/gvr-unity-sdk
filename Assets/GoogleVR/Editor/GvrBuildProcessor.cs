@@ -1,3 +1,5 @@
+//-----------------------------------------------------------------------
+// <copyright file="GvrBuildProcessor.cs" company="Google Inc.">
 // Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 // Only invoke custom build processor when building for Android or iOS.
 #if UNITY_ANDROID || UNITY_IOS

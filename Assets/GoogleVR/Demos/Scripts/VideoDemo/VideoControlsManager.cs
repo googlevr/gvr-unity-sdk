@@ -1,4 +1,6 @@
-﻿// Copyright 2016 Google Inc. All rights reserved.
+//-----------------------------------------------------------------------
+// <copyright file="VideoControlsManager.cs" company="Google Inc.">
+// Copyright 2016 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 namespace GoogleVR.VideoDemo
 {
@@ -132,7 +136,8 @@ namespace GoogleVR.VideoDemo
                 float pct = Player.BufferedPercentage / 100.0f;
                 float sx = Mathf.Clamp(pct, 0, 1f);
                 bufferedBackground.transform.localScale = new Vector3(sx, 1, 1);
-                bufferedBackground.transform.localPosition = new Vector3(basePosition.x - (basePosition.x * sx), 0, 0);
+                bufferedBackground.transform.localPosition =
+                    new Vector3(basePosition.x - (basePosition.x * sx), 0, 0);
 
                 videoPosition.text = FormatTime(Player.CurrentPosition);
                 videoDuration.text = FormatTime(Player.VideoDuration);

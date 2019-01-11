@@ -1,4 +1,6 @@
-﻿// Copyright 2017 Google Inc. All rights reserved.
+//-----------------------------------------------------------------------
+// <copyright file="GvrAllEventsTrigger.cs" company="Google Inc.">
+// Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 using System;
 using System.Collections;
@@ -28,11 +32,22 @@ public class GvrAllEventsTrigger : MonoBehaviour
     {
     }
 
+    /// <summary>Event for OnPointerClick</summary>
     public TriggerEvent OnPointerClick;
+
+    /// <summary>Event for OnPointerDown</summary>
     public TriggerEvent OnPointerDown;
+
+    /// <summary>Event for OnPointerUp</summary>
     public TriggerEvent OnPointerUp;
+
+    /// <summary>Event for OnPointerEnter</summary>
     public TriggerEvent OnPointerEnter;
+
+    /// <summary>Event for OnPointerExit</summary>
     public TriggerEvent OnPointerExit;
+
+    /// <summary>Event for OnScroll</summary>
     public TriggerEvent OnScroll;
 
     private bool listenersAdded;

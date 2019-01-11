@@ -22,7 +22,7 @@
         section. Otherwise, copy this file to this location in your project:
         Assets/Plugins/Android/AndroidManifest.xml.
 
-    2. In the uses-feature tag for "headtracking", Replace "false" with "true" if 6DOF tracking is
+    2. In the uses-feature tag for "headtracking", Replace "false" with "true" if 6DoF tracking is
        absolutely required.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
@@ -55,7 +55,7 @@
       </intent-filter>
     </activity>
   </application>
-  <!-- This is the key feature that enables 6DOF in your app: -->
+  <!-- This is the key feature that enables 6DoF in your app: -->
   <uses-feature
     android:name="android.hardware.vr.headtracking"
     android:version="1"

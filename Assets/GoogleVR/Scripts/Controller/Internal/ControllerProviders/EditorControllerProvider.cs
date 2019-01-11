@@ -1,4 +1,6 @@
-﻿// Copyright 2017 Google Inc. All rights reserved.
+//-----------------------------------------------------------------------
+// <copyright file="EditorControllerProvider.cs" company="Google Inc.">
+// Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 // This provider is only available in the editor.
 #if UNITY_EDITOR
@@ -25,11 +29,11 @@ namespace Gvr.Internal
     {
         private EmulatorControllerProvider emulatorControllerProvider;
         private MouseControllerProvider mouseControllerProvider;
-#if UNITY_HAS_GOOGLEVR
+#if UNITY_ANDROID
         /// Helper class to get Instant Preview controller events if connected.
         private InstantPreviewControllerProvider instantPreviewControllerProvider =
             new InstantPreviewControllerProvider();
-#endif // UNITY_HAS_GOOGLEVR
+#endif // UNITY_ANDROID
 
         ControllerState emulatorState = new ControllerState();
         ControllerState mouseState = new ControllerState();
@@ -43,7 +47,11 @@ namespace Gvr.Internal
         {
             get
             {
+#if UNITY_ANDROID
+                return InstantPreviewControllerProvider.MAX_NUM_CONTROLLERS;
+#else
                 return 1;
+#endif // UNITY_ANDROID
             }
         }
 
@@ -59,20 +67,20 @@ namespace Gvr.Internal
 
         public void ReadState(ControllerState outState, int controller_id)
         {
-            if (controller_id != 0)
+            if (controller_id >= MaxControllerCount)
             {
                 return;
             }
-#if UNITY_HAS_GOOGLEVR
+#if UNITY_ANDROID
             if (InstantPreview.Instance != null
-                   && InstantPreview.Instance.IsCurrentlyConnected
-                   && !EmulatorManager.Instance.Connected)
+                && InstantPreview.Instance.IsCurrentlyConnected
+                && !EmulatorManager.Instance.Connected)
             {
                 // Uses Instant Preview to get controller state if connected.
-                instantPreviewControllerProvider.ReadState(outState);
+                instantPreviewControllerProvider.ReadState(outState, controller_id);
                 return;
             }
-#endif // UNITY_HAS_GOOGLEVR
+#endif // UNITY_ANDROID
 
             // If Instant Preview is not connected, tries to use the emulator or
             // mouse.
@@ -81,7 +89,7 @@ namespace Gvr.Internal
 
             // Defaults to mouse state if the emulator isn't available.
             if (emulatorState.connectionState != GvrConnectionState.Connected
-                   && mouseState.connectionState == GvrConnectionState.Connected)
+                && mouseState.connectionState == GvrConnectionState.Connected)
             {
                 outState.CopyFrom(mouseState);
             }

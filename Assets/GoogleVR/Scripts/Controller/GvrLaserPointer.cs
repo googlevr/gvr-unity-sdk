@@ -1,3 +1,5 @@
+//-----------------------------------------------------------------------
+// <copyright file="GvrLaserPointer.cs" company="Google Inc.">
 // Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 // The controller is not available for versions of Unity without the
 // GVR native integration.
@@ -26,12 +30,15 @@ using UnityEngine.EventSystems;
 [HelpURL("https://developers.google.com/vr/unity/reference/class/GvrLaserPointer")]
 public class GvrLaserPointer : GvrBasePointer
 {
-    [Tooltip("Distance from the pointer that raycast hits will be detected.")]
+   /// <summary>Maximum distance from the pointer that raycast hits will be detected.</summary>
+   [Tooltip("Maximum distance from the pointer that raycast hits will be detected.")]
     public float maxPointerDistance = 20.0f;
 
-    [Tooltip("Distance from the pointer that the reticle will be drawn at when hitting nothing.")]
+    /// <summary>Distance from the pointer at which the reticle will be drawn when hitting nothing.</summary>
+    [Tooltip("Distance from the pointer at which the reticle will be drawn when hitting nothing.")]
     public float defaultReticleDistance = 20.0f;
 
+    /// <summary>The default length of the laser is used as the CameraRayIntersectionDistance.</summary>
     [Tooltip("By default, the length of the laser is used as the CameraRayIntersectionDistance. " +
     "Set this field to a non-zero value to override it.")]
     public float overrideCameraRayIntersectionDistance;
@@ -40,10 +47,12 @@ public class GvrLaserPointer : GvrBasePointer
     /// The rest of the reticle mesh is transparent.
     private const float RETICLE_VISUAL_RATIO = 0.1f;
 
+    /// <summary>The visual object for the laser beam.</summary>
     public GvrLaserVisual LaserVisual { get; private set; }
 
     private bool isHittingTarget;
 
+    /// <summary>Maximum distance from the pointer that raycast hits will be detected.</summary>
     public override float MaxPointerDistance
     {
         get
@@ -52,6 +61,13 @@ public class GvrLaserPointer : GvrBasePointer
         }
     }
 
+    /// <summary>The distance that Camera-based raycasts intersect with
+    ///    Direct (controller-based) raycasts in Hybrid Raycasting mode</summary>
+    /// <remarks>
+    ///  This is also the point at which Hybrid mode will transition from
+    ///   Direct (closer than the intersection) to Camera (further than the
+    ///   intersection) mode.
+    /// </remarks>
     public override float CameraRayIntersectionDistance
     {
         get
@@ -117,17 +133,23 @@ public class GvrLaserPointer : GvrBasePointer
         }
     }
 
+    /// @cond
     void Awake()
     {
         LaserVisual = GetComponent<GvrLaserVisual>();
     }
 
+    /// @endcond
+
+    /// @cond
     protected override void Start()
     {
         base.Start();
         LaserVisual.GetPointForDistanceFunction = GetPointAlongPointer;
         LaserVisual.SetDistance(defaultReticleDistance, true);
     }
+
+    /// @endcond
 
     void Update()
     {

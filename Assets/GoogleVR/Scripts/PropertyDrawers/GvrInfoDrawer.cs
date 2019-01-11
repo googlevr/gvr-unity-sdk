@@ -1,6 +1,8 @@
-﻿// Copyright 2017 Google Inc. All rights reserved.
+//-----------------------------------------------------------------------
+// <copyright file="GvrInfoDrawer.cs" company="Google Inc.">
+// Copyright 2017 Google Inc. All rights reserved.
 //
-// Licensed under the Apache License, Version 2.0 _(the "License");
+// Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
@@ -11,14 +13,14 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-
-using UnityEngine;
-using System.Collections;
-using System;
+// </copyright>
+//-----------------------------------------------------------------------
 
 #if UNITY_EDITOR
 using UnityEditor;
-#endif  // UNITY_EDITOR
+using UnityEngine;
+using System.Collections;
+using System;
 
 /// Use to display an Info box in the inspector for a Monobehaviour or ScriptableObject.
 [AttributeUsage(AttributeTargets.Field, AllowMultiple = true, Inherited = true)]
@@ -26,15 +28,16 @@ public class GvrInfo : PropertyAttribute
 {
     public string text;
     public int numLines;
+    public MessageType messageType;
 
-    public GvrInfo(string text, int numLines)
+    public GvrInfo(string text, int numLines, MessageType messageType)
     {
         this.text = text;
         this.numLines = numLines;
+        this.messageType = messageType;
     }
 }
 
-#if UNITY_EDITOR
 [CustomPropertyDrawer(typeof(GvrInfo))]
 public class GvrInfoDrawer : DecoratorDrawer
 {
@@ -50,7 +53,7 @@ public class GvrInfoDrawer : DecoratorDrawer
 
     public override void OnGUI(Rect position)
     {
-        Draw(position, info.text);
+        Draw(position, info.text, info.messageType);
     }
 
     public static float GetHeightForLines(int numLines)
@@ -58,7 +61,7 @@ public class GvrInfoDrawer : DecoratorDrawer
         return EditorGUIUtility.singleLineHeight * numLines;
     }
 
-    public static void Draw(Rect position, string text)
+    public static void Draw(Rect position, string text, MessageType messageType)
     {
         position.height -= EditorGUIUtility.standardVerticalSpacing;
 
@@ -69,7 +72,7 @@ public class GvrInfoDrawer : DecoratorDrawer
         bool oldWordWrap = EditorStyles.helpBox.wordWrap;
         EditorStyles.helpBox.wordWrap = false;
 
-        EditorGUI.HelpBox(position, text, MessageType.Info);
+        EditorGUI.HelpBox(position, text, messageType);
 
         EditorStyles.helpBox.fontSize = oldFontSize;
         EditorStyles.helpBox.fontStyle = oldFontStyle;

@@ -1,3 +1,5 @@
+//-----------------------------------------------------------------------
+// <copyright file="GvrPointerEventData.cs" company="Google Inc.">
 // Copyright 2018 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -20,10 +24,13 @@ using System.Collections;
 /// specific data.
 public class GvrPointerEventData : PointerEventData
 {
+    /// <summary> Constructs a new instance of GvrPointerEventData.</summary>
+    /// <param name="eventSystem">The event system associated with this event.</param>
     public GvrPointerEventData(EventSystem eventSystem) : base(eventSystem)
     {
     }
 
+    /// <summary>The mask of buttons that are currently down.</summary>
     public GvrControllerButton gvrButtonsDown;
 }
 

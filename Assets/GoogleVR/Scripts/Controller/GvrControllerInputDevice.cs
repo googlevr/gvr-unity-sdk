@@ -1,3 +1,5 @@
+//-----------------------------------------------------------------------
+// <copyright file="GvrControllerInputDevice.cs" company="Google Inc.">
 // Copyright 2018 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 using UnityEngine;
 using System;
@@ -45,11 +49,14 @@ public class GvrControllerInputDevice
         valid = false;
     }
 
+    /// <summary>Returns true if this is the dominant controller hand.</summary>
     public bool IsDominantHand
     {
         get { return controllerId == 0; }
     }
 
+    /// <summary>Returns true if the controller is configured as being in the
+    /// right hand.</summary>
     public bool IsRightHand
     {
         [SuppressMemoryAllocationError(IsWarning = true)]
@@ -107,6 +114,7 @@ public class GvrControllerInputDevice
         }
     }
 
+    /// <summary>Returns the controller's current position in world space.</summary>
     public Vector3 Position
     {
         get

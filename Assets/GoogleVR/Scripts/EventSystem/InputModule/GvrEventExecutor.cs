@@ -1,4 +1,6 @@
-﻿// Copyright 2017 Google Inc. All rights reserved.
+//-----------------------------------------------------------------------
+// <copyright file="GvrEventExecutor.cs" company="Google Inc.">
+// Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 using System;
 using System.Collections.Generic;
@@ -22,6 +26,7 @@ using Gvr.Internal;
 /// Also, exposes event delegates to allow global handling of events.
 public class GvrEventExecutor : IGvrEventExecutor
 {
+    /// <summary>Delegate type for handling pointer events.</summary>
     public delegate void EventDelegate(GameObject target, PointerEventData eventData);
 
     /// Fired when a Click occurs on any object.
@@ -31,35 +36,35 @@ public class GvrEventExecutor : IGvrEventExecutor
         remove { RemoveEventDelegate<IPointerClickHandler>(value); }
     }
 
-    // Fired when a Down event occurs on any object.
+    /// <summary>Fired when a Down event occurs on any object.</summary>
     public event EventDelegate OnPointerDown
     {
         add { AddEventDelegate<IPointerDownHandler>(value); }
         remove { RemoveEventDelegate<IPointerDownHandler>(value); }
     }
 
-    // Fired when an Up event occurs on any object.
+    /// <summary>Fired when an Up event occurs on any object.</summary>
     public event EventDelegate OnPointerUp
     {
         add { AddEventDelegate<IPointerUpHandler>(value); }
         remove { RemoveEventDelegate<IPointerUpHandler>(value); }
     }
 
-    // Fired when an Enter event occurs on any object.
+    /// <summary>Fired when an Enter event occurs on any object.</summary>
     public event EventDelegate OnPointerEnter
     {
         add { AddEventDelegate<IPointerEnterHandler>(value); }
         remove { RemoveEventDelegate<IPointerEnterHandler>(value); }
     }
 
-    // Fired when an Exit event occurs on any object.
+    /// <summary>Fired when an Exit event occurs on any object.</summary>
     public event EventDelegate OnPointerExit
     {
         add { AddEventDelegate<IPointerExitHandler>(value); }
         remove { RemoveEventDelegate<IPointerExitHandler>(value); }
     }
 
-    // Fired when a Scroll event occurs on any object.
+    /// <summary>Fired when a Scroll event occurs on any object.</summary>
     public event EventDelegate OnScroll
     {
         add { AddEventDelegate<IScrollHandler>(value); }

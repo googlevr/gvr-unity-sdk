@@ -1,4 +1,199 @@
-Except as indicated at the end of this LICENSE file,
+===============================================================================
+
+The following files:
+- Assets/GoogleVR/Plugins/Android/gvr.aar
+- Assets/GoogleVR/Plugins/Android/gvr-keyboard.aar
+- Assets/GoogleVR/Plugins/Android/libs/armeabi-v7a/libaudioplugingvrunity.so
+- Assets/GoogleVR/Plugins/Android/libs/armeabi-v7a/libgvrvideo.so
+- Assets/GoogleVR/Plugins/Android/libs/x86/libaudioplugingvrunity.so
+- Assets/GoogleVR/Plugins/Android/libs/x86/libgvrvideo.so
+- Assets/GoogleVR/Plugins/iOS/libaudioplugingvrunity.a
+- Assets/GoogleVR/Plugins/x86/audioplugingvrunity.dll
+- Assets/GoogleVR/Plugins/x86/instant_preview_shared.dll
+- Assets/GoogleVR/Plugins/x86/instant_preview_unity_plugin.dll
+- Assets/GoogleVR/Plugins/x86_64/audioplugingvrunity.bundle
+- Assets/GoogleVR/Plugins/x86_64/audioplugingvrunity.dll
+- Assets/GoogleVR/Plugins/x86_64/instant_preview_shared.dll
+- Assets/GoogleVR/Plugins/x86_64/instant_preview_unity_plugin.bundle
+- Assets/GoogleVR/Plugins/x86_64/instant_preview_unity_plugin.dll
+- Assets/GoogleVR/Plugins/x86_64/libaudioplugingvrunity.so
+
+are licensed as follows:
+
+Covered by the **Google APIs Terms of Service** at
+[https://developers.google.com/terms/](https://developers.google.com/terms/)
+
+===============================================================================
+
+The following files:
+- Assets/GoogleVR/Scripts/EventSystem/InputModule/GvrPointerInputModule.cs
+- Assets/GoogleVR/Scripts/EventSystem/InputModule/GvrPointerInputModuleImpl.cs
+
+are licensed as follows:
+
+
+The MIT License (MIT)
+
+Copyright (c) 2015, Unity Technologies & Google, Inc.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in
+all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+THE SOFTWARE.
+
+===============================================================================
+
+The following files:
+- Assets/GoogleVR/Plugins/x86/libeay32.dll
+- Assets/GoogleVR/Plugins/x86/ssleay32.dll
+- Assets/GoogleVR/Plugins/x86_64/libeay32.dll
+- Assets/GoogleVR/Plugins/x86_64/ssleay32.dll
+
+are licensed as follows:
+
+Copyright (c) 1998-2018 The OpenSSL Project.  All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions
+are met:
+
+1. Redistributions of source code must retain the above copyright
+   notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright
+   notice, this list of conditions and the following disclaimer in
+   the documentation and/or other materials provided with the
+   distribution.
+
+3. All advertising materials mentioning features or use of this
+   software must display the following acknowledgment:
+   "This product includes software developed by the OpenSSL Project
+   for use in the OpenSSL Toolkit. (http://www.openssl.org/)"
+
+4. The names "OpenSSL Toolkit" and "OpenSSL Project" must not be used to
+   endorse or promote products derived from this software without
+   prior written permission. For written permission, please contact
+   openssl-core@openssl.org.
+
+5. Products derived from this software may not be called "OpenSSL"
+   nor may "OpenSSL" appear in their names without prior written
+   permission of the OpenSSL Project.
+
+6. Redistributions of any form whatsoever must retain the following
+   acknowledgment:
+   "This product includes software developed by the OpenSSL Project
+   for use in the OpenSSL Toolkit (http://www.openssl.org/)"
+
+THIS SOFTWARE IS PROVIDED BY THE OpenSSL PROJECT ``AS IS'' AND ANY
+EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE OpenSSL PROJECT OR
+ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
+OF THE POSSIBILITY OF SUCH DAMAGE.
+====================================================================
+
+This product includes cryptographic software written by Eric Young
+(eay@cryptsoft.com).  This product includes software written by Tim
+Hudson (tjh@cryptsoft.com).
+
+===============================================================================
+
+The following file:
+- Assets/GoogleVR/Plugins/x86/zlib.dll
+- Assets/GoogleVR/Plugins/x86_64/zlib.dll
+
+is licensed as follows:
+
+Copyright (C) 1995-2017 Jean-loup Gailly and Mark Adler
+
+This software is provided 'as-is', without any express or implied
+warranty.  In no event will the authors be held liable for any damages
+arising from the use of this software.
+
+Permission is granted to anyone to use this software for any purpose,
+including commercial applications, and to alter it and redistribute it
+freely, subject to the following restrictions:
+
+1. The origin of this software must not be misrepresented; you must not
+   claim that you wrote the original software. If you use this software
+   in a product, an acknowledgment in the product documentation would be
+   appreciated but is not required.
+2. Altered source versions must be plainly marked as such, and must not be
+   misrepresented as being the original software.
+3. This notice may not be removed or altered from any source distribution.
+
+Jean-loup Gailly        Mark Adler
+jloup@gzip.org          madler@alumni.caltech.edu
+
+===============================================================================
+
+The following file:
+- Assets/GoogleVR/Plugins/Google.ProtocolBuffers.dll
+
+is licensed as follows:
+
+Protocol Buffers - Google's data interchange format
+Copyright 2008-2010 Google Inc.  All rights reserved.
+http://github.com/jskeet/dotnet-protobufs/
+Original C++/Java/Python code:
+http://code.google.com/p/protobuf/
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are
+met:
+
+    * Redistributions of source code must retain the above copyright
+notice, this list of conditions and the following disclaimer.
+    * Redistributions in binary form must reproduce the above
+copyright notice, this list of conditions and the following disclaimer
+in the documentation and/or other materials provided with the
+distribution.
+    * Neither the name of Google Inc. nor the names of its
+contributors may be used to endorse or promote products derived from
+this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+===============================================================================
+
+The following file:
+- Assets/GoogleVR/Plugins/Android/exoplayer-1.5.11.aar
+
+is licensed under the Apache License, Version 2.0, with source code at
+[https://github.com/google/ExoPlayer](https://github.com/google/ExoPlayer)
+
+===============================================================================
+
+Except as indicated previously in this LICENSE file,
 files in this SDK are licensed as follows:
 
                                  Apache License
@@ -203,195 +398,3 @@ files in this SDK are licensed as follows:
    See the License for the specific language governing permissions and
    limitations under the License.
 
-===============================================================================
-
-The following files:
-- Assets/GoogleVR/Scripts/EventSystem/InputModule/GvrPointerInputModule.cs
-- Assets/GoogleVR/Scripts/EventSystem/InputModule/GvrPointerInputModuleImpl.cs
-
-are licensed as follows:
-
-
-The MIT License (MIT)
-
-Copyright (c) 2015, Unity Technologies & Google, Inc.
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
-
-===============================================================================
-
-The following files:
-- Assets/GoogleVR/Plugins/Android/gvr.aar
-- Assets/GoogleVR/Plugins/Android/gvr-keyboard.aar
-- Assets/GoogleVR/Plugins/Android/libs/armeabi-v7a/libaudioplugingvrunity.so
-- Assets/GoogleVR/Plugins/Android/libs/armeabi-v7a/libgvrvideo.so
-- Assets/GoogleVR/Plugins/Android/libs/x86/libaudioplugingvrunity.so
-- Assets/GoogleVR/Plugins/Android/libs/x86/libgvrvideo.so
-- Assets/GoogleVR/Plugins/iOS/libaudioplugingvrunity.a
-- Assets/GoogleVR/Plugins/x86/audioplugingvrunity.dll
-- Assets/GoogleVR/Plugins/x86/instant_preview_shared.dll
-- Assets/GoogleVR/Plugins/x86/instant_preview_unity_plugin.dll
-- Assets/GoogleVR/Plugins/x86_64/audioplugingvrunity.bundle
-- Assets/GoogleVR/Plugins/x86_64/audioplugingvrunity.dll
-- Assets/GoogleVR/Plugins/x86_64/instant_preview_shared.dll
-- Assets/GoogleVR/Plugins/x86_64/instant_preview_unity_plugin.bundle
-- Assets/GoogleVR/Plugins/x86_64/instant_preview_unity_plugin.dll
-- Assets/GoogleVR/Plugins/x86_64/libaudioplugingvrunity.so
-
-are licensed as follows:
-
-Covered by the **Google APIs Terms of Service** at
-[https://developers.google.com/terms/](https://developers.google.com/terms/)
-
-===============================================================================
-
-The following file:
-- Assets/GoogleVR/Plugins/Android/exoplayer-1.5.11.aar
-
-is licensed under the Apache License, Version 2.0, with source code at
-[https://github.com/google/ExoPlayer](https://github.com/google/ExoPlayer)
-
-===============================================================================
-
-The following files:
-- Assets/GoogleVR/Plugins/x86/libeay32.dll
-- Assets/GoogleVR/Plugins/x86/ssleay32.dll
-- Assets/GoogleVR/Plugins/x86_64/libeay32.dll
-- Assets/GoogleVR/Plugins/x86_64/ssleay32.dll
-
-are licensed as follows:
-
-Copyright (c) 1998-2018 The OpenSSL Project.  All rights reserved.
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions
-are met:
-
-1. Redistributions of source code must retain the above copyright
-   notice, this list of conditions and the following disclaimer.
-
-2. Redistributions in binary form must reproduce the above copyright
-   notice, this list of conditions and the following disclaimer in
-   the documentation and/or other materials provided with the
-   distribution.
-
-3. All advertising materials mentioning features or use of this
-   software must display the following acknowledgment:
-   "This product includes software developed by the OpenSSL Project
-   for use in the OpenSSL Toolkit. (http://www.openssl.org/)"
-
-4. The names "OpenSSL Toolkit" and "OpenSSL Project" must not be used to
-   endorse or promote products derived from this software without
-   prior written permission. For written permission, please contact
-   openssl-core@openssl.org.
-
-5. Products derived from this software may not be called "OpenSSL"
-   nor may "OpenSSL" appear in their names without prior written
-   permission of the OpenSSL Project.
-
-6. Redistributions of any form whatsoever must retain the following
-   acknowledgment:
-   "This product includes software developed by the OpenSSL Project
-   for use in the OpenSSL Toolkit (http://www.openssl.org/)"
-
-THIS SOFTWARE IS PROVIDED BY THE OpenSSL PROJECT ``AS IS'' AND ANY
-EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
-PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE OpenSSL PROJECT OR
-ITS CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
-NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
-STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
-ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED
-OF THE POSSIBILITY OF SUCH DAMAGE.
-====================================================================
-
-This product includes cryptographic software written by Eric Young
-(eay@cryptsoft.com).  This product includes software written by Tim
-Hudson (tjh@cryptsoft.com).
-
-===============================================================================
-
-The following file:
-- Assets/GoogleVR/Plugins/x86/zlib.dll
-- Assets/GoogleVR/Plugins/x86_64/zlib.dll
-
-is licensed as follows:
-
-Copyright (C) 1995-2017 Jean-loup Gailly and Mark Adler
-
-This software is provided 'as-is', without any express or implied
-warranty.  In no event will the authors be held liable for any damages
-arising from the use of this software.
-
-Permission is granted to anyone to use this software for any purpose,
-including commercial applications, and to alter it and redistribute it
-freely, subject to the following restrictions:
-
-1. The origin of this software must not be misrepresented; you must not
-   claim that you wrote the original software. If you use this software
-   in a product, an acknowledgment in the product documentation would be
-   appreciated but is not required.
-2. Altered source versions must be plainly marked as such, and must not be
-   misrepresented as being the original software.
-3. This notice may not be removed or altered from any source distribution.
-
-Jean-loup Gailly        Mark Adler
-jloup@gzip.org          madler@alumni.caltech.edu
-
-===============================================================================
-
-The following file:
-- Assets/GoogleVR/Plugins/Google.ProtocolBuffers.dll
-
-is licensed as follows:
-
-Protocol Buffers - Google's data interchange format
-Copyright 2008-2010 Google Inc.  All rights reserved.
-http://github.com/jskeet/dotnet-protobufs/
-Original C++/Java/Python code:
-http://code.google.com/p/protobuf/
-
-Redistribution and use in source and binary forms, with or without
-modification, are permitted provided that the following conditions are
-met:
-
-    * Redistributions of source code must retain the above copyright
-notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above
-copyright notice, this list of conditions and the following disclaimer
-in the documentation and/or other materials provided with the
-distribution.
-    * Neither the name of Google Inc. nor the names of its
-contributors may be used to endorse or promote products derived from
-this software without specific prior written permission.
-
-THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
-"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
-LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
-A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
-OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
-SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
-LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
-DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
-THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-(INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.

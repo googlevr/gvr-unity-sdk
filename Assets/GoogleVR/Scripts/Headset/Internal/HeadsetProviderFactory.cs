@@ -1,3 +1,5 @@
+//-----------------------------------------------------------------------
+// <copyright file="HeadsetProviderFactory.cs" company="Google Inc.">
 // Copyright 2017 Google Inc. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
@@ -11,6 +13,8 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
+// </copyright>
+//-----------------------------------------------------------------------
 
 using UnityEngine;
 
@@ -37,8 +41,8 @@ namespace Gvr.Internal
             return new AndroidNativeHeadsetProvider();
 #else
             // Platform not supported.
-            Debug.LogWarning("No Google VR standalone headset / 6DOF support on " +
-            Application.platform + " platform.");
+            Debug.LogWarning("No Google VR standalone headset / 6DoF support on " +
+                Application.platform + " platform.");
             return new DummyHeadsetProvider();
 #endif  // UNITY_EDITOR || UNITY_ANDROID
         }
