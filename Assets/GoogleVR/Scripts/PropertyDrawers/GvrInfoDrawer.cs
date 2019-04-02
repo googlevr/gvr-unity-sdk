@@ -17,50 +17,28 @@
 //-----------------------------------------------------------------------
 
 #if UNITY_EDITOR
+using System;
+using System.Collections;
 using UnityEditor;
 using UnityEngine;
-using System.Collections;
-using System;
 
-/// Use to display an Info box in the inspector for a Monobehaviour or ScriptableObject.
-[AttributeUsage(AttributeTargets.Field, AllowMultiple = true, Inherited = true)]
-public class GvrInfo : PropertyAttribute
-{
-    public string text;
-    public int numLines;
-    public MessageType messageType;
-
-    public GvrInfo(string text, int numLines, MessageType messageType)
-    {
-        this.text = text;
-        this.numLines = numLines;
-        this.messageType = messageType;
-    }
-}
-
+/// <summary>Use to draw a `GvrInfo` in the inspector.</summary>
 [CustomPropertyDrawer(typeof(GvrInfo))]
 public class GvrInfoDrawer : DecoratorDrawer
 {
-    GvrInfo info
-    {
-        get { return ((GvrInfo)attribute); }
-    }
-
-    public override float GetHeight()
-    {
-        return GetHeightForLines(info.numLines);
-    }
-
-    public override void OnGUI(Rect position)
-    {
-        Draw(position, info.text, info.messageType);
-    }
-
+    /// <summary>Calculates the height for an Info box based on number of lines.</summary>
+    /// <param name="numLines">The number of lines.</param>
+    /// <returns>A height.</returns>
     public static float GetHeightForLines(int numLines)
     {
         return EditorGUIUtility.singleLineHeight * numLines;
     }
 
+    /// @cond
+    /// <summary>A DecoratorDrawer builtin to draw an Info box.</summary>
+    /// <param name="position">The position to draw the Info box.</param>
+    /// <param name="text">The text to write in the Info box.</param>
+    /// <param name="messageType">The message type of the Info box.</param>
     public static void Draw(Rect position, string text, MessageType messageType)
     {
         position.height -= EditorGUIUtility.standardVerticalSpacing;
@@ -78,5 +56,24 @@ public class GvrInfoDrawer : DecoratorDrawer
         EditorStyles.helpBox.fontStyle = oldFontStyle;
         EditorStyles.helpBox.wordWrap = oldWordWrap;
     }
+
+    /// @endcond
+    /// @cond
+    /// <inheritdoc/>
+    public override float GetHeight()
+    {
+        return GetHeightForLines((attribute as GvrInfo).numLines);
+    }
+
+    /// @endcond
+    /// @cond
+    /// <summary>A MonoBehavior builtin to draw the Info box on GUI render.</summary>
+    /// <param name="position">The position of the Info box.</param>
+    public override void OnGUI(Rect position)
+    {
+        Draw(position, (attribute as GvrInfo).text, (attribute as GvrInfo).messageType);
+    }
+
+    /// @endcond
 }
 #endif  // UNITY_EDITOR

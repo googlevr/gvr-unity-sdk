@@ -16,43 +16,64 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-using UnityEngine;
 using System;
 using System.Collections;
 using System.ComponentModel;
-
 using Gvr.Internal;
+using UnityEngine;
 
-/// Main entry point for Standalone headset APIs.
-///
-/// To use this API, use the GvrHeadset prefab. There can be only one
-/// such prefab in a scene.
-///
-/// This is a singleton object.
+/// <summary>Main entry point for Standalone headset APIs.</summary>
+/// <remarks>
+/// To use this API, use the GvrHeadset prefab. There can be only one such prefab in a scene, since
+/// this is a singleton object.
+/// </remarks>
 [HelpURL("https://developers.google.com/vr/unity/reference/class/GvrHeadset")]
 public class GvrHeadset : MonoBehaviour
 {
+#if UNITY_EDITOR
+    /// <summary>Whether this app supports Positional Head Tracking in editor play mode.</summary>
+    /// <remarks>
+    /// This is a user-controlled field which can be toggled in the inspector for the GvrHeadset.
+    /// Its value is ignored if there is a connected device running Instant Preview.
+    /// </remarks>
+    public static bool editorSupportsPositionalHeadTracking = false;
+#endif // UNITY_EDITOR
+
     private static GvrHeadset instance;
 
     private IHeadsetProvider headsetProvider;
     private HeadsetState headsetState;
-    private IEnumerator standaloneUpdate;
+    private IEnumerator headsetUpdate;
     private WaitForEndOfFrame waitForEndOfFrame = new WaitForEndOfFrame();
 
     // Delegates for GVR events.
     private OnSafetyRegionEvent safetyRegionDelegate;
     private OnRecenterEvent recenterDelegate;
 
+    /// <summary>Initializes a new instance of the <see cref="GvrHeadset" /> class.</summary>
+    protected GvrHeadset()
+    {
+        headsetState.Initialize();
+    }
+
     // Delegate definitions.
 
+    /// <summary>
     /// This delegate is called when the headset crosses the safety region boundary.
+    /// </summary>
+    /// <param name="enter">
+    /// Set to `true` if the safety region is being entered, or `false` if the safety region is
+    /// being exited.
+    /// </param>
     public delegate void OnSafetyRegionEvent(bool enter);
 
-    /// This delegate is called after the headset is recentered.
-    /// |recenterType| indicates the reason recentering occurred.
-    /// |recenterFlags| are flags related to recentering.  See |GvrRecenterFlags|.
-    /// |recenteredPosition| is the positional offset from the session start pose.
-    /// |recenteredOrientation| is the rotational offset from the session start pose.
+    /// <summary>This delegate is called after the headset is recentered.</summary>
+    /// <param name="recenterType">Indicates the reason recentering occurred.</param>
+    /// <param name="recenterFlags">Flags related to recentering.  See |GvrRecenterFlags|.</param>
+    /// <param name="recenteredPosition">The positional offset from the session start pose.</param>
+    /// <param name="recenteredOrientation">
+    /// The rotational offset from the session start pose.
+    /// </param>
     public delegate void OnRecenterEvent(GvrRecenterEventType recenterType,
                                          GvrRecenterFlags recenterFlags,
                                          Vector3 recenteredPosition,
@@ -60,6 +81,7 @@ public class GvrHeadset : MonoBehaviour
 
 #region DELEGATE_HANDLERS
     /// <summary>Event handlers for `OnSafetyRegionChange`.</summary>
+    /// <remarks>Triggered when the safety region has been entered or exited.</remarks>
     public static event OnSafetyRegionEvent OnSafetyRegionChange
     {
         add
@@ -80,6 +102,7 @@ public class GvrHeadset : MonoBehaviour
     }
 
     /// <summary>Event handlers for `OnRecenter`.</summary>
+    /// <remarks>Triggered when a recenter command has been issued by the user.</remarks>
     public static event OnRecenterEvent OnRecenter
     {
         add
@@ -101,8 +124,13 @@ public class GvrHeadset : MonoBehaviour
 #endregion  // DELEGATE_HANDLERS
 
 #region GVR_HEADSET_PROPERTIES
-    /// Returns |true| if the current headset supports positionally tracked, 6DoF head poses.
-    /// Returns |false| if only rotation-based head poses are supported.
+    /// <summary>
+    /// Gets a value indicating whether this headset supports 6DoF positional tracking.
+    /// </summary>
+    /// <value>
+    /// Value `true` if this headset supports 6DoF positional tracking, or `false` if only 3DoF
+    /// rotation-based head tracking is supported.
+    /// </value>
     public static bool SupportsPositionalTracking
     {
         get
@@ -124,10 +152,32 @@ public class GvrHeadset : MonoBehaviour
         }
     }
 
-    /// If a floor is found, populates floorHeight with the detected height.
-    /// Otherwise, leaves the value unchanged.
-    /// Returns true if value retrieval was successful, false otherwise (depends on tracking state).
-    [SuppressMemoryAllocationError(IsWarning = true, Reason = "A getter for a float should not allocate.")]
+    /// <summary>
+    /// Gets a value indicating whether this headset provides an Editor Emulator.
+    /// </summary>
+    /// <value>
+    /// Value `true` if this headset provides an Editor Emulator, or `false` otherwise.
+    /// </value>
+    public bool ProvidesEditorEmulator
+    {
+        get
+        {
+            return headsetProvider as EditorHeadsetProvider != null;
+        }
+    }
+
+    /// <summary>Populates `floorHeight` with the detected height, if one is available.</summary>
+    /// <remarks>This may be unavailable if the underlying GVR API call fails.</remarks>
+    /// <returns>
+    /// Returns `true` if value retrieval was successful, `false` otherwise (depends on tracking
+    /// state).
+    /// </returns>
+    /// <param name="floorHeight">
+    /// If this call returns `true`, this value is set to the retrieved `floorHeight`.  Otherwise
+    /// leaves the value unchanged.
+    /// </param>
+    [SuppressMemoryAllocationError(
+        IsWarning = true, Reason = "A getter for a float should not allocate.")]
     public static bool TryGetFloorHeight(ref float floorHeight)
     {
         if (instance == null)
@@ -138,9 +188,17 @@ public class GvrHeadset : MonoBehaviour
         return instance.headsetProvider.TryGetFloorHeight(ref floorHeight);
     }
 
-    /// If the last recentering transform is available, populates position and rotation with that
-    /// transform.
-    /// Returns true if value retrieval was successful, false otherwise (unlikely).
+    /// <summary>
+    /// Populates position and rotation with the last recenter transform, if one is available.
+    /// </summary>
+    /// <remarks>This may be unavailable if the underlying GVR API call fails.</remarks>
+    /// <returns>Returns `true` if value retrieval was successful, `false` otherwise.</returns>
+    /// <param name="position">
+    /// If this call returns `true`, this value is set to the retrieved position.
+    /// </param>
+    /// <param name="rotation">
+    /// If this call returns `true`, this value is set to the retrieved rotation.
+    /// </param>
     public static bool TryGetRecenterTransform(ref Vector3 position, ref Quaternion rotation)
     {
         if (instance == null)
@@ -151,9 +209,15 @@ public class GvrHeadset : MonoBehaviour
         return instance.headsetProvider.TryGetRecenterTransform(ref position, ref rotation);
     }
 
-    /// Populates safetyType with the available safety region feature on the
-    /// currently-running device.
-    /// Returns true if value retrieval was successful, false otherwise(unlikely).
+    /// <summary>Populates `safetyType` with the safety region type, if one is available.</summary>
+    /// <remarks>
+    /// Populates `safetyType` with the available safety region feature on the currently-running
+    /// device.  This may be unavailable if the underlying GVR API call fails.
+    /// </remarks>
+    /// <returns>Returns `true` if value retrieval was successful, `false` otherwise.</returns>
+    /// <param name="safetyType">
+    /// If this call returns `true`, this value is set to the retrieved `safetyType`.
+    /// </param>
     public static bool TryGetSafetyRegionType(ref GvrSafetyRegionType safetyType)
     {
         if (instance == null)
@@ -164,11 +228,21 @@ public class GvrHeadset : MonoBehaviour
         return instance.headsetProvider.TryGetSafetyRegionType(ref safetyType);
     }
 
-    /// If the safety region is of type GvrSafetyRegionType.Cylinder, populates innerRadius with the
-    /// inner radius size (where fog starts appearing) of the safety cylinder in meters.
-    /// Assumes the safety region type has been previously checked by the caller.
-    /// Returns true if value retrieval was successful, false otherwise (if region type is
-    /// GvrSafetyRegionType.Invalid).
+    /// <summary>
+    /// Populates `innerRadius` with the safety cylinder inner radius, if one is available.
+    /// </summary>
+    /// <remarks>
+    /// This is the radius at which safety management (e.g. safety fog) may cease taking effect.
+    /// <para>
+    /// If the safety region is of type `GvrSafetyRegionType.Cylinder`, populates `innerRadius` with
+    /// the inner radius size of the safety cylinder in meters.  Before using, confirm that the
+    /// safety region type is `GvrSafetyRegionType.Cylinder`.  This may be unavailable if the
+    /// underlying GVR API call fails.
+    /// </para></remarks>
+    /// <returns>Returns `true` if value retrieval was successful, `false` otherwise.</returns>
+    /// <param name="innerRadius">
+    /// If this call returns `true`, this value is set to the retrieved `innerRadius`.
+    /// </param>
     public static bool TryGetSafetyCylinderInnerRadius(ref float innerRadius)
     {
         if (instance == null)
@@ -179,11 +253,21 @@ public class GvrHeadset : MonoBehaviour
         return instance.headsetProvider.TryGetSafetyCylinderInnerRadius(ref innerRadius);
     }
 
-    /// If the safety region is of type GvrSafetyRegionType.Cylinder, populates outerRadius with the
-    /// outer radius size (where fog is 100% opaque) of the safety cylinder in meters.
-    /// Assumes the safety region type has been previously checked by the caller.
-    /// Returns true if value retrieval was successful, false otherwise (if region type is
-    /// GvrSafetyRegionType.Invalid).
+    /// <summary>
+    /// Populates `outerRadius` with the safety cylinder outer radius, if one is available.
+    /// </summary>
+    /// <remarks>
+    /// If the safety region is of type `GvrSafetyRegionType.Cylinder`, populates `outerRadius` with
+    /// the outer radius size of the safety cylinder in meters.  Before using, confirm that the
+    /// safety region type is `GvrSafetyRegionType.Cylinder`.  This may be unavailable if the
+    /// underlying GVR API call fails.
+    /// <para>
+    /// This is the radius at which safety management (e.g. safety fog) may start to take effect.
+    /// </para></remarks>
+    /// <returns>Returns `true` if value retrieval was successful, `false` otherwise.</returns>
+    /// <param name="outerRadius">
+    /// If this call returns `true`, this value is set to the retrieved `outerRadius`.
+    /// </param>
     public static bool TryGetSafetyCylinderOuterRadius(ref float outerRadius)
     {
         if (instance == null)
@@ -193,14 +277,9 @@ public class GvrHeadset : MonoBehaviour
 
         return instance.headsetProvider.TryGetSafetyCylinderOuterRadius(ref outerRadius);
     }
+
 #endregion  // GVR_HEADSET_PROPERTIES
-
-    private GvrHeadset()
-    {
-        headsetState.Initialize();
-    }
-
-    void Awake()
+    private void Awake()
     {
         if (instance != null)
         {
@@ -217,28 +296,31 @@ public class GvrHeadset : MonoBehaviour
         }
     }
 
-    void OnEnable()
+    private void OnEnable()
     {
         if (!SupportsPositionalTracking)
         {
             return;
         }
 
-        standaloneUpdate = EndOfFrame();
-        StartCoroutine(standaloneUpdate);
+        headsetUpdate = EndOfFrame();
+        StartCoroutine(headsetUpdate);
     }
 
-    void OnDisable()
+    private void OnDisable()
     {
         if (!SupportsPositionalTracking)
         {
             return;
         }
 
-        StopCoroutine(standaloneUpdate);
+        if (headsetUpdate != null)
+        {
+            StopCoroutine(headsetUpdate);
+        }
     }
 
-    void OnDestroy()
+    private void OnDestroy()
     {
         if (!SupportsPositionalTracking)
         {
@@ -281,7 +363,8 @@ public class GvrHeadset : MonoBehaviour
 
                     break;
                 case GvrEventType.Invalid:
-                    throw new InvalidEnumArgumentException("Invalid headset event: " + headsetState.eventType);
+                    throw new InvalidEnumArgumentException(
+                        "Invalid headset event: " + headsetState.eventType);
                 default:  // Fallthrough, should never get here.
                     break;
             }
@@ -290,12 +373,13 @@ public class GvrHeadset : MonoBehaviour
         }
     }
 
-    IEnumerator EndOfFrame()
+    private IEnumerator EndOfFrame()
     {
         while (true)
         {
             // This must be done at the end of the frame to ensure that all GameObjects had a chance
-            // to read transient state (e.g. events, etc) for the current frame before it gets reset.
+            // to read transient state (e.g. events, etc) for the current frame before it gets
+            // reset.
             yield return waitForEndOfFrame;
             UpdateStandalone();
         }

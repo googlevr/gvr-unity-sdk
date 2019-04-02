@@ -16,58 +16,57 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Collections;
 
 /// <summary>
 /// A tooltip for displaying control schemes overlaying the controller visual using a Unity Canvas.
 /// </summary>
 /// <remarks>
-/// Automatically changes what side of the controller the tooltip is shown on depending
-/// on the handedness setting for the player.
-/// Automatically fades out when the controller visual is too close or too far
-/// away from the player's head.
-/// Look at the prefab GvrControllerPointer to see an example of how to use this script.
+/// Automatically changes what side of the controller the tooltip is shown on depending on the
+/// handedness setting for the player.  Automatically fades out when the controller visual is too
+/// close or too far away from the player's head.  Look at the prefab GvrControllerPointer to see an
+/// example of how to use this script.
 /// </remarks>
 [RequireComponent(typeof(CanvasGroup))]
 [RequireComponent(typeof(RectTransform))]
 [ExecuteInEditMode]
-[HelpURL("https://developers.google.com/vr/unity/reference/class/GvrTooltip")]
+[HelpURL("https://developers.google.com/vr/reference/unity/class/GvrTooltip")]
 public class GvrTooltip : MonoBehaviour, IGvrArmModelReceiver
 {
-    /// Rotation for a tooltip when it is displayed on the right side of the controller visual.
-    protected static readonly Quaternion RIGHT_SIDE_ROTATION = Quaternion.Euler(0.0f, 0.0f, 0.0f);
-
-    /// Rotation for a tooltip when it is displayed on the left side of the controller visual.
-    protected static readonly Quaternion LEFT_SIDE_ROTATION = Quaternion.Euler(0.0f, 0.0f, 180.0f);
-
-    /// Anchor point for a tooltip, used for controlling what side the tooltip is on.
-    protected static readonly Vector2 SQUARE_CENTER = new Vector2(0.5f, 0.5f);
-
-    /// Pivot point for a tooltip, used for controlling what side the tooltip is on.
-    protected static readonly Vector2 PIVOT = new Vector2(-0.5f, 0.5f);
-
+    /// <summary>
     /// Y Position for touch pad tooltips based on the standard controller visual.
+    /// </summary>
     protected const float TOUCH_PAD_Y_POSITION_METERS = 0.0385f;
 
+    /// <summary>
     /// Y position for app button tooltips based on the standard controller visual.
+    /// </summary>
     protected const float APP_BUTTON_Y_POSITION_METERS = 0.0105f;
 
-    /// Z position for all tooltips based on the standard controller visual.
+    /// <summary>Z position for all tooltips based on the standard controller visual.</summary>
     protected const float TOOLTIP_Z_POSITION_METERS = 0.0098f;
 
-    /// Options for where the controller should be displayed.
-    /// If set to custom, then the manually set localPosition of the tooltip is used.
-    /// This is useful when displaying a tooltip for a non-standard controller visual.
-    enum Location
-    {
-        TouchPadOutside,
-        TouchPadInside,
-        AppButtonOutside,
-        AppButtonInside,
-        Custom
-    }
+    /// <summary>
+    /// Rotation for a tooltip when it is displayed on the right side of the controller visual.
+    /// </summary>
+    protected static readonly Quaternion RIGHT_SIDE_ROTATION = Quaternion.Euler(0.0f, 0.0f, 0.0f);
+
+    /// <summary>
+    /// Rotation for a tooltip when it is displayed on the left side of the controller visual.
+    /// </summary>
+    protected static readonly Quaternion LEFT_SIDE_ROTATION = Quaternion.Euler(0.0f, 0.0f, 180.0f);
+
+    /// <summary>
+    /// Anchor point for a tooltip, used for controlling what side the tooltip is on.
+    /// </summary>
+    protected static readonly Vector2 SQUARE_CENTER = new Vector2(0.5f, 0.5f);
+
+    /// <summary>
+    /// Pivot point for a tooltip, used for controlling what side the tooltip is on.
+    /// </summary>
+    protected static readonly Vector2 PIVOT = new Vector2(-0.5f, 0.5f);
 
     [Tooltip("The location to display the tooltip at relative to the controller visual.")]
     [SerializeField]
@@ -77,7 +76,8 @@ public class GvrTooltip : MonoBehaviour, IGvrArmModelReceiver
     [SerializeField]
     private Text text;
 
-    [Tooltip("Determines if the tooltip is always visible regardless of the controller's location.")]
+    [Tooltip(
+        "Determines if the tooltip is always visible regardless of the controller's location.")]
     [SerializeField]
     private bool alwaysVisible;
 
@@ -85,66 +85,35 @@ public class GvrTooltip : MonoBehaviour, IGvrArmModelReceiver
     private RectTransform rectTransform;
     private CanvasGroup canvasGroup;
 
-    /// The text field for this tooltip.
+    /// <summary>Options for where the controller should be displayed.</summary>
+    /// <remarks>
+    /// If set to custom, then the manually set localPosition of the tooltip is used.  This is
+    /// useful when displaying a tooltip for a non-standard controller visual.
+    /// </remarks>
+    internal enum Location
+    {
+        TouchPadOutside,
+        TouchPadInside,
+        AppButtonOutside,
+        AppButtonInside,
+        Custom
+    }
+
+    /// <summary>Gets the text field for this tooltip.</summary>
+    /// <value>The tooltip text.</value>
     public Text TooltipText
     {
         get { return text; }
     }
 
-    /// <summary>Arm model reference.</summary>
+    /// <summary>Gets or sets the arm model reference.</summary>
+    /// <value>The arm model reference.</value>
     public GvrBaseArmModel ArmModel { get; set; }
 
-    void Awake()
-    {
-        rectTransform = GetComponent<RectTransform>();
-        canvasGroup = GetComponent<CanvasGroup>();
-        isOnLeft = IsTooltipOnLeft();
-        RefreshTooltip();
-    }
-
-    void OnEnable()
-    {
-        // Update using OnPostControllerInputUpdated.
-        // This way, the position and rotation will be correct for the entire frame
-        // so that it doesn't matter what order Updates get called in.
-        if (Application.isPlaying)
-        {
-            GvrControllerInput.OnPostControllerInputUpdated += OnPostControllerInputUpdated;
-        }
-    }
-
-    void OnDisable()
-    {
-        GvrControllerInput.OnPostControllerInputUpdated -= OnPostControllerInputUpdated;
-    }
-
-    private void OnPostControllerInputUpdated()
-    {
-        CheckTooltipSide();
-
-        if (canvasGroup != null && ArmModel != null)
-        {
-            canvasGroup.alpha = alwaysVisible ? 1.0f : ArmModel.TooltipAlphaValue;
-        }
-    }
-
-    void OnValidate()
-    {
-        rectTransform = GetComponent<RectTransform>();
-        RefreshTooltip();
-    }
-
-#if UNITY_EDITOR
-    void OnRenderObject()
-    {
-        if (!Application.isPlaying)
-        {
-            CheckTooltipSide();
-        }
-    }
-#endif  // UNITY_EDITOR
-
-    /// <summary>Returns true if this tooltip is set to display on the inside of the controller.</summary>
+    /// <summary>
+    /// Returns `true` if this tooltip is set to display on the inside of the controller.
+    /// </summary>
+    /// <returns>Returns `true` if this instance is tooltip inside; otherwise, `false`.</returns>
     public bool IsTooltipInside()
     {
         switch (location)
@@ -160,9 +129,14 @@ public class GvrTooltip : MonoBehaviour, IGvrArmModelReceiver
         }
     }
 
-    /// Returns true if the tooltip should display on the left side of the controller.
-    /// This will change based on the handedness of the controller, as well as if the
-    /// tooltip is set to display inside or outside.
+    /// <summary>
+    /// Returns `true` if the tooltip should display on the left side of the controller.
+    /// </summary>
+    /// <remarks>
+    /// This will change based on the handedness of the controller, as well as if the tooltip is set
+    /// to display inside or outside.
+    /// </remarks>
+    /// <returns>Returns `true` if this instance is tooltip on left; otherwise, `false`.</returns>
     public bool IsTooltipOnLeft()
     {
         bool isInside = IsTooltipInside();
@@ -178,24 +152,80 @@ public class GvrTooltip : MonoBehaviour, IGvrArmModelReceiver
         }
     }
 
+    /// <summary>
     /// Refreshes how the tooltip is being displayed based on what side it is being shown on.
-    /// Override to add custom display functionality.
+    /// </summary>
+    /// <remarks>Override to add custom display functionality.</remarks>
+    /// <param name="IsLocationOnLeft">Whether the location is on the left.</param>
     protected virtual void OnSideChanged(bool IsLocationOnLeft)
     {
-        transform.localRotation = (isOnLeft ? LEFT_SIDE_ROTATION : RIGHT_SIDE_ROTATION);
+        transform.localRotation = isOnLeft ? LEFT_SIDE_ROTATION : RIGHT_SIDE_ROTATION;
 
         if (text != null)
         {
-            text.transform.localRotation = (IsLocationOnLeft ? LEFT_SIDE_ROTATION : RIGHT_SIDE_ROTATION);
-            text.alignment = (IsLocationOnLeft ? TextAnchor.MiddleRight : TextAnchor.MiddleLeft);
+            text.transform.localRotation =
+                IsLocationOnLeft ? LEFT_SIDE_ROTATION : RIGHT_SIDE_ROTATION;
+
+            text.alignment = IsLocationOnLeft ? TextAnchor.MiddleRight : TextAnchor.MiddleLeft;
         }
     }
 
-    /// <summary>Helper method to return meters to canvas scale.</summary>
+    /// <summary>Gets the meters-to-canvas scale.</summary>
+    /// <returns>The meters-to-canvas scale.</returns>
     protected float GetMetersToCanvasScale()
     {
         return GvrUIHelpers.GetMetersToCanvasScale(transform);
     }
+
+    private void Awake()
+    {
+        rectTransform = GetComponent<RectTransform>();
+        canvasGroup = GetComponent<CanvasGroup>();
+        isOnLeft = IsTooltipOnLeft();
+        RefreshTooltip();
+    }
+
+    private void OnEnable()
+    {
+        // Update using OnPostControllerInputUpdated.
+        // This way, the position and rotation will be correct for the entire frame
+        // so that it doesn't matter what order Updates get called in.
+        if (Application.isPlaying)
+        {
+            GvrControllerInput.OnPostControllerInputUpdated += OnPostControllerInputUpdated;
+        }
+    }
+
+    private void OnDisable()
+    {
+        GvrControllerInput.OnPostControllerInputUpdated -= OnPostControllerInputUpdated;
+    }
+
+    private void OnPostControllerInputUpdated()
+    {
+        CheckTooltipSide();
+
+        if (canvasGroup != null && ArmModel != null)
+        {
+            canvasGroup.alpha = alwaysVisible ? 1.0f : ArmModel.TooltipAlphaValue;
+        }
+    }
+
+    private void OnValidate()
+    {
+        rectTransform = GetComponent<RectTransform>();
+        RefreshTooltip();
+    }
+
+#if UNITY_EDITOR
+    private void OnRenderObject()
+    {
+        if (!Application.isPlaying)
+        {
+            CheckTooltipSide();
+        }
+    }
+#endif  // UNITY_EDITOR
 
     private Vector3 GetLocalPosition()
     {

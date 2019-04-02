@@ -22,13 +22,20 @@ using UnityEngine;
 
 namespace Gvr.Internal
 {
+    using GoogleVR.Beta;
+
+    /// <summary>A class for providing instant preview controller implementations.</summary>
     class InstantPreviewControllerProvider
     {
+        /// <summary>The maximum number of connected controllers.</summary>
         internal const int MAX_NUM_CONTROLLERS = 2;
 
         /// <summary>
         /// This is a mirror of Gvr.Internal.ControllerState, but a struct instead.
         /// </summary>
+        /// <remarks>
+        /// This also contains some Beta features which are mirrored by `GvrBetaControllerState`.
+        /// </remarks>
         private struct NativeControllerState
         {
             public GvrConnectionState connectionState;
@@ -54,6 +61,10 @@ namespace Gvr.Internal
             public bool triggerButtonState;
             [MarshalAs(UnmanagedType.U1)]
             public bool gripButtonState;
+            // Beta field.
+            public GvrBetaControllerInput.Configuration betaConfigurationType;
+            // Beta field.
+            public GvrBetaControllerInput.TrackingStatusFlags betaTrackingStatusFlags;
         }
 
         private GvrControllerButton[] prevButtonsState = new GvrControllerButton[MAX_NUM_CONTROLLERS];
@@ -62,6 +73,9 @@ namespace Gvr.Internal
         [DllImport(InstantPreview.dllName)]
         private static extern void ReadControllerState(out NativeControllerState nativeControllerState, int controller_id);
 
+        /// <summary>Reads a single controller's state for this frame.</summary>
+        /// <param name="outState">The controller to write data to.</param>
+        /// <param name="controller_id">The controller id to fetch data for.</param>
         public void ReadState(ControllerState outState, int controller_id)
         {
             if (controller_id >= MAX_NUM_CONTROLLERS)
@@ -122,6 +136,23 @@ namespace Gvr.Internal
 
             outState.SetButtonsUpDownFromPrevious(prevButtonsState[controller_id]);
             prevButtonsState[controller_id] = outState.buttonsState;
+        }
+
+        /// <summary>Reads a single controller's state for Beta features for this frame.</summary>
+        /// <param name="betaOutState">The controller to write data to.</param>
+        /// <param name="controller_id">The controller id to fetch data for.</param>
+        /// <remarks>This surfaces only Beta features and will be removed in the future.</remarks>
+        internal void ReadBetaState(GvrBetaControllerState betaOutState, int controller_id)
+        {
+            if (controller_id >= MAX_NUM_CONTROLLERS)
+            {
+                return;
+            }
+
+            ReadControllerState(out nativeControllerState, controller_id);
+
+            betaOutState.betaConfigurationType = nativeControllerState.betaConfigurationType;
+            betaOutState.betaTrackingStatusFlags = nativeControllerState.betaTrackingStatusFlags;
         }
     }
 }

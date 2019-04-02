@@ -16,29 +16,36 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using System.Collections.Generic;
 
-/// This script provides shared functionality used by all Gvr raycasters.
+/// <summary>This script provides shared functionality used by all Gvr raycasters.</summary>
 public abstract class GvrBasePointerRaycaster : BaseRaycaster
 {
     private GvrBasePointer.PointerRay lastRay;
 
-    /// <summary>The mode used for raycasting.</summary>
-    protected GvrBasePointer.RaycastMode CurrentRaycastModeForHybrid { get; private set; }
-
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GvrBasePointerRaycaster" /> class.
+    /// </summary>
     protected GvrBasePointerRaycaster()
     {
     }
 
-    /// <summary>Returns the last ray created.</summary>
+    /// <summary>Gets the mode used for raycasting.</summary>
+    /// <value>The mode used for raycasting.</value>
+    protected GvrBasePointer.RaycastMode CurrentRaycastModeForHybrid { get; private set; }
+
+    /// <summary>
+    /// Gets the last ray created.
+    /// </summary>
+    /// <returns>The last ray created.</returns>
     public GvrBasePointer.PointerRay GetLastRay()
     {
         return lastRay;
     }
 
-    /// <summary>Raycast against the scene</summary>
+    /// <summary>Raycast against the scene.</summary>
     /// <param name="eventData">The pointer event data.</param>
     /// <param name="resultAppendList">The result of the raycast is appended to this list.</param>
     public override void Raycast(PointerEventData eventData, List<RaycastResult> resultAppendList)
@@ -62,12 +69,17 @@ public abstract class GvrBasePointerRaycaster : BaseRaycaster
     /// <summary>Perform raycast on the scene.</summary>
     /// <param name="pointerRay">The ray to use for the operation.</param>
     /// <param name="radius">The radius of the ray to use when testing for hits.</param>
-    /// <param name="eventData">The pointer event data.</param>
-    /// <param name="resultAppendList">The results are appended to this list</param>
-    protected abstract bool PerformRaycast(GvrBasePointer.PointerRay pointerRay, float radius,
-                                           PointerEventData eventData, List<RaycastResult> resultAppendList);
+    /// <param name="eventData">The event data triggered by any resultant Raycast hits.</param>
+    /// <param name="resultAppendList">The results are appended to this list.</param>
+    /// <returns>Returns `true` if the Raycast has at least one hit, `false` otherwise.</returns>
+    protected abstract bool PerformRaycast(GvrBasePointer.PointerRay pointerRay,
+                                           float radius,
+                                           PointerEventData eventData,
+                                           List<RaycastResult> resultAppendList);
 
-    private void RaycastHybrid(GvrBasePointer pointer, PointerEventData eventData, List<RaycastResult> resultAppendList)
+    private void RaycastHybrid(GvrBasePointer pointer,
+                               PointerEventData eventData,
+                               List<RaycastResult> resultAppendList)
     {
         CurrentRaycastModeForHybrid = GvrBasePointer.RaycastMode.Direct;
         lastRay = GvrBasePointer.CalculateHybridRay(pointer, CurrentRaycastModeForHybrid);
@@ -82,7 +94,9 @@ public abstract class GvrBasePointerRaycaster : BaseRaycaster
         }
     }
 
-    private void RaycastDefault(GvrBasePointer pointer, PointerEventData eventData, List<RaycastResult> resultAppendList)
+    private void RaycastDefault(GvrBasePointer pointer,
+                                PointerEventData eventData,
+                                List<RaycastResult> resultAppendList)
     {
         lastRay = GvrBasePointer.CalculateRay(pointer, pointer.raycastMode);
         float radius = pointer.CurrentPointerRadius;

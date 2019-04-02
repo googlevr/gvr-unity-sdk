@@ -30,10 +30,15 @@ public static class GvrIntent
 
     private const string EXTRA_VR_LAUNCH = "android.intent.extra.VR_LAUNCH";
 
-  /// <summary>Returns the string representation of the data URI on which
-  ///  this activity's intent is operating.</summary>
-  /// <remarks>See Intent.getDataString() in the Android documentation.</remarks>
-  public static string GetData()
+    /// <summary>
+    /// Returns the string representation of the data URI on which this activity's intent is
+    /// operating.
+    /// </summary>
+    /// <remarks>See `Intent.getDataString()` in the Android documentation.</remarks>
+    /// <returns>
+    /// The `string` representation of the data URI on which this activity's intent is operating.
+    /// </returns>
+    public static string GetData()
     {
 #if UNITY_EDITOR || !UNITY_ANDROID
         return null;
@@ -49,7 +54,13 @@ public static class GvrIntent
 #endif  // UNITY_EDITOR || !UNITY_ANDROID
     }
 
-    /// <summary>Returns true if the intent category contains "android.intent.extra.VR_LAUNCH".</summary>
+    /// <summary>
+    /// Checks whether the intent category contains "android.intent.extra.VR_LAUNCH".
+    /// </summary>
+    /// <returns>
+    /// Returns `true` if the intent category contains "android.intent.extra.VR_LAUNCH", `false`
+    /// otherwise.
+    /// </returns>
     public static bool IsLaunchedFromVr()
     {
 #if UNITY_EDITOR || !UNITY_ANDROID
@@ -67,8 +78,8 @@ public static class GvrIntent
     }
 
     /// <summary>Returns the hash code of the Java intent object.</summary>
-    /// <remarks>Useful for discerning whether you have a new intent on un-pause.
-    /// </remarks>
+    /// <remarks>Useful for discerning whether you have a new intent on un-pause.</remarks>
+    /// <returns>The hash code of the Java intent object.</returns>
     public static int GetIntentHashCode()
     {
 #if UNITY_EDITOR || !UNITY_ANDROID

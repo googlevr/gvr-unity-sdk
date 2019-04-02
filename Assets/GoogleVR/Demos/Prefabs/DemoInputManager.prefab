@@ -177,6 +177,7 @@ MonoBehaviour:
   controllerMain: {fileID: 0}
   controllerPointers:
   - {fileID: 0}
+  - {fileID: 0}
   reticlePointer: {fileID: 0}
   messageCanvas: {fileID: 0}
   messageText: {fileID: 0}
@@ -291,5 +292,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ae2d286fc7c3e427bbde238c0ebb970b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_launchVrHomeButton: {fileID: 0}
-  m_demoInputManager: {fileID: 11499020}
+  launchVrHomeButton: {fileID: 0}
+  demoInputManager: {fileID: 11499020}

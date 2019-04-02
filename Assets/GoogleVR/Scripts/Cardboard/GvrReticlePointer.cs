@@ -19,78 +19,96 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 
-/// Draws a circular reticle in front of any object that the user points at.
-/// The circle dilates if the object is clickable.
+/// <summary>Draws a circular reticle in front of any object that the user points at.</summary>
+/// <remarks>The circle dilates if the object is clickable.</remarks>
 [HelpURL("https://developers.google.com/vr/unity/reference/class/GvrReticlePointer")]
 public class GvrReticlePointer : GvrBasePointer
 {
+    /// <summary>
     /// The constants below are expsed for testing. Minimum inner angle of the reticle (in degrees).
+    /// </summary>
     public const float RETICLE_MIN_INNER_ANGLE = 0.0f;
 
-    /// Minimum outer angle of the reticle (in degrees).
+    /// <summary>Minimum outer angle of the reticle (in degrees).</summary>
     public const float RETICLE_MIN_OUTER_ANGLE = 0.5f;
 
+    /// <summary>
     /// Angle at which to expand the reticle when intersecting with an object (in degrees).
+    /// </summary>
     public const float RETICLE_GROWTH_ANGLE = 1.5f;
 
-    /// Minimum distance of the reticle (in meters).
+    /// <summary>Minimum distance of the reticle (in meters).</summary>
     public const float RETICLE_DISTANCE_MIN = 0.45f;
 
-    /// Maximum distance of the reticle (in meters).
+    /// <summary>Maximum distance of the reticle (in meters).</summary>
     public float maxReticleDistance = 20.0f;
 
-    /// Number of segments making the reticle circle.
+    /// <summary>Number of segments making the reticle circle.</summary>
     public int reticleSegments = 20;
 
-    /// Growth speed multiplier for the reticle/
+    /// <summary>Growth speed multiplier for the reticle.</summary>
     public float reticleGrowthSpeed = 8.0f;
 
-    /// Sorting order to use for the reticle's renderer.
+    /// <summary>Sorting order to use for the reticle's renderer.</summary>
+    /// <remarks><para>
     /// Range values come from https://docs.unity3d.com/ScriptReference/Renderer-sortingOrder.html.
+    /// </para><para>
     /// Default value 32767 ensures gaze reticle is always rendered on top.
+    /// </para></remarks>
     [Range(-32767, 32767)]
     public int reticleSortingOrder = 32767;
 
-    /// <summary>The material used to render the reticle.</summary>
+    /// <summary>Gets or sets the material used to render the reticle.</summary>
+    /// <value>The material used to render the reticle.</value>
     public Material MaterialComp { private get; set; }
 
-    /// <summary>Current inner angle of the reticle (in degrees).</summary>
+    /// <summary>Gets the current inner angle of the reticle (in degrees).</summary>
     /// <remarks>Exposed for testing.</remarks>
+    /// <value>The current inner angle of the reticle (in degrees).</value>
     public float ReticleInnerAngle { get; private set; }
 
-    /// <summary>Current outer angle of the reticle (in degrees).</summary>
+    /// <summary>Gets the current outer angle of the reticle (in degrees).</summary>
     /// <remarks>Exposed for testing.</remarks>
+    /// <value>The current outer angle of the reticle (in degrees).</value>
     public float ReticleOuterAngle { get; private set; }
 
-    /// <summary>Current distance of the reticle (in meters).</summary>
+    /// <summary>Gets the current distance of the reticle (in meters).</summary>
     /// <remarks>Getter exposed for testing.</remarks>
+    /// <value>The current distance of the reticle (in meters).</value>
     public float ReticleDistanceInMeters { get; private set; }
 
-    /// <summary>Current inner and outer diameters of the reticle,
-    ///   before distance multiplication. </summary>
+    /// <summary>
+    /// Gets the current inner and outer diameters of the reticle, before distance multiplication.
+    /// </summary>
     /// <remarks>Getters exposed for testing.</remarks>
+    /// <value>
+    /// The current inner and outer diameters of the reticle, before distance multiplication.
+    /// </value>
     public float ReticleInnerDiameter { get; private set; }
 
-    /// <summary>Current outer diameter of the reticle (in meters).</summary>
+    /// <summary>Gets the current outer diameter of the reticle (in meters).</summary>
+    /// <value>The current outer diameter of the reticle (in meters).</value>
     public float ReticleOuterDiameter { get; private set; }
 
-    /// <summary>Returns the max distance from the pointer that
-    /// raycast hits will be detected.</summary>
+    /// <inheritdoc/>
     public override float MaxPointerDistance
     {
         get { return maxReticleDistance; }
     }
 
+    /// <inheritdoc/>
     public override void OnPointerEnter(RaycastResult raycastResultResult, bool isInteractive)
     {
         SetPointerTarget(raycastResultResult.worldPosition, isInteractive);
     }
 
+    /// <inheritdoc/>
     public override void OnPointerHover(RaycastResult raycastResultResult, bool isInteractive)
     {
         SetPointerTarget(raycastResultResult.worldPosition, isInteractive);
     }
 
+    /// <inheritdoc/>
     public override void OnPointerExit(GameObject previousObject)
     {
         ReticleDistanceInMeters = maxReticleDistance;
@@ -98,18 +116,23 @@ public class GvrReticlePointer : GvrBasePointer
         ReticleOuterAngle = RETICLE_MIN_OUTER_ANGLE;
     }
 
+    /// <inheritdoc/>
     public override void OnPointerClickDown()
     {
     }
 
+    /// <inheritdoc/>
     public override void OnPointerClickUp()
     {
     }
 
+    /// <inheritdoc/>
     public override void GetPointerRadius(out float enterRadius, out float exitRadius)
     {
         float min_inner_angle_radians = Mathf.Deg2Rad * RETICLE_MIN_INNER_ANGLE;
-        float max_inner_angle_radians = Mathf.Deg2Rad * (RETICLE_MIN_INNER_ANGLE + RETICLE_GROWTH_ANGLE);
+
+        float max_inner_angle_radians =
+            Mathf.Deg2Rad * (RETICLE_MIN_INNER_ANGLE + RETICLE_GROWTH_ANGLE);
 
         enterRadius = 2.0f * Mathf.Tan(min_inner_angle_radians);
         exitRadius = 2.0f * Mathf.Tan(max_inner_angle_radians);
@@ -147,13 +170,8 @@ public class GvrReticlePointer : GvrBasePointer
         MaterialComp.SetFloat("_DistanceInMeters", ReticleDistanceInMeters);
     }
 
-    void Awake()
-    {
-        ReticleInnerAngle = RETICLE_MIN_INNER_ANGLE;
-        ReticleOuterAngle = RETICLE_MIN_OUTER_ANGLE;
-    }
-
     /// @cond
+    /// <inheritdoc/>
     protected override void Start()
     {
         base.Start();
@@ -167,23 +185,38 @@ public class GvrReticlePointer : GvrBasePointer
     }
 
     /// @endcond
+    /// <summary>This MonoBehavior's Awake behavior.</summary>
+    private void Awake()
+    {
+        ReticleInnerAngle = RETICLE_MIN_INNER_ANGLE;
+        ReticleOuterAngle = RETICLE_MIN_OUTER_ANGLE;
+    }
 
-    void Update()
+    /// @cond
+    /// <summary>This MonoBehavior's `Update` method.</summary>
+    private void Update()
     {
         UpdateDiameters();
     }
 
+    /// @endcond
+    /// <summary>Sets the reticle pointer's target.</summary>
+    /// <param name="target">The target location.</param>
+    /// <param name="interactive">Whether the pointer is pointing at an interactive object.</param>
+    /// <returns>Returns `true` if the target is set successfully.</returns>
     private bool SetPointerTarget(Vector3 target, bool interactive)
     {
-        if (base.PointerTransform == null)
+        if (PointerTransform == null)
         {
             Debug.LogWarning("Cannot operate on a null pointer transform");
             return false;
         }
 
-        Vector3 targetLocalPosition = base.PointerTransform.InverseTransformPoint(target);
+        Vector3 targetLocalPosition = PointerTransform.InverseTransformPoint(target);
 
-        ReticleDistanceInMeters = Mathf.Clamp(targetLocalPosition.z, RETICLE_DISTANCE_MIN, maxReticleDistance);
+        ReticleDistanceInMeters = Mathf.Clamp(targetLocalPosition.z,
+                                              RETICLE_DISTANCE_MIN,
+                                              maxReticleDistance);
         if (interactive)
         {
             ReticleInnerAngle = RETICLE_MIN_INNER_ANGLE + RETICLE_GROWTH_ANGLE;
@@ -217,7 +250,7 @@ public class GvrReticlePointer : GvrBasePointer
         {
             // Add two vertices for every circle segment: one at the beginning of the
             // prism, and one at the end of the prism.
-            float angle = (float)si / (float)(segments_count) * kTwoPi;
+            float angle = (float)si / (float)segments_count * kTwoPi;
 
             float x = Mathf.Sin(angle);
             float y = Mathf.Cos(angle);

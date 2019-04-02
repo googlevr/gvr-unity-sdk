@@ -20,28 +20,41 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-/// Interface for a mathematical model that uses the orientation and location
-/// of the physical controller, and predicts the location of the controller and pointer
-/// to determine where to place the controller model within the scene.
-[HelpURL("https://developers.google.com/vr/unity/reference/class/GvrBaseArmModel")]
+/// <summary>Interface for a mathematical Arm model for 3DoF controllers.</summary>
+/// <remarks>
+/// Uses the orientation and location of the physical controller, and predicts the location of the
+/// controller and pointer to determine where to place the controller model within the scene.
+/// </remarks>
+[HelpURL("https://developers.google.com/vr/reference/unity/class/GvrBaseArmModel")]
 public abstract class GvrBaseArmModel : MonoBehaviour
 {
-    /// Vector to represent the controller's location relative to
-    /// the user's head position.
+    /// <summary>
+    /// Gets a Vector to represent the controller's location relative to the player's head position.
+    /// </summary>
+    /// <value>A Vector to represent the controller's location.</value>
     public abstract Vector3 ControllerPositionFromHead { get; }
 
-    /// Quaternion to represent the controller's rotation relative to
-    /// the user's head position.
+    /// <summary>
+    /// Gets a Quaternion to represent the controller's rotation relative to the player's head
+    /// position.
+    /// </summary>
+    /// <value>A Quaternion to represent the controller's rotation.</value>
     public abstract Quaternion ControllerRotationFromHead { get; }
 
-    /// The suggested rendering alpha value of the controller.
-    /// This is to prevent the controller from intersecting the face.
+    /// <summary>Gets the suggested rendering alpha value of the controller.</summary>
+    /// <remarks>
+    /// This is to prevent the controller from intersecting the player's face.
+    /// <para>
     /// The range is always 0 - 1.
+    /// </para></remarks>
+    /// <value>The suggested rendering alpha value of the controller.</value>
     public abstract float PreferredAlpha { get; }
 
-    /// The suggested rendering alpha value of the controller tooltips.
-    /// This is to only display the tooltips when the player is looking
-    /// at the controller, and also to prevent the tooltips from intersecting the
-    /// player's face.
+    /// <summary>Gets the suggested rendering alpha value of the controller tooltips.</summary>
+    /// <remarks>
+    /// This is to only display the tooltips when the player is looking at the controller, and also
+    /// to prevent the tooltips from intersecting the player's face.
+    /// </remarks>
+    /// <value>The suggested rendering alpha value of the controller tooltips.</value>
     public abstract float TooltipAlphaValue { get; }
 }

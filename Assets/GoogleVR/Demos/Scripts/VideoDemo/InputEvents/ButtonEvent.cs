@@ -22,6 +22,10 @@ namespace GoogleVR.VideoDemo
     using UnityEngine;
     using UnityEngine.Events;
 
+    /// <summary>
+    /// A `UnityEvent` wrapper for Button events, for example
+    /// `Gvr.Internal.ControllerUtils.AnyButtonUp(GvrControllerButton.App)`.
+    /// </summary>
     [Serializable]
     public class ButtonEvent : UnityEvent
     {

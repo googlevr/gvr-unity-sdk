@@ -18,29 +18,31 @@
 
 namespace GoogleVR.KeyboardDemo
 {
+    using System;
     using UnityEngine;
     using UnityEngine.UI;
-    using System;
 
+    /// <summary>
+    /// An example `GvrKeyboardDelegateBase` implementation for use in the Keyboard Demo scene.
+    /// </summary>
     public class KeyboardDelegateExample : GvrKeyboardDelegateBase
     {
-        public Text KeyboardText;
-        public Canvas UpdateCanvas;
+        /// <summary>The GUI text associated with this keyboard.</summary>
+        public Text keyboardText;
 
+        /// <summary>The canvas associated with the `keyboardText` and this keyboard.</summary>
+        public Canvas updateCanvas;
+
+        private const string DD_KEYBOARD_NOT_INSTALLED_MSG =
+            "Please update the Daydream Keyboard app from the Play Store.";
+
+        /// <summary>Occurs when keyboard hidden.</summary>
         public override event EventHandler KeyboardHidden;
 
+        /// <summary>Occurs when keyboard shown.</summary>
         public override event EventHandler KeyboardShown;
 
-        private const string DD_KEYBOARD_NOT_INSTALLED_MSG = "Please update the Daydream Keyboard app from the Play Store.";
-
-        void Awake()
-        {
-            if (UpdateCanvas != null)
-            {
-                UpdateCanvas.gameObject.SetActive(false);
-            }
-        }
-
+        /// <summary>Handles the keyboard show event.</summary>
         public override void OnKeyboardShow()
         {
             Debug.Log("Calling Keyboard Show Delegate!");
@@ -51,6 +53,10 @@ namespace GoogleVR.KeyboardDemo
             }
         }
 
+        /// <summary>
+        /// An event which triggers the `KeyboardHidden` event when the keyboard is no longer in
+        /// use.
+        /// </summary>
         public override void OnKeyboardHide()
         {
             Debug.Log("Calling Keyboard Hide Delegate!");
@@ -61,11 +67,15 @@ namespace GoogleVR.KeyboardDemo
             }
         }
 
+        /// <summary>
+        /// A keyboard update event which sets the `keyboardText` to the keyboard-entered string.
+        /// </summary>
+        /// <param name="text">The text currently typed in the Keyboard.</param>
         public override void OnKeyboardUpdate(string text)
         {
-            if (KeyboardText != null)
+            if (keyboardText != null)
             {
-                KeyboardText.text = text;
+                keyboardText.text = text;
             }
             else
             {
@@ -73,11 +83,19 @@ namespace GoogleVR.KeyboardDemo
             }
         }
 
+        /// <summary>
+        /// A KeyboardEnterPressed event which triggers when the ENTER button is pressed.
+        /// </summary>
+        /// <param name="text">The text currently typed in the keyboard.</param>
         public override void OnKeyboardEnterPressed(string text)
         {
             Debug.Log("Calling Keyboard Enter Pressed Delegate: " + text);
         }
 
+        /// <summary>
+        /// A KeyboardError event which triggers when an error occurs related to the keyboard.
+        /// </summary>
+        /// <param name="errCode">The GvrKeyboardError which triggered this event.</param>
         public override void OnKeyboardError(GvrKeyboardError errCode)
         {
             Debug.Log("Calling Keyboard Error Delegate: ");
@@ -94,30 +112,39 @@ namespace GoogleVR.KeyboardDemo
                     break;
                 case GvrKeyboardError.SDK_LOAD_FAILED:
                     Debug.LogWarning(DD_KEYBOARD_NOT_INSTALLED_MSG);
-                    if (KeyboardText != null)
+                    if (keyboardText != null)
                     {
-                        KeyboardText.text = DD_KEYBOARD_NOT_INSTALLED_MSG;
+                        keyboardText.text = DD_KEYBOARD_NOT_INSTALLED_MSG;
                     }
 
-                    if (UpdateCanvas != null)
+                    if (updateCanvas != null)
                     {
-                        UpdateCanvas.gameObject.SetActive(true);
+                        updateCanvas.gameObject.SetActive(true);
                     }
 
                     break;
             }
         }
 
+        /// <summary>Launches the Play Store to download the necessary Keyboard apps.</summary>
         public void LaunchPlayStore()
         {
-            if (UpdateCanvas != null)
+            if (updateCanvas != null)
             {
-                UpdateCanvas.gameObject.SetActive(false);
+                updateCanvas.gameObject.SetActive(false);
 #if !UNITY_ANDROID
                 Debug.LogError("GVR Keyboard available only on Android.");
 #else
                 GvrKeyboardIntent.Instance.LaunchPlayStore();
 #endif  // !UNITY_ANDROID
+            }
+        }
+
+        private void Awake()
+        {
+            if (updateCanvas != null)
+            {
+                updateCanvas.gameObject.SetActive(false);
             }
         }
     }

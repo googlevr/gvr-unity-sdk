@@ -18,25 +18,35 @@
 
 using UnityEngine;
 
-/// <summary>Simple static class to abstract out several JNI calls that need to be shared
-/// between different classes.</summary>
+/// <summary>
+/// Simple static class to abstract out several JNI calls that need to be shared between different
+/// classes.
+/// </summary>
 public static class GvrActivityHelper
 {
     /// @cond
 #if UNITY_IOS
+    /// <summary>The name of the GVR DLL.</summary>
     public const string GVR_DLL_NAME = "__Internal";
 #else
+    /// <summary>The name of the GVR DLL.</summary>
     public const string GVR_DLL_NAME = "gvr";
+
+    /// <summary>The name of the GVR Shim DLL.</summary>
     public const string GVR_SHIM_DLL_NAME = "gvrshim";
 #endif // UNITY_IOS
     /// @endcond
-
     /// <summary>Package name for the Android Unity player class.</summary>
     public const string PACKAGE_UNITY_PLAYER = "com.unity3d.player.UnityPlayer";
 
 #if UNITY_ANDROID && !UNITY_EDITOR
-    /// Returns the Android Activity used by the Unity device player. The caller is
-    /// responsible for memory-managing the returned AndroidJavaObject.
+    /// <summary>
+    /// Returns the Android Activity used by the Unity device player.
+    /// </summary>
+    /// <remarks>
+    /// The caller is responsible for memory-managing the returned `AndroidJavaObject`.
+    /// </remarks>
+    /// <returns>An Android GVR activity.</returns>
     public static AndroidJavaObject GetActivity()
     {
         AndroidJavaClass jc = new AndroidJavaClass(PACKAGE_UNITY_PLAYER);
@@ -56,7 +66,9 @@ public static class GvrActivityHelper
         return activity;
     }
 
-    /// Returns the application context of the current Android Activity.
+    /// <summary>Returns the application context of the current Android Activity.</summary>
+    /// <param name="activity">The Android activity from which to get the context.</param>
+    /// <returns>The application context from the associated GVR activity.</returns>
     public static AndroidJavaObject GetApplicationContext(AndroidJavaObject activity)
     {
         AndroidJavaObject context = activity.Call<AndroidJavaObject>("getApplicationContext");

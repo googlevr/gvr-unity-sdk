@@ -1,6 +1,6 @@
 //-----------------------------------------------------------------------
-// <copyright file="GvrBetaControllerVisualMulti.cs" company="Google Inc.">
-// Copyright 2018 Google Inc. All rights reserved.
+// <copyright file="GvrBetaControllerVisualMulti.cs" company="Google LLC">
+// Copyright 2018 Google LLC. All rights reserved.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,15 +18,19 @@
 
 namespace GoogleVR.Beta
 {
-    using UnityEngine;
     using GoogleVR.Beta;
+    using UnityEngine;
 
+    /// <summary>A beta library for multiple 6DoF controller visuals.</summary>
     public class GvrBetaControllerVisualMulti : GvrControllerVisual
     {
+        /// <summary>
         /// An array of mesh and material pairs used to dynamically change the controller visual.
+        /// </summary>
         [SerializeField]
         private VisualAssets[] visualsAssets;
 
+        /// <inheritdoc/>
         public override float PreferredAlpha
         {
             get
@@ -47,6 +51,7 @@ namespace GoogleVR.Beta
             }
         }
 
+        /// <inheritdoc/>
         protected override VisualAssets GetVisualAssets()
         {
             VisualAssets vizAssets = base.GetVisualAssets();

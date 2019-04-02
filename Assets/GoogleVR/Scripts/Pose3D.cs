@@ -18,30 +18,56 @@
 
 using UnityEngine;
 
-/// @cond
+/// <summary>
 /// Encapsulates a rotation and a translation.  This is a convenience class that allows
 /// construction and value access either by Matrix4x4 or Quaternion + Vector3 types.
+/// </summary>
 public class Pose3D
 {
-    /// Right-handed to left-handed matrix converter (and vice versa).
+    /// <summary>Right-handed to left-handed matrix converter (and vice versa).</summary>
     public static readonly Matrix4x4 FLIP_Z = Matrix4x4.Scale(new Vector3(1, 1, -1));
 
-    /// Flip the handedness of a matrix.
-    static public Matrix4x4 FlipHandedness(Matrix4x4 matrix)
+    /// <summary>Initializes a new instance of the <see cref="Pose3D" /> class.</summary>
+    /// <remarks>
+    /// Initializes position to the origin and orientation to the identity rotation.
+    /// </remarks>
+    public Pose3D()
     {
-        return FLIP_Z * matrix * FLIP_Z;
+        Position = Vector3.zero;
+        Orientation = Quaternion.identity;
+        Matrix = Matrix4x4.identity;
     }
 
-    /// The translation component of the pose.
+    /// <summary>Initializes a new instance of the <see cref="Pose3D" /> class.</summary>
+    /// <param name="position">The position to initialize.</param>
+    /// <param name="orientation">The orientation to initialize.</param>
+    public Pose3D(Vector3 position, Quaternion orientation)
+    {
+        Set(position, orientation);
+    }
+
+    /// <summary>Initializes a new instance of the <see cref="Pose3D" /> class.</summary>
+    /// <param name="matrix">The matrix to initialize.</param>
+    public Pose3D(Matrix4x4 matrix)
+    {
+        Set(matrix);
+    }
+
+    /// <summary>Gets or sets the translation component of the pose.</summary>
+    /// <value>The translation component of the pose.</value>
     public Vector3 Position { get; protected set; }
 
-    /// The rotation component of the pose.
+    /// <summary>Gets or sets the rotation component of the pose.</summary>
+    /// <value>The rotation component of the pose.</value>
     public Quaternion Orientation { get; protected set; }
 
-    /// The pose as a matrix in Unity gameobject convention (left-handed).
+    /// <summary>Gets or sets the pose as a matrix in Unity gameobject convention.</summary>
+    /// <remarks>GVR contention is right-handed, while Unity convention is left-handed.</remarks>
+    /// <value>The pose as a matrix in Unity gameobject convention.</value>
     public Matrix4x4 Matrix { get; protected set; }
 
-    /// The pose as a matrix in right-handed coordinates.
+    /// <summary>Gets the pose as a matrix in right-handed coordinates.</summary>
+    /// <value>The pose as a matrix in right-handed coordinates.</value>
     public Matrix4x4 RightHandedMatrix
     {
         get
@@ -50,27 +76,17 @@ public class Pose3D
         }
     }
 
-    /// Default constructor.
-    /// Initializes position to the origin and orientation to the identity rotation.
-    public Pose3D()
+    /// <summary>Flip the handedness of a matrix.</summary>
+    /// <param name="matrix">The Matrix4x4 to flip.</param>
+    /// <returns>A handedness-flipped Matrix4x4.</returns>
+    public static Matrix4x4 FlipHandedness(Matrix4x4 matrix)
     {
-        Position = Vector3.zero;
-        Orientation = Quaternion.identity;
-        Matrix = Matrix4x4.identity;
+        return FLIP_Z * matrix * FLIP_Z;
     }
 
-    /// Constructor that takes a Vector3 and a Quaternion.
-    public Pose3D(Vector3 position, Quaternion orientation)
-    {
-        Set(position, orientation);
-    }
-
-    /// Constructor that takes a Matrix4x4.
-    public Pose3D(Matrix4x4 matrix)
-    {
-        Set(matrix);
-    }
-
+    /// <summary>Sets a Pose3D according to the provided values.</summary>
+    /// <param name="position">The position to set.</param>
+    /// <param name="orientation">The orientation to set.</param>
     protected void Set(Vector3 position, Quaternion orientation)
     {
         Position = position;
@@ -78,6 +94,8 @@ public class Pose3D
         Matrix = Matrix4x4.TRS(position, orientation, Vector3.one);
     }
 
+    /// <summary>Sets a Pose3D according to the provided values.</summary>
+    /// <param name="matrix">The matrix to set.</param>
     protected void Set(Matrix4x4 matrix)
     {
         Matrix = matrix;
@@ -86,29 +104,28 @@ public class Pose3D
     }
 }
 
-/// @endcond
-
-/// @cond
-/// Mutable version of Pose3D.
+/// <summary>Mutable version of Pose3D.</summary>
 public class MutablePose3D : Pose3D
 {
-    /// Sets the position and orientation from a Vector3 + Quaternion.
+    /// <summary>Sets the position and orientation from a Vector3 + Quaternion.</summary>
+    /// <param name="position">The position to set.</param>
+    /// <param name="orientation">The orientation to set.</param>
     public new void Set(Vector3 position, Quaternion orientation)
     {
         base.Set(position, orientation);
     }
 
-    /// Sets the position and orientation from a Matrix4x4.
+    /// <summary>Sets the position and orientation from a Matrix4x4.</summary>
+    /// <param name="matrix">The matrix to set.</param>
     public new void Set(Matrix4x4 matrix)
     {
         base.Set(matrix);
     }
 
-    /// Sets the position and orientation from a right-handed Matrix4x4.
+    /// <summary>Sets the position and orientation from a right-handed Matrix4x4.</summary>
+    /// <param name="matrix">The right-handed matrix to set.</param>
     public void SetRightHanded(Matrix4x4 matrix)
     {
         Set(FlipHandedness(matrix));
     }
 }
-
-/// @endcond

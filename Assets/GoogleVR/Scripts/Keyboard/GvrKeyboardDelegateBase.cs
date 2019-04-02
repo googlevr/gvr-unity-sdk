@@ -16,14 +16,23 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-using UnityEngine;
 using System;
+using UnityEngine;
 
-/// <summary>An abstract class instead of an interface so that it can be exposed in Unity's
-/// editor. It inherits from MonoBehaviour so that it can be directly used as a game object.
-/// </summary>
+/// <summary>An abstract interface for `GvrKeyboard` methods.</summary>
+/// <remarks><para>
+/// An abstract class instead of an interface so that it can be exposed in Unity's editor.
+/// </para><para>
+/// It inherits from `MonoBehaviour` so that it can be directly used as a game object.
+/// </para></remarks>
 public abstract class GvrKeyboardDelegateBase : MonoBehaviour
 {
+    /// <summary>Event for the keyboard being hidden.</summary>
+    public abstract event EventHandler KeyboardHidden;
+
+    /// <summary>Event for the keyboard being shown.</summary>
+    public abstract event EventHandler KeyboardShown;
+
     /// <summary>Called to show the keyboard.</summary>
     public abstract void OnKeyboardShow();
 
@@ -41,10 +50,4 @@ public abstract class GvrKeyboardDelegateBase : MonoBehaviour
     /// <summary>Called when there is an error with the keyboard.</summary>
     /// <param name="errorCode">The code of the error encountered.</param>
     public abstract void OnKeyboardError(GvrKeyboardError errorCode);
-
-    /// <summary>Event for the keyboard being hidden.</summary>
-    public abstract event EventHandler KeyboardHidden;
-
-    /// <summary>Event for the keyboard being shown.</summary>
-    public abstract event EventHandler KeyboardShown;
 }

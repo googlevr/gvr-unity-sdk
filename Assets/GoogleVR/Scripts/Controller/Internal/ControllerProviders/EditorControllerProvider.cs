@@ -31,7 +31,7 @@ namespace Gvr.Internal
         private MouseControllerProvider mouseControllerProvider;
 #if UNITY_ANDROID
         /// Helper class to get Instant Preview controller events if connected.
-        private InstantPreviewControllerProvider instantPreviewControllerProvider =
+        static internal InstantPreviewControllerProvider instantPreviewControllerProvider =
             new InstantPreviewControllerProvider();
 #endif // UNITY_ANDROID
 
@@ -72,8 +72,7 @@ namespace Gvr.Internal
                 return;
             }
 #if UNITY_ANDROID
-            if (InstantPreview.Instance != null
-                && InstantPreview.Instance.IsCurrentlyConnected
+            if (InstantPreview.IsActive
                 && !EmulatorManager.Instance.Connected)
             {
                 // Uses Instant Preview to get controller state if connected.

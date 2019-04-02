@@ -17,18 +17,15 @@
 //-----------------------------------------------------------------------
 
 #if UNITY_ANDROID || UNITY_EDITOR
-using UnityEngine;
 using System;
 using System.Collections.Generic;
 using Gvr.Internal;
+using UnityEngine;
 
-// Requests dangerous permissions at runtime
+/// <summary>Requests dangerous permissions at runtime.</summary>
 [HelpURL("https://developers.google.com/vr/unity/reference/class/GvrPermissionsRequester")]
 public class GvrPermissionsRequester
 {
-    // Permissions are requested via an Android Activity Fragment java object.
-    private AndroidJavaObject permissionsFragment = null;
-
     // Constants used via JNI to access the permissions fragment.
     private const string FRAGMENT_CLASSNAME =
         "com.google.gvr.permissionsupport.PermissionsFragment";
@@ -38,12 +35,18 @@ public class GvrPermissionsRequester
     // Singleton instance.
     private static GvrPermissionsRequester theInstance;
 
-    /// The singleton instance of the PermissionsRequester class,
-    /// lazily instantiated.
+    // Permissions are requested via an Android Activity Fragment java object.
+    private AndroidJavaObject permissionsFragment = null;
+
+    /// <summary>
+    /// Gets the singleton instance of the `PermissionsRequester` class, lazily instantiated.
+    /// </summary>
+    /// <value>The singleton instance of this class, lazily instantiated.</value>
     public static GvrPermissionsRequester Instance
     {
-        [SuppressMemoryAllocationError(IsWarning = false,
-                                       Reason = "Lazy-loading getter is allowed to allocate sometimes.")]
+        [SuppressMemoryAllocationError(
+            IsWarning = false,
+            Reason = "Lazy-loading getter is allowed to allocate sometimes.")]
         get
         {
             if (theInstance == null)
@@ -60,9 +63,60 @@ public class GvrPermissionsRequester
         }
     }
 
-    /// <summary>
-    /// Initializes the fragment via JNI.
-    /// </summary>
+    /// <summary>Checks whether a given permission is granted.</summary>
+    /// <param name="permission">The name of the permission to check.</param>
+    /// <returns>Returns `true` if the permission is granted, `false` otherwise.</returns>
+    [SuppressMemoryAllocationError(IsWarning = true)]
+    public bool IsPermissionGranted(string permission)
+    {
+        return permissionsFragment.Call<bool>("hasPermission", permission);
+    }
+
+    /// <summary>Checks whether a given set of permission are granted.</summary>
+    /// <param name="permissions">The names of the permissions to check.</param>
+    /// <returns>Returns `true` if the permissions are all granted, `false` otherwise.</returns>
+    [SuppressMemoryAllocationError(IsWarning = true)]
+    public bool[] HasPermissionsGranted(string[] permissions)
+    {
+        Debug.Log("Calling HasPermissionsGranted: " + permissions);
+
+        object[] args = { permissions };
+        AndroidJavaObject resultArr =
+            permissionsFragment.Call<AndroidJavaObject>("hasPermissions", args);
+
+        if (resultArr.GetRawObject() != IntPtr.Zero)
+        {
+            return AndroidJNIHelper.ConvertFromJNIArray<bool[]>(
+                resultArr.GetRawObject());
+        }
+        else
+        {
+            return new bool[0];
+        }
+    }
+
+    /// <summary>Checks whether the rationale for a given permission should be shown.</summary>
+    /// <remarks>This should be called `ShouldShowRationale`.</remarks>
+    /// <param name="permission">The name of the permission to check.</param>
+    /// <returns>Returns `true` if the rationale should be shown, `false` otherwise.</returns>
+    public bool ShouldShowRational(string permission)
+    {
+        Debug.Log("GvrPermissionsRequester.ShouldShowRational()");
+        return permissionsFragment.Call<bool>("shouldShowRational", permission);
+    }
+
+    /// <summary>Requests a set of permissions.</summary>
+    /// <param name="permissionArray">The names of the permissions to request.</param>
+    /// <param name="callback">The callback to make when requesting permissions.</param>
+    public void RequestPermissions(string[] permissionArray,
+                                   Action<PermissionStatus[]> callback)
+    {
+        PermissionsCallback cb = new PermissionsCallback(permissionArray, callback);
+        permissionsFragment.Call("requestPermission", permissionArray, cb);
+        Debug.Log("Calling requestPermission");
+    }
+
+    /// <summary>Initializes the fragment via JNI.</summary>
     /// <returns>True if fragment was initialized.</returns>
     protected bool InitializeFragment()
     {
@@ -84,66 +138,35 @@ public class GvrPermissionsRequester
 #endif  // !UNITY_ANDROID || UNITY_EDITOR
     }
 
-    [SuppressMemoryAllocationError(IsWarning = true)]
-    public bool IsPermissionGranted(string permission)
-    {
-        return permissionsFragment.Call<bool>("hasPermission", permission);
-    }
-
-    [SuppressMemoryAllocationError(IsWarning = true)]
-    public bool[] HasPermissionsGranted(string[] permissions)
-    {
-        Debug.Log("Calling HasPermissionsGranted: " + permissions);
-
-        object[] args = { permissions };
-        AndroidJavaObject resultArr =
-            permissionsFragment.Call<AndroidJavaObject>("hasPermissions", args);
-
-        if (resultArr.GetRawObject() != IntPtr.Zero)
-        {
-            return AndroidJNIHelper.ConvertFromJNIArray<bool[]>(
-                resultArr.GetRawObject());
-        }
-        else
-        {
-            return new bool[0];
-        }
-    }
-
-    public bool ShouldShowRational(string permission)
-    {
-        Debug.Log("GvrPermissionsRequester.ShouldShowRational()");
-        return permissionsFragment.Call<bool>("shouldShowRational", permission);
-    }
-
-    public void RequestPermissions(string[] permissionArray,
-                                   Action<PermissionStatus[]> callback)
-    {
-        PermissionsCallback cb = new PermissionsCallback(permissionArray, callback);
-        permissionsFragment.Call("requestPermission", permissionArray, cb);
-        Debug.Log("Calling requestPermission");
-    }
-
+    /// <summary>A class representing a given permission's information and status.</summary>
     public class PermissionStatus
     {
+        /// <summary>
+        /// Initializes a new instance of the <see cref="PermissionStatus" /> class.
+        /// </summary>
+        /// <param name="name">The name of this permission.</param>
+        /// <param name="granted">Whether this permission has been granted.</param>
         public PermissionStatus(string name, bool granted)
         {
             Name = name;
             Granted = granted;
         }
 
+        /// <summary>Gets or sets the name of this permission.</summary>
+        /// <value>The name of this permission.</value>
         public string Name { get; set; }
 
+        /// <summary>Gets or sets a value indicating whether this permission is granted.</summary>
+        /// <value>Value `true` if this permission is granted, `false` otherwise.</value>
         public bool Granted { get; set; }
     }
 
-    /// <summary>
-    /// Permissions callback implementation.
-    /// </summary>
-    /// <remarks>Instances of this class are passed to the java fragment and then
-    /// invoked once the request process is completed by the user.
+    /// <summary>Permissions callback implementation.</summary>
+    /// <remarks>
+    /// Instances of this class are passed to the java fragment and then invoked once the request
+    /// process is completed by the user.
     /// </remarks>
-    class PermissionsCallback : AndroidJavaProxy
+    internal class PermissionsCallback : AndroidJavaProxy
     {
         // permissions being requested.
         private string[] permissionNames;
@@ -157,12 +180,9 @@ public class GvrPermissionsRequester
             this.callback = callback;
         }
 
-        /// <summary>
-        /// Called when then permission request flow is completed.
-        /// </summary>
-        /// <param name="allPermissionsGranted">
-        /// True if all permissions granted.</param>
-        void onRequestPermissionResult(bool allPermissionsGranted)
+        /// <summary>Called when then permission request flow is completed.</summary>
+        /// <param name="allPermissionsGranted">Value `true` if all permissions granted.</param>
+        private void onRequestPermissionResult(bool allPermissionsGranted)
         {
             List<PermissionStatus> permissionStatusList =
                 new List<PermissionStatus>();
@@ -194,4 +214,4 @@ public class GvrPermissionsRequester
         }
     }
 }
-#endif  // UNITY_ANDROID
+#endif  // UNITY_ANDROID || UNITY_EDITOR

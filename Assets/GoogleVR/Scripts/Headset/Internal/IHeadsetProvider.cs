@@ -23,39 +23,91 @@ namespace Gvr.Internal
 {
     interface IHeadsetProvider
     {
-        /// Returns whether the current headset supports positionally tracked, 6DoF head poses.
+        /// <summary>
+        /// Gets a value indicating whether the current headset supports positionally tracked,
+        /// 6DoF head poses.
+        /// </summary>
+        /// <value>
+        /// Value `true` if the current headset supports positionally tracked, 6DoF head poses,
+        /// `false` otherwise.
+        /// </value>
         bool SupportsPositionalTracking { get; }
 
-        /// Polls for GVR standalone events.
+        /// <summary>Polls for GVR headset events.</summary>
         void PollEventState(ref HeadsetState outState);
 
-        /// If a floor is found, populates floorHeight with the detected height.
-        /// Otherwise, leaves the value unchanged.
-        /// Returns true if value retrieval was successful, false otherwise (depends on tracking state).
+        /// <summary>
+        /// Populates `floorHeight` with the detected height, if one is available.
+        /// </summary>
+        /// <remarks>This may be unavailable if the underlying GVR API call fails.</remarks>
+        /// <returns>
+        /// Returns `true` if value retrieval was successful, `false` otherwise.
+        /// </returns>
+        /// <param name="floorHeight">
+        /// If this call returns `true`, this value is set to the retrieved `floorHeight`.
+        /// Otherwise leaves the value unchanged.
+        /// </param>
         bool TryGetFloorHeight(ref float floorHeight);
 
-        /// If the last recentering transform is available, populates position and rotation with that
-        /// transform.
-        /// Returns true if value retrieval was successful, false otherwise (unlikely).
+        /// <summary>
+        /// Populates position and rotation with the last recenter transform, if one is available.
+        /// </summary>
+        /// <remarks>This may be unavailable if the underlying GVR API call fails.</remarks>
+        /// <returns>Returns `true` if value retrieval was successful, `false` otherwise.</returns>
+        /// <param name="position">
+        /// If this call returns `true`, this value is set to the retrieved position.
+        /// </param>
+        /// <param name="rotation">
+        /// If this call returns `true`, this value is set to the retrieved rotation.
+        /// </param>
         bool TryGetRecenterTransform(ref Vector3 position, ref Quaternion rotation);
 
-        /// Populates safetyType with the available safety region feature on the
-        /// currently-running device.
-        /// Returns true if value retrieval was successful, false otherwise (unlikely).
+        /// <summary>
+        /// Populates `safetyType` with the safety region type, if one is available.
+        /// </summary>
+        /// <remarks>
+        /// Populates `safetyType` with the available safety region feature on the currently-running
+        /// device.  This may be unavailable if the underlying GVR API call fails.
+        /// </remarks>
+        /// <returns>Returns `true` if value retrieval was successful, `false` otherwise.</returns>
+        /// <param name="safetyType">
+        /// If this call returns `true`, this value is set to the retrieved `safetyType`.
+        /// </param>
         bool TryGetSafetyRegionType(ref GvrSafetyRegionType safetyType);
 
-        /// If the safety region is of type GvrSafetyRegionType.Cylinder, populates innerRadius with the
-        /// inner radius size (where fog starts appearing) of the safety cylinder in meters.
-        /// Assumes the safety region type has been previously checked by the caller.
-        /// Returns true if value retrieval was successful, false otherwise (if region type is
-        /// GvrSafetyRegionType.Invalid).
+        /// <summary>
+        /// Populates `innerRadius` with the safety cylinder inner radius, if one is available.
+        /// </summary>
+        /// <remarks>
+        /// If the safety region is of type `GvrSafetyRegionType.Cylinder`, populates `innerRadius`
+        /// with the inner radius size of the safety cylinder in meters.  Before using, confirm that
+        /// the safety region type is `GvrSafetyRegionType.Cylinder`.  This may be unavailable if
+        /// the underlying GVR API call fails.
+        /// <para>
+        /// This is the radius at which safety management (e.g. safety fog) may cease taking effect.
+        /// </para></remarks>
+        /// <returns>Returns `true` if value retrieval was successful, `false` otherwise.</returns>
+        /// <param name="innerRadius">
+        /// If this call returns `true`, this value is set to the retrieved `innerRadius`.
+        /// </param>
         bool TryGetSafetyCylinderInnerRadius(ref float innerRadius);
 
-        /// If the safety region is of type GvrSafetyRegionType.Cylinder, populates outerRadius with the
-        /// outer radius size (where fog is 100% opaque) of the safety cylinder in meters.
-        /// Assumes the safety region type has been previously checked by the caller.
-        /// Returns true if value retrieval was successful, false otherwise (if region type is
-        /// GvrSafetyRegionType.Invalid).
+        /// <summary>
+        /// Populates `outerRadius` with the safety cylinder outer radius, if one is available.
+        /// </summary>
+        /// <remarks>
+        /// If the safety region is of type `GvrSafetyRegionType.Cylinder`, populates `outerRadius`
+        /// with the outer radius size of the safety cylinder in meters.  Before using, confirm that
+        /// the safety region type is `GvrSafetyRegionType.Cylinder`.  This may be unavailable if
+        /// the underlying GVR API call fails.
+        /// <para>
+        /// This is the radius at which safety management (e.g. safety fog) may start to take
+        /// effect.
+        /// </para></remarks>
+        /// <returns>Returns `true` if value retrieval was successful, `false` otherwise.</returns>
+        /// <param name="outerRadius">
+        /// If this call returns `true`, this value is set to the retrieved `outerRadius`.
+        /// </param>
         bool TryGetSafetyCylinderOuterRadius(ref float outerRadius);
     }
 }

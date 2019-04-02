@@ -20,5 +20,14 @@ model {
             cppFlags.addAll(['-std=c++11'])
             ldLibs.addAll(['android', 'log', "EGL", "GLESv2"])
         }
+        ndk {
+            platformVersion = '21'
+            moduleName = 'gvrvideo'
+            stl = 'c++_static'
+            abiFilters.addAll(['arm64-v8a'])
+            cppFlags.addAll(['-I' + file('src/main/jni/ndk_helper')])
+            cppFlags.addAll(['-std=c++11'])
+            ldLibs.addAll(['android', 'log', "EGL", "GLESv2"])
+        }
     }
 }

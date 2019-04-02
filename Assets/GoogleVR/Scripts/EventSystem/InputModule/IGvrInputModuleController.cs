@@ -22,30 +22,46 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 
 /// <summary>
-/// Interface for manipulating an InputModule used by _GvrPointerInputModuleImpl_.
+/// Interface for manipulating an input module used by `GvrPointerInputModuleImpl`.
 /// </summary>
 public interface IGvrInputModuleController
 {
-    /// <summary>Reference to EventSystem.</summary>
+    /// <summary>Gets a reference to the event system.</summary>
+    /// <value>A reference to the event system.</value>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "UnityRules.LegacyGvrStyleRules",
+        "VR1001:AccessibleNonConstantPropertiesMustBeUpperCamelCase",
+        Justification = "Legacy Public API.")]
     EventSystem eventSystem { get; }
 
-    /// <summary>Raycast result cache list.</summary>
+    /// <summary>Gets the raycast result cache list.</summary>
+    /// <value>The raycast result cache list.</value>
     List<RaycastResult> RaycastResultCache { get; }
 
-    /// <summary>Should the controller be activated.</summary>
+    /// <summary>Whether the controller should be activated.</summary>
+    /// <returns>Returns `true` if the controller should be activated, `false` otherwise.</returns>
     bool ShouldActivate();
 
     /// <summary>Deactivate the controller.</summary>
     void Deactivate();
 
-    /// <summary>Given two game objects, return a common root game object,
-    /// or null if there is no common root.</summary>
+    /// <summary>
+    /// Given two game objects, return a common root game object, or null if there is no common
+    /// root.
+    /// </summary>
+    /// <param name="g1">The first `GameObject`.</param>
+    /// <param name="g2">The second `GameObject`.</param>
+    /// <returns>The common root.</returns>
     GameObject FindCommonRoot(GameObject g1, GameObject g2);
 
-    /// <summary>Generate a BaseEventData that can be used by the EventSystem.
-    /// </summary>
+    /// <summary>Gets a `BaseEventData` that can be used by the `EventSystem`.</summary>
+    /// <returns>A `BaseEventData` that can be used by the `EventSystem`.</returns>
     BaseEventData GetBaseEventData();
 
     /// <summary>Return the first valid raycast result.</summary>
+    /// <param name="candidates">
+    /// The list of `RaycastResults` to search for the first Raycast.
+    /// </param>
+    /// <returns>The first raycast.</returns>
     RaycastResult FindFirstRaycast(List<RaycastResult> candidates);
 }

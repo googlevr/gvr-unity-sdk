@@ -16,9 +16,9 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
+using System.Collections;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using System.Collections;
 
 #if UNITY_2017_2_OR_NEWER
 using UnityEngine.XR;
@@ -26,9 +26,12 @@ using UnityEngine.XR;
 using XRSettings = UnityEngine.VR.VRSettings;
 #endif  // UNITY_2017_2_OR_NEWER
 
-/// Helper functions to perform common math operations for Gvr.
+/// <summary>Helper functions to perform common math operations for Gvr.</summary>
 public static class GvrMathHelpers
 {
+    // 3D pose instance to be used in ConvertFloatArrayToMatrix calls.
+    private static MutablePose3D transientPose = new MutablePose3D();
+
     /// <summary>Gets the intersection position of the camera and the raycast result.</summary>
     /// <param name="cam">The camera to use.</param>
     /// <param name="raycastResult">The result of the raycast to intersect with the camera.</param>
@@ -42,11 +45,12 @@ public static class GvrMathHelpers
         }
 
         float intersectionDistance = raycastResult.distance + cam.nearClipPlane;
-        Vector3 intersectionPosition = cam.transform.position + cam.transform.forward * intersectionDistance;
+        Vector3 intersectionPosition =
+            cam.transform.position + (cam.transform.forward * intersectionDistance);
         return intersectionPosition;
     }
 
-    /// <summary>Normalizes the coodinates from cartesian to spherical system.</summary>
+    /// <summary>Normalizes a 3D Cartesian direction to a 2D spherical direction.</summary>
     /// <param name="cartCoords">The coordinates to normalize.</param>
     /// <returns>The spherical coordinates.</returns>
     public static Vector2 NormalizedCartesianToSpherical(Vector3 cartCoords)
@@ -69,12 +73,10 @@ public static class GvrMathHelpers
         return new Vector2(polar, elevation);
     }
 
-    /// <summary>
-    /// A cubic easing function (https://easings.net/#easeOutCubic).
-    /// </summary>
-    /// <param name="min>The minimum output value.</param>
-    /// <param name="max>The maximum output value.</param>
-    /// <param name="value>The input to the easing function between 0 and 1.</param>
+    /// <summary>A cubic easing function (https://easings.net/#easeOutCubic).</summary>
+    /// <param name="min">The minimum output value.</param>
+    /// <param name="max">The maximum output value.</param>
+    /// <param name="value">The input to the easing function between 0 and 1.</param>
     /// <returns>The output of the easing function between (min) and (max).</returns>
     public static float EaseOutCubic(float min, float max, float value)
     {
@@ -88,18 +90,18 @@ public static class GvrMathHelpers
         value = Mathf.Clamp01(value);
         value -= 1.0f;
         float delta = max - min;
-        float result = delta * (value * value * value + 1.0f) + min;
+        float result = (delta * ((value * value * value) + 1.0f)) + min;
         return result;
     }
 
     /// <summary>Converts matrix from Google VR convention to Unity convention.</summary>
-    /// <remarks>
-    ///   Google VR is row-major, RHS coordinates, and Unity is column-major, LHS.
-    /// <remarks>
-    /// <param name="gvrMatrix">The Google VR matrix data</param>
-    /// <param name="position">The position in Unity space based on the Google VR matrix</param>
+    /// <remarks>Google VR is row-major, RHS coordinates, and Unity is column-major, LHS.</remarks>
+    /// <param name="gvrMatrix">The Google VR matrix data.</param>
+    /// <param name="position">The position in Unity space based on the Google VR matrix.</param>
     /// <param name="orientation">The orientation in Unity space.</param>
-    public static void GvrMatrixToUnitySpace(Matrix4x4 gvrMatrix, out Vector3 position, out Quaternion orientation)
+    public static void GvrMatrixToUnitySpace(Matrix4x4 gvrMatrix,
+                                             out Vector3 position,
+                                             out Quaternion orientation)
     {
         // Invert the matrix to go from row-major (GVR) to column-major (Unity).
         Matrix4x4 unityMatrix = Matrix4x4.Transpose(gvrMatrix);
@@ -111,14 +113,17 @@ public static class GvrMathHelpers
         orientation = transientPose.Orientation;
     }
 
-    /// Converts a float array of length 16 into a column-major 4x4 matrix.
+    /// <summary>Converts a float array of length 16 into a column-major 4x4 matrix.</summary>
+    /// <param name="floatArray">The array to convert to a matrix.</param>
+    /// <returns>A column-major 4x4 matrix.</returns>
     public static Matrix4x4 ConvertFloatArrayToMatrix(float[] floatArray)
     {
         Matrix4x4 result = new Matrix4x4();
 
         if (floatArray == null || floatArray.Length != 16)
         {
-            throw new System.ArgumentException("floatArray must not be null and have a length of 16.");
+            throw new System.ArgumentException(
+                "floatArray must not be null and have a length of 16.");
         }
 
         result[0, 0] = floatArray[0];
@@ -140,7 +145,4 @@ public static class GvrMathHelpers
 
         return result;
     }
-
-    // 3D pose instance to be used in ConvertFloatArrayToMatrix calls.
-    private static MutablePose3D transientPose = new MutablePose3D();
 }

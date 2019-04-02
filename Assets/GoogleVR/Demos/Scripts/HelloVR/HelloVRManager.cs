@@ -18,47 +18,31 @@
 
 namespace GoogleVR.HelloVR
 {
-    using UnityEngine;
     using GoogleVR.Demos;
+    using UnityEngine;
 
+    /// @deprecated
+    /// <summary>
+    /// Keeps tabs on the scene's associated DemoInputManager, and deactivates it if necessary.
+    /// </summary>
+    /// <remarks>
+    /// Capable of piping calls to a deprecated launchVrHomeButton to the GvrDaydreamApi.
+    /// </remarks>
     public class HelloVRManager : MonoBehaviour
     {
-        public GameObject m_launchVrHomeButton;
-        public DemoInputManager m_demoInputManager;
+        /// @deprecated
+        /// <summary>
+        /// A VR Home button to activate or deactivate as devices connect to or disconnect from the
+        /// app.
+        /// </summary>
+        public GameObject launchVrHomeButton;
 
-        void Start()
-        {
-#if !UNITY_ANDROID || UNITY_EDITOR
-            if (m_launchVrHomeButton == null)
-            {
-                return;
-            }
+        /// @deprecated
+        /// <summary>A DemoInputManager instance which is managing the scene, if any.</summary>
+        public DemoInputManager demoInputManager;
 
-            m_launchVrHomeButton.SetActive(false);
-#else
-            GvrDaydreamApi.CreateAsync((success) =>
-            {
-                if (!success)
-                {
-                    // Unexpected. See GvrDaydreamApi log messages for details.
-                    Debug.LogError("GvrDaydreamApi.CreateAsync() failed");
-                }
-            });
-#endif  // !UNITY_ANDROID || UNITY_EDITOR
-        }
-
-#if UNITY_ANDROID && !UNITY_EDITOR
-        void Update()
-        {
-            if (m_launchVrHomeButton == null || m_demoInputManager == null)
-            {
-                return;
-            }
-
-            m_launchVrHomeButton.SetActive(m_demoInputManager.IsCurrentlyDaydream());
-        }
-#endif  // UNITY_ANDROID && !UNITY_EDITOR
-
+        /// @deprecated
+        /// <summary>A method which launches the VR Home screen.</summary>
         public void LaunchVrHome()
         {
 #if UNITY_ANDROID && !UNITY_EDITOR
@@ -72,5 +56,38 @@ namespace GoogleVR.HelloVR
             });
 #endif  // UNITY_ANDROID && !UNITY_EDITOR
         }
+
+        private void Start()
+        {
+#if !UNITY_ANDROID || UNITY_EDITOR
+            if (launchVrHomeButton == null)
+            {
+                return;
+            }
+
+            launchVrHomeButton.SetActive(false);
+#else
+            GvrDaydreamApi.CreateAsync((success) =>
+            {
+                if (!success)
+                {
+                    // Unexpected. See GvrDaydreamApi log messages for details.
+                    Debug.LogError("GvrDaydreamApi.CreateAsync() failed");
+                }
+            });
+#endif  // !UNITY_ANDROID || UNITY_EDITOR
+        }
+
+#if UNITY_ANDROID && !UNITY_EDITOR
+        private void Update()
+        {
+            if (launchVrHomeButton == null || demoInputManager == null)
+            {
+                return;
+            }
+
+            launchVrHomeButton.SetActive(demoInputManager.IsCurrentlyDaydream());
+        }
+#endif  // UNITY_ANDROID && !UNITY_EDITOR
     }
 }

@@ -20,11 +20,16 @@ namespace GoogleVR.VideoDemo
 {
     using UnityEngine;
 
+    /// <summary>
+    /// A data class which finds and stores reference information for `GvrVideoPlayerTexture`
+    /// instances.
+    /// </summary>
     public class VideoPlayerReference : MonoBehaviour
     {
+        /// <summary>The `GvrVideoPlayerTexture` instance this object refers to.</summary>
         public GvrVideoPlayerTexture player;
 
-        void Awake()
+        private void Awake()
         {
 #if !UNITY_5_2
             GetComponentInChildren<VideoControlsManager>(true).Player = player;

@@ -18,67 +18,76 @@
 
 using System;
 using System.Collections.Generic;
+using Gvr.Internal;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using Gvr.Internal;
 
-/// Wraps UnityEngine.EventSystems.ExecuteEvents.
-/// Also, exposes event delegates to allow global handling of events.
+/// <summary>Wraps `UnityEngine.EventSystems.ExecuteEvents`.</summary>
+/// <remarks>Also, exposes event delegates to allow global handling of events.</remarks>
 public class GvrEventExecutor : IGvrEventExecutor
 {
+    /// <summary>Stores delegates for events.</summary>
+    private Dictionary<Type, EventDelegate> eventTable;
+
+    /// <summary>Initializes a new instance of the <see cref="GvrEventExecutor" /> class.</summary>
+    public GvrEventExecutor()
+    {
+        eventTable = new Dictionary<Type, EventDelegate>();
+    }
+
     /// <summary>Delegate type for handling pointer events.</summary>
+    /// <param name="target">The GameObject to add this behavior to.</param>
+    /// <param name="eventData">The context data of the Event which triggered this call.</param>
     public delegate void EventDelegate(GameObject target, PointerEventData eventData);
 
-    /// Fired when a Click occurs on any object.
+    /// <summary>Adds or removes delegate functions for the `OnPointerClick` event.</summary>
     public event EventDelegate OnPointerClick
     {
         add { AddEventDelegate<IPointerClickHandler>(value); }
         remove { RemoveEventDelegate<IPointerClickHandler>(value); }
     }
 
-    /// <summary>Fired when a Down event occurs on any object.</summary>
+    /// <summary>Adds or removes delegate functions for the `OnPointerDown` event.</summary>
     public event EventDelegate OnPointerDown
     {
         add { AddEventDelegate<IPointerDownHandler>(value); }
         remove { RemoveEventDelegate<IPointerDownHandler>(value); }
     }
 
-    /// <summary>Fired when an Up event occurs on any object.</summary>
+    /// <summary>Adds or removes delegate functions for the `OnPointerUp` event.</summary>
     public event EventDelegate OnPointerUp
     {
         add { AddEventDelegate<IPointerUpHandler>(value); }
         remove { RemoveEventDelegate<IPointerUpHandler>(value); }
     }
 
-    /// <summary>Fired when an Enter event occurs on any object.</summary>
+    /// <summary>Adds or removes delegate functions for the `OnPointerEnter` event.</summary>
     public event EventDelegate OnPointerEnter
     {
         add { AddEventDelegate<IPointerEnterHandler>(value); }
         remove { RemoveEventDelegate<IPointerEnterHandler>(value); }
     }
 
-    /// <summary>Fired when an Exit event occurs on any object.</summary>
+    /// <summary>Adds or removes delegate functions for the `OnPointerExit` event.</summary>
     public event EventDelegate OnPointerExit
     {
         add { AddEventDelegate<IPointerExitHandler>(value); }
         remove { RemoveEventDelegate<IPointerExitHandler>(value); }
     }
 
-    /// <summary>Fired when a Scroll event occurs on any object.</summary>
+    /// <summary>Adds or removes delegate functions for the `OnScroll` event.</summary>
     public event EventDelegate OnScroll
     {
         add { AddEventDelegate<IScrollHandler>(value); }
         remove { RemoveEventDelegate<IScrollHandler>(value); }
     }
 
-    /// Stores delegates for events.
-    private Dictionary<Type, EventDelegate> eventTable;
-
-    public GvrEventExecutor()
-    {
-        eventTable = new Dictionary<Type, EventDelegate>();
-    }
-
+    /// <summary>Execute the specified target, eventData and functor.</summary>
+    /// <param name="target">The `GameObject` to execute this event behavior on.</param>
+    /// <param name="eventData">The triggering EventData.</param>
+    /// <param name="functor">The delegate call's implementation.</param>
+    /// <typeparam name="T">The 1st type parameter.</typeparam>
+    /// <returns>Returns `true` if the method successfully executes, `false` otherwise.</returns>
     [SuppressMemoryAllocationError(IsWarning = true, Reason = "Pending documentation.")]
     public bool Execute<T>(GameObject target,
                            BaseEventData eventData,
@@ -91,6 +100,12 @@ public class GvrEventExecutor : IGvrEventExecutor
         return result;
     }
 
+    /// <summary>Executes the hierarchy.</summary>
+    /// <returns>The hierarchy.</returns>
+    /// <param name="root">The top-level object this event should trigger.</param>
+    /// <param name="eventData">The triggering EventData.</param>
+    /// <param name="callbackFunction">Callback function.</param>
+    /// <typeparam name="T">The 1st type parameter.</typeparam>
     [SuppressMemoryAllocationError(IsWarning = true, Reason = "Pending documentation.")]
     public GameObject ExecuteHierarchy<T>(GameObject root,
                                           BaseEventData eventData,
@@ -103,6 +118,10 @@ public class GvrEventExecutor : IGvrEventExecutor
         return result;
     }
 
+    /// <summary>Gets the event handler.</summary>
+    /// <returns>The event handler.</returns>
+    /// <param name="root">The top-level object this event should trigger.</param>
+    /// <typeparam name="T">The 1st type parameter.</typeparam>
     [SuppressMemoryAllocationError(IsWarning = true, Reason = "Pending documentation.")]
     public GameObject GetEventHandler<T>(GameObject root)
     where T : IEventSystemHandler

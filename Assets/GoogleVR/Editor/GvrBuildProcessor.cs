@@ -18,57 +18,87 @@
 
 // Only invoke custom build processor when building for Android or iOS.
 #if UNITY_ANDROID || UNITY_IOS
-using UnityEngine;
-using UnityEditor;
-using UnityEditor.Build;
-using System.Linq;
 
 #if UNITY_IOS
-using UnityEditor.iOS.Xcode;
 using System.IO;
 #endif
+using System.Linq;
 
+using UnityEditor;
+using UnityEditor.Build;
+#if UNITY_2018_1_OR_NEWER
+using UnityEditor.Build.Reporting;
+#endif
+#if UNITY_IOS
+using UnityEditor.iOS.Xcode;
+#endif
+
+using UnityEngine;
 #if UNITY_2017_2_OR_NEWER
 using UnityEngine.XR;
 #else
 using XRSettings = UnityEngine.VR.VRSettings;
 #endif  // UNITY_2017_2_OR_NEWER
 
+/// <summary>
+/// Notifies users if they build for Android or iOS without Cardboard or Daydream enabled.
+/// </summary>
 #if UNITY_2018_1_OR_NEWER
-using UnityEditor.Build.Reporting;
-#endif
-
-// Notifies users if they build for Android or iOS without Cardboard or Daydream enabled.
-#if UNITY_2018_1_OR_NEWER
-class GvrBuildProcessor : IPreprocessBuildWithReport, IPostprocessBuildWithReport
+internal class GvrBuildProcessor : IPreprocessBuildWithReport, IPostprocessBuildWithReport
 #else
-class GvrBuildProcessor : IPreprocessBuild, IPostprocessBuild
+internal class GvrBuildProcessor : IPreprocessBuild, IPostprocessBuild
 #endif
 {
     private const string VR_SETTINGS_NOT_ENABLED_ERROR_MESSAGE_FORMAT =
-        "To use the Google VR SDK on {0}, 'Player Settings > Virtual Reality Supported' setting must be checked.\n" +
+        "To use the Google VR SDK on {0}, 'Player Settings > Virtual Reality Supported' setting " +
+        "must be checked.\n" +
         "Please fix this setting and rebuild your app.";
 
     private const string IOS_MISSING_GVR_SDK_ERROR_MESSAGE =
-        "To use the Google VR SDK on iOS, 'Player Settings > Virtual Reality SDKs' must include 'Cardboard'.\n" +
+        "To use the Google VR SDK on iOS, 'Player Settings > Virtual Reality SDKs' must include " +
+        "'Cardboard'.\n" +
         "Please fix this setting and rebuild your app.";
 
     private const string ANDROID_MISSING_GVR_SDK_ERROR_MESSAGE =
-        "To use the Google VR SDK on Android, 'Player Settings > Virtual Reality SDKs' must include 'Daydream' or 'Cardboard'.\n" +
+        "To use the Google VR SDK on Android, 'Player Settings > Virtual Reality SDKs' must " +
+        "include 'Daydream' or 'Cardboard'.\n" +
         "Please fix this setting and rebuild your app.";
 
+    /// @cond
+    /// <summary>Gets this `IOrderedCallback`'s callback order.</summary>
+    /// <remarks>Determines which order this runs in relative to other preoprocessors.</remarks>
+    /// <returns>The ordered callback step this runs in.</returns>
     public int callbackOrder
     {
         get { return 0; }
     }
 
+    /// @endcond
 #if UNITY_2018_1_OR_NEWER
+    /// @cond
+    /// <summary>An `IPreprocessBuildWithReport` builtin.</summary>
+    /// <remarks>
+    /// Implement this function to receive a callback before the build is started.
+    /// </remarks>
+    /// <param name="report">
+    /// A report containing information about the build, such as its target platform and output
+    /// path.
+    /// </param>
     public void OnPreprocessBuild(BuildReport report)
     {
           OnPreprocessBuild(report.summary.platform, report.summary.outputPath);
     }
+
+    /// @endcond
 #endif
 
+    /// @cond
+    /// <summary>An `IPreprocessBuildWithReport` builtin.</summary>
+    /// <remarks>
+    /// Implement this function to receive a callback before the build is started.
+    /// </remarks>
+    /// <param name="target">The build target (Android or iOS).</param>
+    /// <param name="path">This parameter is unused.</param>
     public void OnPreprocessBuild(BuildTarget target, string path)
     {
         if (target != BuildTarget.Android && target != BuildTarget.iOS)
@@ -104,35 +134,60 @@ class GvrBuildProcessor : IPreprocessBuild, IPostprocessBuild
         }
     }
 
+    /// @endcond
 #if UNITY_2018_1_OR_NEWER
+    /// @cond
+    /// <summary>An `IPostprocessBuildWithReport` builtin.</summary>
+    /// <remarks>
+    /// Implement this function to receive a callback after the build is complete.
+    /// </remarks>
+    /// <param name="report">
+    /// A report containing information about the build, such as its target platform and output
+    /// path.
+    /// </param>
     public void OnPostprocessBuild(BuildReport report)
     {
         OnPostprocessBuild(report.summary.platform, report.summary.outputPath);
-     }
+    }
+
+    /// @endcond
 #endif
 
+    /// @cond
+    /// <summary>An `IPostprocessBuildWithReport` builtin.</summary>
+    /// <remarks>
+    /// Implement this function to receive a callback after the build is complete.
+    /// </remarks>
+    /// <param name="target">The build target (Android or iOS).</param>
+    /// <param name="outputPath">The path to a plist file to write to.</param>
     public void OnPostprocessBuild(BuildTarget target, string outputPath)
     {
 #if UNITY_IOS
         // Add Camera usage description for scanning viewer QR codes on iOS.
         if (target == BuildTarget.iOS)
         {
-              // Read plist
-              var plistPath = Path.Combine(outputPath, "Info.plist");
-               var plist = new PlistDocument();
-              plist.ReadFromFile(plistPath);
+            // Read plist
+            var plistPath = Path.Combine(outputPath, "Info.plist");
+            var plist = new PlistDocument();
+            plist.ReadFromFile(plistPath);
 
             // Update value
-              PlistElementDict rootDict = plist.root;
-              rootDict.SetString("NSCameraUsageDescription", "Scan Cardboard viewer QR code");
+            PlistElementDict rootDict = plist.root;
+            rootDict.SetString("NSCameraUsageDescription", "Scan Cardboard viewer QR code");
 
             // Write plist
-             File.WriteAllText(plistPath, plist.WriteToString());
+            File.WriteAllText(plistPath, plist.WriteToString());
         }
 #endif
-      }
+    }
 
-    // 'Player Settings > Virtual Reality Supported' enabled?
+    /// @endcond
+    /// <summary>
+    /// Gets whether 'Player Settings > Virtual Reality Supported' is enabled.
+    /// </summary>
+    /// <returns>
+    /// True if 'Player Settings > Virtual Reality Supported' is enabled.  False otherwise.
+    /// </returns>
     private bool IsVRSupportEnabled()
     {
         return PlayerSettings.virtualRealitySupported;

@@ -18,10 +18,11 @@
 
 namespace GoogleVR.VideoDemo
 {
-    using UnityEngine;
     using System.Collections;
+    using UnityEngine;
     using UnityEngine.UI;
 
+    /// <summary>Controls for the Video Player.</summary>
     public class VideoControlsManager : MonoBehaviour
     {
         private GameObject pauseSprite;
@@ -35,9 +36,101 @@ namespace GoogleVR.VideoDemo
         private Text videoPosition;
         private Text videoDuration;
 
-        public GvrVideoPlayerTexture Player { set; get; }
+        /// <summary>Gets or sets the player.</summary>
+        /// <value>The player.</value>
+        public GvrVideoPlayerTexture Player { get; set; }
 
-        void Awake()
+        /// <summary>Raises the volume up event.</summary>
+        public void OnVolumeUp()
+        {
+            if (Player.CurrentVolume < Player.MaxVolume)
+            {
+                Player.CurrentVolume += 1;
+            }
+        }
+
+        /// <summary>Raises the volume down event.</summary>
+        public void OnVolumeDown()
+        {
+            if (Player.CurrentVolume > 0)
+            {
+                Player.CurrentVolume -= 1;
+            }
+        }
+
+        /// <summary>Raises the toggle volume event.</summary>
+        public void OnToggleVolume()
+        {
+            bool visible = !volumeWidget.activeSelf;
+            volumeWidget.SetActive(visible);
+
+            // close settings if volume opens.
+            settingsPanel.SetActive(settingsPanel.activeSelf && !visible);
+        }
+
+        /// <summary>Raises the toggle settings event.</summary>
+        public void OnToggleSettings()
+        {
+            bool visible = !settingsPanel.activeSelf;
+            settingsPanel.SetActive(visible);
+
+            // close settings if volume opens.
+            volumeWidget.SetActive(volumeWidget.activeSelf && !visible);
+        }
+
+        /// <summary>Raises the play pause event.</summary>
+        public void OnPlayPause()
+        {
+            bool isPaused = Player.IsPaused;
+            if (isPaused)
+            {
+                Player.Play();
+            }
+            else
+            {
+                Player.Pause();
+            }
+
+            pauseSprite.SetActive(isPaused);
+            playSprite.SetActive(!isPaused);
+            CloseSubPanels();
+        }
+
+        /// <summary>Sets the volume to the given value.</summary>
+        /// <param name="val">The new Volume value.</param>
+        public void OnVolumePositionChanged(float val)
+        {
+            if (Player.VideoReady)
+            {
+                Debug.Log("Setting current volume to " + val);
+                Player.CurrentVolume = (int)val;
+            }
+        }
+
+        /// <summary>Closes the sub panels.</summary>
+        public void CloseSubPanels()
+        {
+            volumeWidget.SetActive(false);
+            settingsPanel.SetActive(false);
+        }
+
+        /// <summary>Fade this video canvas in or out.</summary>
+        /// <param name="show">
+        /// Value `true` if this video should appear, or `false` if it should fade.
+        /// </param>
+        public void Fade(bool show)
+        {
+            if (show)
+            {
+                StartCoroutine(DoAppear());
+            }
+            else
+            {
+                StartCoroutine(DoFade());
+            }
+        }
+
+        private void Awake()
         {
             foreach (Text t in GetComponentsInChildren<Text>())
             {
@@ -97,7 +190,7 @@ namespace GoogleVR.VideoDemo
             }
         }
 
-        void Start()
+        private void Start()
         {
             foreach (ScrubberEvents s in GetComponentsInChildren<ScrubberEvents>(true))
             {
@@ -110,9 +203,9 @@ namespace GoogleVR.VideoDemo
             }
         }
 
-        void Update()
+        private void Update()
         {
-            if ((!Player.VideoReady || Player.IsPaused))
+            if (!Player.VideoReady || Player.IsPaused)
             {
                 pauseSprite.SetActive(false);
                 playSprite.SetActive(true);
@@ -155,85 +248,7 @@ namespace GoogleVR.VideoDemo
             }
         }
 
-        public void OnVolumeUp()
-        {
-            if (Player.CurrentVolume < Player.MaxVolume)
-            {
-                Player.CurrentVolume += 1;
-            }
-        }
-
-        public void OnVolumeDown()
-        {
-            if (Player.CurrentVolume > 0)
-            {
-                Player.CurrentVolume -= 1;
-            }
-        }
-
-        public void OnToggleVolume()
-        {
-            bool visible = !volumeWidget.activeSelf;
-            volumeWidget.SetActive(visible);
-
-            // close settings if volume opens.
-            settingsPanel.SetActive(settingsPanel.activeSelf && !visible);
-        }
-
-        public void OnToggleSettings()
-        {
-            bool visible = !settingsPanel.activeSelf;
-            settingsPanel.SetActive(visible);
-
-            // close settings if volume opens.
-            volumeWidget.SetActive(volumeWidget.activeSelf && !visible);
-        }
-
-        public void OnPlayPause()
-        {
-            bool isPaused = Player.IsPaused;
-            if (isPaused)
-            {
-                Player.Play();
-            }
-            else
-            {
-                Player.Pause();
-            }
-
-            pauseSprite.SetActive(isPaused);
-            playSprite.SetActive(!isPaused);
-            CloseSubPanels();
-        }
-
-        public void OnVolumePositionChanged(float val)
-        {
-            if (Player.VideoReady)
-            {
-                Debug.Log("Setting current volume to " + val);
-                Player.CurrentVolume = (int)val;
-            }
-        }
-
-        public void CloseSubPanels()
-        {
-            volumeWidget.SetActive(false);
-            settingsPanel.SetActive(false);
-        }
-
-        public void Fade(bool show)
-        {
-            if (show)
-            {
-                StartCoroutine(DoAppear());
-            }
-            else
-            {
-                StartCoroutine(DoFade());
-            }
-        }
-
-        IEnumerator DoAppear()
+        private IEnumerator DoAppear()
         {
             CanvasGroup cg = GetComponent<CanvasGroup>();
             while (cg.alpha < 1.0)
@@ -246,7 +261,7 @@ namespace GoogleVR.VideoDemo
             yield break;
         }
 
-        IEnumerator DoFade()
+        private IEnumerator DoFade()
         {
             CanvasGroup cg = GetComponent<CanvasGroup>();
             while (cg.alpha > 0)
@@ -262,7 +277,7 @@ namespace GoogleVR.VideoDemo
 
         private string FormatTime(long ms)
         {
-            int sec = ((int)(ms / 1000L));
+            int sec = (int)(ms / 1000L);
             int mn = sec / 60;
             sec = sec % 60;
             int hr = mn / 60;

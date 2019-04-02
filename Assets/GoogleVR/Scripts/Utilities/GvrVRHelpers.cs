@@ -16,10 +16,10 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-using UnityEngine;
-using UnityEngine.EventSystems;
 using System.Collections;
 using Gvr.Internal;
+using UnityEngine;
+using UnityEngine.EventSystems;
 #if UNITY_2017_2_OR_NEWER
 using UnityEngine.XR;
 #else
@@ -31,7 +31,8 @@ using XRSettings = UnityEngine.VR.VRSettings;
 /// <summary>Helper functions common to GVR VR applications.</summary>
 public static class GvrVRHelpers
 {
-    /// <summary>Returns the center of the viewport.</summary>
+    /// <summary>Gets the center of the screen or eye texture, in pixels.</summary>
+    /// <returns>The center of the screen, in pixels.</returns>
     public static Vector2 GetViewportCenter()
     {
         int viewportWidth = Screen.width;
@@ -45,17 +46,19 @@ public static class GvrVRHelpers
         return new Vector2(0.5f * viewportWidth, 0.5f * viewportHeight);
     }
 
-    /// <summary>Returns the forward vector relative to the head rotation.</summary>
+    /// <summary>Gets the forward vector relative to the headset's rotation.</summary>
+    /// <returns>The forward vector relative to the headset's rotation.</returns>
     public static Vector3 GetHeadForward()
     {
         return GetHeadRotation() * Vector3.forward;
     }
 
-    /// <summary>Returns the head rotation.</summary>
+    /// <summary>Gets the headset's rotation.</summary>
+    /// <returns>The headset's rotation.</returns>
     public static Quaternion GetHeadRotation()
     {
 #if UNITY_EDITOR
-        if (InstantPreview.Instance != null && InstantPreview.Instance.IsCurrentlyConnected)
+        if (InstantPreview.IsActive)
         {
             // In-editor; Instant Preview is active:
             return Camera.main.transform.localRotation;
@@ -65,8 +68,8 @@ public static class GvrVRHelpers
             // In-editor; Instant Preview is not active:
             if (GvrEditorEmulator.Instance == null)
             {
-                Debug.LogWarning("No GvrEditorEmulator instance was found in your scene. Please ensure that " +
-                "GvrEditorEmulator exists in your scene.");
+                Debug.LogWarning("No GvrEditorEmulator instance was found in your scene. Please " +
+                                 "ensure that GvrEditorEmulator exists in your scene.");
                 return Quaternion.identity;
             }
 
@@ -78,14 +81,15 @@ public static class GvrVRHelpers
 #endif // UNITY_EDITOR
     }
 
-    /// <summary>Returns the head position.</summary>
+    /// <summary>Gets the head's position.</summary>
+    /// <returns>The head's position.</returns>
     public static Vector3 GetHeadPosition()
     {
 #if UNITY_EDITOR
         if (GvrEditorEmulator.Instance == null)
         {
-            Debug.LogWarning("No GvrEditorEmulator instance was found in your scene. Please ensure that " +
-            "GvrEditorEmulator exists in your scene.");
+            Debug.LogWarning("No GvrEditorEmulator instance was found in your scene. Please " +
+                             "ensure that GvrEditorEmulator exists in your scene.");
             return Vector3.zero;
         }
 
@@ -95,7 +99,9 @@ public static class GvrVRHelpers
 #endif // UNITY_EDITOR
     }
 
-    /// <summary>Returns the recommended maximum laser distance for the given mode.</summary>
+    /// <summary>Gets the recommended max laser distance, based on raycast mode.</summary>
+    /// <param name="mode">The `RaycastMode` for which to get the recommended distance.</param>
+    /// <returns>The recommended maximum laser distance for the given mode.</returns>
     public static float GetRecommendedMaxLaserDistance(GvrBasePointer.RaycastMode mode)
     {
         switch (mode)
@@ -110,7 +116,16 @@ public static class GvrVRHelpers
         }
     }
 
-    /// <summary>Returns the distance of the ray intersection for the given mode.</summary>
+    /// <summary>Gets the distance at which the `Direct` and `Camera` raycasts intersect.</summary>
+    /// <remarks>
+    /// This is the the point at which `Hybrid` mode will transition from `Direct` (closer than the
+    /// intersection) to `Camera` (further than the intersection) mode.
+    /// </remarks>
+    /// <param name="mode">
+    /// The `RaycastMode` for which to get the intersection distance.  Only returns non-zero when
+    /// this is `RaycastMode.Camera`.
+    /// </param>
+    /// <returns>The distance at which the `Direct` and `Camera` raycasts intersect.</returns>
     public static float GetRayIntersection(GvrBasePointer.RaycastMode mode)
     {
         switch (mode)
@@ -125,7 +140,9 @@ public static class GvrVRHelpers
         }
     }
 
-    /// <summary>Returns true if the laser should be shrunk based on the given mode.</summary>
+    /// <summary>Returns a value indicating whether the laser is visually shrunken.</summary>
+    /// <param name="mode">The `RaycastMode` for which to check behavior.</param>
+    /// <returns>Returns `true` if the laser is shrunken, `false`a otherwise.</returns>
     public static bool GetShrinkLaser(GvrBasePointer.RaycastMode mode)
     {
         switch (mode)

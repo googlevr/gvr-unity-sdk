@@ -20,15 +20,15 @@ namespace GoogleVR.Demos
 {
     using UnityEngine;
 
-    // Ensures correct app and scene setup.
+    /// <summary>Ensures correct app and scene setup.</summary>
     public class DemoSceneManager : MonoBehaviour
     {
-        void Start()
+        private void Start()
         {
             Input.backButtonLeavesApp = true;
         }
 
-        void Update()
+        private void Update()
         {
             // Exit when (X) is tapped.
             if (Input.GetKeyDown(KeyCode.Escape))

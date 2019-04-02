@@ -20,89 +20,85 @@ using System;
 using UnityEngine;
 using UnityEngine.Assertions;
 
-/// Visualizes a laser and a reticle using a LineRenderer and a Quad.
-/// Provides functions for settings the end point of the laser,
-/// and clamps the laser and reticle based on max distances.
+/// <summary>Visualizes a laser and a reticle using a LineRenderer and a Quad.</summary>
+/// <remarks>
+/// Provides functions for settings the end point of the laser, and clamps the laser and reticle
+/// based on max distances.
+/// </remarks>
 [RequireComponent(typeof(LineRenderer))]
-[HelpURL("https://developers.google.com/vr/unity/reference/class/GvrLaserVisual")]
+[HelpURL("https://developers.google.com/vr/reference/unity/class/GvrLaserVisual")]
 public class GvrLaserVisual : MonoBehaviour, IGvrArmModelReceiver
 {
-    /// Used to position the reticle at the current position.
+    /// <summary>Used to position the reticle at the current position.</summary>
     [Tooltip("Used to position the reticle at the current position.")]
     public GvrControllerReticleVisual reticle;
 
-    /// The end point of the visual will not necessarily be along the forward direction of the laser.
-    /// This is particularly true in both Camera and Hybrid Raycast Modes. In that case, both the
-    /// laser and the controller are rotated to face the end point. This reference is used to control
-    /// the rotation of the controller.
+    /// <summary>The controller visual's transform.</summary>
+    /// <remarks>
+    /// The end point of the visual will not necessarily be along the forward direction of the
+    /// laser. This is particularly true in both Camera and Hybrid Raycast Modes. In that case, both
+    /// the laser and the controller are rotated to face the end point. This reference is used to
+    /// control the rotation of the controller.
+    /// </remarks>
     [Tooltip("Used to rotate the controller to face the current position.")]
     public Transform controller;
 
-    /// Color of the laser pointer including alpha transparency.
+    /// <summary>Color of the laser pointer including alpha transparency.</summary>
     [Tooltip("Start color of the laser pointer including alpha transparency.")]
     public Color laserColor = new Color(1.0f, 1.0f, 1.0f, 0.25f);
 
-    /// Color of the laser pointer including alpha transparency.
+    /// <summary>Color of the laser pointer including alpha transparency.</summary>
     [Tooltip("End color of the laser pointer including alpha transparency.")]
     public Color laserColorEnd = new Color(1.0f, 1.0f, 1.0f, 0.0f);
 
-    /// Maximum distance of the laser(meters).
+    /// <summary>Maximum distance of the laser (meters).</summary>
     [Tooltip("Maximum distance of the laser(meters).")]
     [Range(0.0f, 20.0f)]
     public float maxLaserDistance = 1.0f;
 
-    /// The rate that the current position moves towards the target position.
+    /// <summary>The rate that the current position moves towards the target position.</summary>
     [Tooltip("The rate that the current position moves towards the target position.")]
     public float lerpSpeed = 20.0f;
 
-    /// If the targetPosition is greater than this threshold, then
-    /// the position changes immediately instead of lerping.
+    /// <summary>The threashold at which position change becomes immediate.</summary>
+    /// <remarks>
+    /// If the targetPosition is greater than this threshold, then the position changes immediately
+    /// instead of lerping.
+    /// </remarks>
     [Tooltip("If the target position is greater than this threshold, then the position changes " +
     "immediately instead of lerping.")]
     public float lerpThreshold = 1.0f;
 
+    /// <summary>
     /// This is primarily used for Hybrid Raycast mode (details in _GvrBasePointer_) to prevent
     /// mismatches between the laser and the reticle when the "camera" component of the ray is used.
+    /// </summary>
     [Tooltip("Determines if the laser will shrink when it isn't facing in the forward direction " +
     "of the transform.")]
     public bool shrinkLaser = true;
 
-    /// Amount to shrink the laser when it is fully shrunk.
+    /// <summary>Amount to shrink the laser when it is fully shrunk.</summary>
     [Range(0.0f, 1.0f)]
     [Tooltip("Amount to shrink the laser when it is fully shrunk.")]
     public float shrunkScale = 0.2f;
 
-    /// Begin shrinking the laser when the angle between transform.forward and the reticle
-    /// is greater than this value.
+    /// <summary>
+    /// Begin shrinking the laser when the angle between `transform.forward` and the reticle is
+    /// greater than this value.
+    /// </summary>
     [Range(0.0f, 15.0f)]
     [Tooltip("Begin shrinking the laser when the angle between transform.forward and the reticle " +
-    "is greater than this value.")]
+        "is greater than this value.")]
     public float beginShrinkAngleDegrees = 0.0f;
 
-    /// Finish shrinking the laser when the angle between transform.forward and the reticle is
+    /// <summary>
+    /// Finish shrinking the laser when the angle between `transform.forward` and the reticle is
     /// greater than this value.
+    /// </summary>
     [Range(0.0f, 15.0f)]
     [Tooltip("Finish shrinking the laser when the angle between transform.forward and the reticle " +
-    "is greater than this value.")]
+        "is greater than this value.")]
     public float endShrinkAngleDegrees = 2.0f;
-
-    private const float LERP_CLAMP_THRESHOLD = 0.02f;
-
-    /// <summary> The arm model used to control the visual.</summary>
-    public GvrBaseArmModel ArmModel { get; set; }
-
-    /// Reference to the laser's line renderer.
-    public LineRenderer Laser { get; private set; }
-
-    /// <summary>Delegate for customizing how the currentPosition is calculated based on the distance.</summary>
-    /// <remarks>
-    /// If not set, the currentPosition is determined based on the distance multiplied by the forward
-    /// direction of the transform added to the position of the transform.
-    /// </remarks>
-    public delegate Vector3 GetPointForDistanceDelegate(float distance);
-
-    /// <summary>The function to use for determining the point at a distance.</summary>
-    public GetPointForDistanceDelegate GetPointForDistanceFunction { get; set; }
 
     /// <summary>Ratio to shrink the visual by.</summary>
     protected float shrinkRatio;
@@ -110,7 +106,7 @@ public class GvrLaserVisual : MonoBehaviour, IGvrArmModelReceiver
     /// <summary>Distance to the target object.</summary>
     protected float targetDistance;
 
-    /// <summary>Current distance to the visual</summary>
+    /// <summary>Current distance to the visual.</summary>
     protected float currentDistance;
 
     /// <summary>Current world position of the visual.</summary>
@@ -122,11 +118,49 @@ public class GvrLaserVisual : MonoBehaviour, IGvrArmModelReceiver
     /// <summary>Current local rotation of the visual.</summary>
     protected Quaternion currentLocalRotation;
 
-    /// Set the distance of the laser.
-    /// Clamps the distance of the laser and reticle.
-    ///
-    /// **distance** target distance from the pointer to draw the visual at.
-    /// **immediate** If true, the distance is changed immediately. Otherwise, it will lerp.
+    private const float LERP_CLAMP_THRESHOLD = 0.02f;
+
+    /// <summary>
+    /// Optional delegate for customizing how the currentPosition is calculated based on the
+    /// distance.
+    /// </summary>
+    /// <remarks>
+    /// If not set, the `currentPosition` is determined based on the distance multiplied by the
+    /// forward direction of the transform added to the position of the transform.
+    /// </remarks>
+    /// <returns>
+    /// Default: The distance mutliplied by the forwrad direction of the transform added to the
+    /// position of the transform.
+    /// Overridden: An implementation for calculating `currentPosition` from distance.
+    /// </returns>
+    /// <param name="distance">The distance to use in calculating the `currentPosition`.</param>
+    public delegate Vector3 GetPointForDistanceDelegate(float distance);
+
+    /// <summary>Gets or sets the arm model used to control the visual.</summary>
+    /// <value>The arm model used to control the visual.</value>
+    public GvrBaseArmModel ArmModel { get; set; }
+
+    /// <summary>Gets a reference to the laser's line renderer.</summary>
+    /// <value>The laser's line renderer.</value>
+    public LineRenderer Laser { get; private set; }
+
+    /// <summary>Gets or sets the function to use for determining the point at a distance.</summary>
+    /// <value>The function to use for determining the point at a distance.</value>
+    public GetPointForDistanceDelegate GetPointForDistanceFunction { get; set; }
+
+    /// <summary>Gets the current distance to the visual.</summary>
+    /// <value>The current distance to the visual.</value>
+    public float CurrentDistance
+    {
+        get { return currentDistance; }
+    }
+
+    /// <summary>Set the distance of the laser.</summary>
+    /// <remarks>Clamps the distance of the laser and reticle.</remarks>
+    /// <param name="distance">Target distance from the pointer to draw the visual at.</param>
+    /// <param name="immediate">
+    /// If `true`, the distance is changed immediately. Otherwise, it will lerp.
+    /// </param>
     public virtual void SetDistance(float distance, bool immediate = false)
     {
         targetDistance = distance;
@@ -141,21 +175,16 @@ public class GvrLaserVisual : MonoBehaviour, IGvrArmModelReceiver
         }
     }
 
-    /// <summary>Current distance to the visual.</summary>
-    public float CurrentDistance
-    {
-        get { return currentDistance; }
-    }
-
     /// @cond
+    /// <summary>The MonoBehavior's Awake method.</summary>
     protected virtual void Awake()
     {
         Laser = GetComponent<LineRenderer>();
     }
 
     /// @endcond
-
     /// @cond
+    /// <summary>The MonoBehavior's Awake method.</summary>
     protected virtual void LateUpdate()
     {
         UpdateCurrentPosition();
@@ -166,7 +195,6 @@ public class GvrLaserVisual : MonoBehaviour, IGvrArmModelReceiver
     }
 
     /// @endcond
-
     /// <summary>Updates the current position of the visual.</summary>
     protected virtual void UpdateCurrentPosition()
     {
@@ -195,8 +223,9 @@ public class GvrLaserVisual : MonoBehaviour, IGvrArmModelReceiver
         currentLocalRotation = Quaternion.FromToRotation(Vector3.forward, currentLocalPosition);
     }
 
-    /// <summary>Updates the rotation of  the controller based on the current
-    /// local rotation.</summary>
+    /// <summary>
+    /// Updates the rotation of  the controller based on the current local rotation.
+    /// </summary>
     protected virtual void UpdateControllerOrientation()
     {
         if (controller == null)
@@ -247,7 +276,8 @@ public class GvrLaserVisual : MonoBehaviour, IGvrArmModelReceiver
 
             // Calculate the shrink ratio based on the angle.
             float shrinkAngleDelta = endShrinkAngleDegrees - beginShrinkAngleDegrees;
-            float clampedAngle = Mathf.Clamp(angle - beginShrinkAngleDegrees, 0.0f, shrinkAngleDelta);
+            float clampedAngle =
+                Mathf.Clamp(angle - beginShrinkAngleDegrees, 0.0f, shrinkAngleDelta);
             shrinkRatio = clampedAngle / shrinkAngleDelta;
 
             // Calculate the shrink coeff.
@@ -289,7 +319,8 @@ public class GvrLaserVisual : MonoBehaviour, IGvrArmModelReceiver
         Laser.endColor = finalEndColor;
     }
 
-    /// <summary>Speed of the moving pointer visual.</summary>
+    /// <summary>Gets the speed of the moving pointer visual.</summary>
+    /// <returns>The lerp speed of the moving pointer visual.</returns>
     protected virtual float GetSpeed()
     {
         return lerpSpeed > 0.0f ? lerpSpeed * Time.unscaledDeltaTime : 1.0f;

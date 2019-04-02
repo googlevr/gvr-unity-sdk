@@ -18,30 +18,20 @@
 
 namespace GoogleVR.Demos
 {
-    using UnityEngine;
     using UnityEditor;
+    using UnityEngine;
 
+    /// <summary>Allows DemoInputManager fields to be accessed through the Unity Editor.</summary>
     [CustomEditor(typeof(DemoInputManager))]
     public class DemoInputManagerEditor : Editor
     {
-        SerializedProperty emulatedPlatformTypeProp;
-        SerializedProperty gvrControllerMainProp;
-        SerializedProperty gvrControllerPointerProp;
-        SerializedProperty gvrReticlePointerProp;
+        private SerializedProperty emulatedPlatformTypeProp;
+        private SerializedProperty gvrControllerMainProp;
+        private SerializedProperty gvrControllerPointerProp;
+        private SerializedProperty gvrReticlePointerProp;
 
-        void OnEnable()
-        {
-            gvrControllerMainProp =
-                serializedObject.FindProperty(DemoInputManager.CONTROLLER_MAIN_PROP_NAME);
-            gvrControllerPointerProp =
-                serializedObject.FindProperty(DemoInputManager.CONTROLLER_POINTER_PROP_NAME);
-            gvrReticlePointerProp =
-                serializedObject.FindProperty(DemoInputManager.RETICLE_POINTER_PROP_NAME);
-
-            emulatedPlatformTypeProp =
-                serializedObject.FindProperty(DemoInputManager.EMULATED_PLATFORM_PROP_NAME);
-        }
-
+        /// @cond
+        /// <summary>The Editor's OnInspectorGUI method.</summary>
         public override void OnInspectorGUI()
         {
             serializedObject.Update();
@@ -65,6 +55,21 @@ namespace GoogleVR.Demos
             }
 
             serializedObject.ApplyModifiedProperties();
+        }
+
+        /// @endcond
+        /// <summary>The MonoBehavior's OnEnable behavior.</summary>
+        private void OnEnable()
+        {
+            gvrControllerMainProp =
+                serializedObject.FindProperty(DemoInputManager.CONTROLLER_MAIN_PROP_NAME);
+            gvrControllerPointerProp =
+                serializedObject.FindProperty(DemoInputManager.CONTROLLER_POINTER_PROP_NAME);
+            gvrReticlePointerProp =
+                serializedObject.FindProperty(DemoInputManager.RETICLE_POINTER_PROP_NAME);
+
+            emulatedPlatformTypeProp =
+                serializedObject.FindProperty(DemoInputManager.EMULATED_PLATFORM_PROP_NAME);
         }
     }
 }

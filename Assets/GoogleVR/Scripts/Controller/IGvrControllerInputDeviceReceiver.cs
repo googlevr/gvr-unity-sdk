@@ -24,5 +24,6 @@ using UnityEngine;
 public interface IGvrControllerInputDeviceReceiver
 {
     /// <summary>Sets the reference to the controller input device.</summary>
+    /// <value>The `GvrControllerInputDevice` this instance listens to.</value>
     GvrControllerInputDevice ControllerInputDevice { set; }
 }

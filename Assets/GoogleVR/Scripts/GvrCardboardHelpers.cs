@@ -16,18 +16,22 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-using UnityEngine;
-
 using System;
 using System.Runtime.InteropServices;
+using UnityEngine;
 
 /// <summary>General Cardboard helper methods.</summary>
 public class GvrCardboardHelpers
 {
-    /// Manual recenter for Cardboard apps. After recentering the camera's orientation will be given
-    /// in the new recentered coordinate system.
+    /// <summary>Manual recenter for Cardboard apps.</summary>
+    /// <remarks><para>
+    /// After recentering the camera's orientation will be given in the new recentered coordinate
+    /// system.
+    /// </para><para>
     /// Do not use for Daydream apps as controller based recentering is handled automatically by
-    /// Google VR Services, see `GvrControllerInput.Rencentered` for details.
+    /// Google VR Services.  <see cref="GvrControllerInput#recentered"/>
+    /// for details.
+    /// </para></remarks>
     public static void Recenter()
     {
 #if UNITY_EDITOR
@@ -48,9 +52,12 @@ public class GvrCardboardHelpers
         Debug.Log("Use GvrEditorEmulator for in-editor recentering");
     }
 
-    /// Set the Cardboard viewer params.
+    /// <summary>Set the Cardboard viewer params.</summary>
+    /// <remarks>
     /// Example URI for 2015 Cardboard Viewer V2:
-    /// http://google.com/cardboard/cfg?p=CgZHb29nbGUSEkNhcmRib2FyZCBJL08gMjAxNR0rGBU9JQHegj0qEAAASEIAAEhCAABIQgAASEJYADUpXA89OggeZnc-Ej6aPlAAYAM
+    /// "http://google.com/cardboard/cfg?p=CgZHb29nbGUSEkNhcmRib2FyZCBJL08gMjAxNR0rGBU9JQHegj0qEAAASEIAAEhCAABIQgAASEJYADUpXA89OggeZnc-Ej6aPlAAYAM".
+    /// </remarks>
+    /// <param name="viewerProfileUri">The URI to a cardboard viewer profile.</param>
     public static void SetViewerProfile(String viewerProfileUri)
     {
 #if (UNITY_ANDROID || UNITY_IOS) && !UNITY_EDITOR

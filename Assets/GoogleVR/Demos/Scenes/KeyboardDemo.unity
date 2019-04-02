@@ -156,7 +156,7 @@ Prefab:
       value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 2044164019, guid: 3b7eeb268f8424f809fc34c33b2a6820, type: 2}
-      propertyPath: KeyboardText
+      propertyPath: keyboardText
       value: 
       objectReference: {fileID: 34730832}
     - target: {fileID: 2044164019, guid: 3b7eeb268f8424f809fc34c33b2a6820, type: 2}
@@ -164,7 +164,7 @@ Prefab:
       value: 
       objectReference: {fileID: 1053603994}
     - target: {fileID: 2044164019, guid: 3b7eeb268f8424f809fc34c33b2a6820, type: 2}
-      propertyPath: UpdateCanvas
+      propertyPath: updateCanvas
       value: 
       objectReference: {fileID: 1202287596}
     m_RemovedComponents: []
@@ -810,7 +810,7 @@ GameObject:
   - component: {fileID: 1202287598}
   - component: {fileID: 1202287600}
   m_Layer: 5
-  m_Name: UpdateCanvas
+  m_Name: updateCanvas
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

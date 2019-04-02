@@ -17,54 +17,75 @@
 //-----------------------------------------------------------------------
 
 using System.Collections.Generic;
+using Gvr.Internal;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
-using Gvr.Internal;
-
-/// This script provides a raycaster for use with the GvrPointerInputModule.
-/// It behaves similarly to the standards Graphic raycaster, except that it utilize raycast
+/// <summary>This script provides a raycaster for use with the `GvrPointerInputModule`.</summary>
+/// <remarks><para>
+/// This behaves similarly to the standards Graphic raycaster, except that it utilize raycast
 /// modes specifically for Gvr.
-///
-/// View GvrBasePointerRaycaster.cs and GvrPointerInputModule.cs for more details.
+/// </para><para>
+/// See `GvrBasePointerRaycaster.cs` and `GvrPointerInputModule.cs` for more details.
+/// </para></remarks>
 [AddComponentMenu("GoogleVR/GvrPointerGraphicRaycaster")]
 [RequireComponent(typeof(Canvas))]
 [HelpURL("https://developers.google.com/vr/unity/reference/class/GvrPointerGraphicRaycaster")]
 public class GvrPointerGraphicRaycaster : GvrBasePointerRaycaster
 {
-    /// <summary>Blocking object types.</summary>
-    public enum BlockingObjects
-    {
-        None = 0,
-        TwoD = 1,
-        ThreeD = 2,
-        All = 3,
-    }
-
-    private const int NO_EVENT_MASK_SET = -1;
-
     /// <summary>Flag for ignoring reversed graphics direction.</summary>
     public bool ignoreReversedGraphics = true;
 
-    /// <summary>The type of objects blocking raycasts.</summary>
+    /// <summary>The type of objects which can block raycasts.</summary>
     public BlockingObjects blockingObjects = BlockingObjects.ThreeD;
 
     /// <summary>The blocking layer mask to use when raycasting.</summary>
     public LayerMask blockingMask = NO_EVENT_MASK_SET;
 
+    private const int NO_EVENT_MASK_SET = -1;
+
+    private static List<Graphic> sortedGraphics = new List<Graphic>();
+
     private Canvas targetCanvas;
     private List<Graphic> raycastResults = new List<Graphic>();
     private Camera cachedPointerEventCamera;
 
-    private static readonly List<Graphic> sortedGraphics = new List<Graphic>();
+    /// <summary>
+    /// Initializes a new instance of the <see cref="GvrPointerGraphicRaycaster" /> class.
+    /// </summary>
+    protected GvrPointerGraphicRaycaster()
+    {
+    }
 
-    /// <summary>The camera to use when raycasting.</summary>
+    /// <summary>Types of blocking objects this object's raycasts can hit.</summary>
+    public enum BlockingObjects
+    {
+        /// <summary>This cannot hit any objects.</summary>
+        None = 0,
+
+        /// <summary>This can hit only 2D objects.</summary>
+        TwoD = 1,
+
+        /// <summary>This can hit only 3D objects.</summary>
+        ThreeD = 2,
+
+        /// <summary>This can hit all objects.</summary>
+        All = 3,
+    }
+
+    /// <summary>Gets the event Camera used for gaze-based raycasts.</summary>
+    /// <value>The event camera.</value>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage(
+        "UnityRules.LegacyGvrStyleRules",
+        "VR1001:AccessibleNonConstantPropertiesMustBeUpperCamelCase",
+        Justification = "Legacy Public API.")]
     public override Camera eventCamera
     {
-        [SuppressMemoryAllocationError(IsWarning = true, Reason = "A getter for a Camera should not allocate.")]
-    get
-    {
+        [SuppressMemoryAllocationError(IsWarning = true,
+                                       Reason = "A getter for a Camera should not allocate.")]
+        get
+        {
             GvrBasePointer pointer = GvrPointerInputModule.Pointer;
             if (pointer == null)
             {
@@ -82,35 +103,24 @@ public class GvrPointerGraphicRaycaster : GvrBasePointerRaycaster
         }
     }
 
-    private Canvas canvas
-    {
-        get
-        {
-            if (targetCanvas != null)
-            {
-                return targetCanvas;
-            }
-
-            targetCanvas = GetComponent<Canvas>();
-            return targetCanvas;
-        }
-    }
-
-    protected GvrPointerGraphicRaycaster()
-    {
-    }
-
     /// <summary>Perform raycast on the scene.</summary>
     /// <param name="pointerRay">The ray to use for the operation.</param>
     /// <param name="radius">The radius of the ray to use when testing for hits.</param>
-    /// <param name="eventData">The pointer event data.</param>
-    /// <param name="resultAppendList">The list to append the results to.</param>
-    protected override bool PerformRaycast(GvrBasePointer.PointerRay pointerRay, float radius,
-                                           PointerEventData eventData, List<RaycastResult> resultAppendList)
+    /// <param name="eventData">The event data triggered by any resultant Raycast hits.</param>
+    /// <param name="resultAppendList">The results are appended to this list.</param>
+    /// <returns>Returns `true` if the Raycast has at least one hit, `false` otherwise.</returns>
+    protected override bool PerformRaycast(GvrBasePointer.PointerRay pointerRay,
+                                           float radius,
+                                           PointerEventData eventData,
+                                           List<RaycastResult> resultAppendList)
     {
-        if (canvas == null)
+        if (targetCanvas == null)
         {
-            return false;
+            targetCanvas = GetComponent<Canvas>();
+            if (targetCanvas == null)
+            {
+                return false;
+            }
         }
 
         if (eventCamera == null)
@@ -118,9 +128,10 @@ public class GvrPointerGraphicRaycaster : GvrBasePointerRaycaster
             return false;
         }
 
-        if (canvas.renderMode != RenderMode.WorldSpace)
+        if (targetCanvas.renderMode != RenderMode.WorldSpace)
         {
-            Debug.LogError("GvrPointerGraphicRaycaster requires that the canvas renderMode is set to WorldSpace.");
+            Debug.LogError("GvrPointerGraphicRaycaster requires that the canvas renderMode is set "
+                           + "to WorldSpace.");
             return false;
         }
 
@@ -141,7 +152,10 @@ public class GvrPointerGraphicRaycaster : GvrBasePointerRaycaster
 
             if (blockingObjects == BlockingObjects.TwoD || blockingObjects == BlockingObjects.All)
             {
-                RaycastHit2D hit = Physics2D.Raycast(pointerRay.ray.origin, pointerRay.ray.direction, dist, blockingMask);
+                RaycastHit2D hit = Physics2D.Raycast(pointerRay.ray.origin,
+                                                     pointerRay.ray.direction,
+                                                     dist,
+                                                     blockingMask);
 
                 if (hit.collider != null)
                 {
@@ -152,7 +166,12 @@ public class GvrPointerGraphicRaycaster : GvrBasePointerRaycaster
 
         raycastResults.Clear();
         Ray finalRay;
-        Raycast(canvas, pointerRay.ray, eventCamera, pointerRay.distance, raycastResults, out finalRay);
+        Raycast(targetCanvas,
+                pointerRay.ray,
+                eventCamera,
+                pointerRay.distance,
+                raycastResults,
+                out finalRay);
 
         bool foundHit = false;
 
@@ -180,10 +199,13 @@ public class GvrPointerGraphicRaycaster : GvrBasePointerRaycaster
                 float transDot = Vector3.Dot(transForward, trans.position - pointerRay.ray.origin);
                 float rayDot = Vector3.Dot(transForward, pointerRay.ray.direction);
                 resultDistance = transDot / rayDot;
-                Vector3 hitPosition = pointerRay.ray.origin + (pointerRay.ray.direction * resultDistance);
+                Vector3 hitPosition =
+                    pointerRay.ray.origin + (pointerRay.ray.direction * resultDistance);
 
                 // Check to see if the go is behind the camera.
-                if (resultDistance < 0 || resultDistance >= hitDistance || resultDistance > pointerRay.distance)
+                if (resultDistance < 0 ||
+                    resultDistance >= hitDistance ||
+                    resultDistance > pointerRay.distance)
                 {
                     continue;
                 }
@@ -206,8 +228,8 @@ public class GvrPointerGraphicRaycaster : GvrBasePointerRaycaster
                     screenPosition = eventCamera.WorldToScreenPoint(hitPosition),
                     index = resultAppendList.Count,
                     depth = raycastResults[index].depth,
-                    sortingLayer = canvas.sortingLayerID,
-                    sortingOrder = canvas.sortingOrder
+                    sortingLayer = targetCanvas.sortingLayerID,
+                    sortingOrder = targetCanvas.sortingOrder
                 };
 
                 resultAppendList.Add(castResult);
@@ -218,39 +240,7 @@ public class GvrPointerGraphicRaycaster : GvrBasePointerRaycaster
         return foundHit;
     }
 
-    private Camera GetCameraForRaycastMode(GvrBasePointer pointer, GvrBasePointer.RaycastMode mode)
-    {
-        switch (mode)
-        {
-            case GvrBasePointer.RaycastMode.Direct:
-                if (cachedPointerEventCamera == null)
-                {
-                    Transform pointerTransform = GvrPointerInputModule.Pointer.PointerTransform;
-                    cachedPointerEventCamera = pointerTransform.GetComponent<Camera>();
-                }
-
-                if (cachedPointerEventCamera == null)
-                {
-                    cachedPointerEventCamera = AddDummyCameraToPointer(pointer);
-                    return null;
-                }
-
-                return cachedPointerEventCamera;
-            case GvrBasePointer.RaycastMode.Camera:
-            default:
-                return pointer.PointerCamera;
-        }
-    }
-
-    private Camera AddDummyCameraToPointer(GvrBasePointer pointer)
-    {
-        Camera camera = pointer.PointerTransform.gameObject.AddComponent<Camera>();
-        camera.enabled = false;
-        camera.nearClipPlane = 0.01f; // Minimum Near Clip Plane.
-        return camera;
-    }
-
-    /// Perform a raycast into the screen and collect all graphics underneath it.
+    // Perform a raycast into the screen and collect all graphics underneath it.
     private static void Raycast(Canvas canvas, Ray ray, Camera cam, float distance,
                                  List<Graphic> results, out Ray finalRay)
     {
@@ -269,7 +259,9 @@ public class GvrPointerGraphicRaycaster : GvrBasePointerRaycaster
                 continue;
             }
 
-            if (!RectTransformUtility.RectangleContainsScreenPoint(graphic.rectTransform, screenPoint, cam))
+            if (!RectTransformUtility.RectangleContainsScreenPoint(graphic.rectTransform,
+                                                                   screenPoint,
+                                                                   cam))
             {
                 continue;
             }
@@ -288,5 +280,51 @@ public class GvrPointerGraphicRaycaster : GvrBasePointerRaycaster
         }
 
         sortedGraphics.Clear();
+    }
+
+    private Camera GetCameraForRaycastMode(GvrBasePointer pointer, GvrBasePointer.RaycastMode mode)
+    {
+        switch (mode)
+        {
+            case GvrBasePointer.RaycastMode.Direct:
+                return GetCameraForRaycastModeDirect(pointer);
+            case GvrBasePointer.RaycastMode.Camera:
+            default:
+                return pointer.PointerCamera;
+        }
+    }
+
+    private Camera GetCameraForRaycastModeDirect(GvrBasePointer pointer)
+    {
+        // Clear cachedPointerEventCamera if the pointer has changed.
+        if (cachedPointerEventCamera != null &&
+            cachedPointerEventCamera.gameObject !=
+                GvrPointerInputModule.Pointer.PointerTransform.gameObject)
+        {
+            cachedPointerEventCamera = null;
+        }
+
+        // Get and cache the pointer's camera component.
+        if (cachedPointerEventCamera == null)
+        {
+            Transform pointerTransform = GvrPointerInputModule.Pointer.PointerTransform;
+            cachedPointerEventCamera = pointerTransform.GetComponent<Camera>();
+        }
+
+        // Still no pointer camera?  Add a dummy one.
+        if (cachedPointerEventCamera == null)
+        {
+            cachedPointerEventCamera = AddDummyCameraToPointer(pointer);
+        }
+
+        return cachedPointerEventCamera;
+    }
+
+    private Camera AddDummyCameraToPointer(GvrBasePointer pointer)
+    {
+        Camera camera = pointer.PointerTransform.gameObject.AddComponent<Camera>();
+        camera.enabled = false;
+        camera.nearClipPlane = 0.01f; // Minimum Near Clip Plane.
+        return camera;
     }
 }

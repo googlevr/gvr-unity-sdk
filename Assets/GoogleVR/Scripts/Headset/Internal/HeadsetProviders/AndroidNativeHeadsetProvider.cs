@@ -439,7 +439,7 @@ namespace Gvr.Internal
         private const string DLL_NAME = GvrActivityHelper.GVR_DLL_NAME;
 
         [DllImport(DLL_NAME)]
-        private static extern bool gvr_is_feature_supported(IntPtr gvr_context, int feature);
+        internal static extern bool gvr_is_feature_supported(IntPtr gvr_context, int feature);
 
         [DllImport(DLL_NAME)]
         private static extern int gvr_poll_event(IntPtr gvr_context, IntPtr event_out);

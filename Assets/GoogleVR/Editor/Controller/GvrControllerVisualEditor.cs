@@ -16,28 +16,18 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-using UnityEngine;
-using UnityEditor;
 using System.Collections;
+using UnityEditor;
+using UnityEngine;
 
-/// Custom editor for GvrControllerVisual.
-/// Enhances the visualization of the displayState and ensures that it can only be edited
-/// if the application isn't playing or if readControllerState is turned off.
+/// <summary>Custom editor for `GvrControllerVisual`.</summary>
+/// <remarks>
+/// Enhances the visualization of the `displayState` and ensures that it can only be edited if the
+/// application isn't playing or if `readControllerState` is turned off.
+/// </remarks>
 [CustomEditor(typeof(GvrControllerVisual)), CanEditMultipleObjects]
 public class GvrControllerVisualEditor : Editor
 {
-    private SerializedProperty attachmentPrefabs;
-    private SerializedProperty touchPadColor;
-    private SerializedProperty appButtonColor;
-    private SerializedProperty systemButtonColor;
-    private SerializedProperty readControllerState;
-    private SerializedProperty displayState;
-    private SerializedProperty maximumAlpha;
-
-    private GUIStyle displayStateHeaderStyle;
-    private GUIContent displayStateHeaderContent;
-    private float displayStateHeaderHeight;
-
     private const string DISPLAY_STATE_HEADER_TEXT = "DisplayState:";
     private const string DISPLAY_STATE_ITEM_PREFIX = "• ";
     private const int DISPLAY_STATE_HEADER_FONT_SIZE_OFFSET = 2;
@@ -50,17 +40,21 @@ public class GvrControllerVisualEditor : Editor
     private const string DISPLAY_STATE_PROP_NAME = "displayState";
     private const string MAXIMUM_ALPHA_PROP_NAME = "maximumAlpha";
 
-    void OnEnable()
-    {
-        attachmentPrefabs = serializedObject.FindProperty(ATTACHMENT_PREFABS_PROP_NAME);
-        touchPadColor = serializedObject.FindProperty(TOUCH_PAD_COLOR_PROP_NAME);
-        appButtonColor = serializedObject.FindProperty(APP_BUTTON_COLOR_PROP_NAME);
-        systemButtonColor = serializedObject.FindProperty(SYSTEM_BUTTON_COLOR_PROP_NAME);
-        readControllerState = serializedObject.FindProperty(READ_CONTROLLER_STATE_PROP_NAME);
-        displayState = serializedObject.FindProperty(DISPLAY_STATE_PROP_NAME);
-        maximumAlpha = serializedObject.FindProperty(MAXIMUM_ALPHA_PROP_NAME);
-    }
+    private SerializedProperty attachmentPrefabs;
+    private SerializedProperty touchPadColor;
+    private SerializedProperty appButtonColor;
+    private SerializedProperty systemButtonColor;
+    private SerializedProperty readControllerState;
+    private SerializedProperty displayState;
+    private SerializedProperty maximumAlpha;
 
+    private GUIStyle displayStateHeaderStyle;
+    private GUIContent displayStateHeaderContent;
+    private float displayStateHeaderHeight;
+
+    /// @cond
+    /// <summary>A builtin method of the `Editor` class.</summary>
+    /// <remarks>Implement this function to make a custom inspector.</remarks>
     public override void OnInspectorGUI()
     {
         serializedObject.Update();
@@ -108,8 +102,8 @@ public class GvrControllerVisualEditor : Editor
         iter.NextVisible(true);
         do
         {
-            // It iter is the same as nextElement, then the iter has moved beyond the children of the
-            // display state which means it has finished showing the display state.
+            // It iter is the same as nextElement, then the iter has moved beyond the children of
+            // the display state which means it has finished showing the display state.
             if (hasNextElement && SerializedProperty.EqualContents(nextElement, iter))
             {
                 break;
@@ -136,6 +130,21 @@ public class GvrControllerVisualEditor : Editor
         serializedObject.ApplyModifiedProperties();
     }
 
+    private void OnEnable()
+    {
+        attachmentPrefabs = serializedObject.FindProperty(ATTACHMENT_PREFABS_PROP_NAME);
+        touchPadColor = serializedObject.FindProperty(TOUCH_PAD_COLOR_PROP_NAME);
+        appButtonColor = serializedObject.FindProperty(APP_BUTTON_COLOR_PROP_NAME);
+        systemButtonColor = serializedObject.FindProperty(SYSTEM_BUTTON_COLOR_PROP_NAME);
+        readControllerState = serializedObject.FindProperty(READ_CONTROLLER_STATE_PROP_NAME);
+        displayState = serializedObject.FindProperty(DISPLAY_STATE_PROP_NAME);
+        maximumAlpha = serializedObject.FindProperty(MAXIMUM_ALPHA_PROP_NAME);
+    }
+
+    /// @endcond
+    /// <summary>
+    /// Creates GUI content for the Controller Visual with any applicable text styles applied.
+    /// </summary>
     private void CreateStylesAndContent()
     {
         if (displayStateHeaderContent == null)
@@ -148,9 +157,10 @@ public class GvrControllerVisualEditor : Editor
             displayStateHeaderStyle = new GUIStyle(EditorStyles.boldLabel);
 
             displayStateHeaderStyle.fontSize =
-        displayStateHeaderStyle.font.fontSize + DISPLAY_STATE_HEADER_FONT_SIZE_OFFSET;
+                    displayStateHeaderStyle.font.fontSize + DISPLAY_STATE_HEADER_FONT_SIZE_OFFSET;
 
-            displayStateHeaderHeight = displayStateHeaderStyle.CalcSize(displayStateHeaderContent).y;
+            displayStateHeaderHeight =
+                    displayStateHeaderStyle.CalcSize(displayStateHeaderContent).y;
         }
     }
 }

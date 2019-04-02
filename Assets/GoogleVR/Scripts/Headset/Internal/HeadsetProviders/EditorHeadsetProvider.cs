@@ -16,39 +16,93 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-using Gvr;
-using UnityEngine;
-
 /// @cond
 namespace Gvr.Internal
 {
-    class EditorHeadsetProvider : IHeadsetProvider
+    using Gvr;
+    using System.Collections.Generic;
+#if UNITY_EDITOR
+    using UnityEditor;
+#endif // UNITY_EDITOR
+    using UnityEngine;
+
+    public class EditorHeadsetProvider : IHeadsetProvider
     {
         public const float DEFAULT_FLOOR_HEIGHT_3DOF = -1.6f;
         public static readonly Vector3 DEFAULT_RECENTER_TRANSFORM_POSITION = Vector3.zero;
-        public static readonly Quaternion DEFAULT_RECENTER_TRANSFORM_ROTATION = Quaternion.identity;
-        public const GvrSafetyRegionType DEFAULT_SAFETY_REGION_TYPE_3DOF = GvrSafetyRegionType.Cylinder;
+        public static readonly Quaternion DEFAULT_RECENTER_TRANSFORM_ROTATION
+                = Quaternion.identity;
+        public const GvrSafetyRegionType DEFAULT_SAFETY_REGION_TYPE_3DOF
+                = GvrSafetyRegionType.Cylinder;
         public const float DEFAULT_SAFETY_CYLINDER_ENTER_RADIUS_3DOF = 0.6f;
         public const float DEFAULT_SAFETY_CYLINDER_EXIT_RADIUS_3DOF = 0.7f;
 
         private HeadsetState dummyState;
+#if UNITY_EDITOR
+        private HashSet<string> printedErrorMessages = new HashSet<string>();
+#endif // UNITY_EDITOR
 
         public bool SupportsPositionalTracking
         {
             get
             {
-                return true;
+#if UNITY_EDITOR
+                UnityEditor.XR.Daydream.SupportedHeadTracking minTrackingState
+                        = UnityEditor.PlayerSettings.VRDaydream.minimumSupportedHeadTracking;
+                UnityEditor.XR.Daydream.SupportedHeadTracking maxTrackingState
+                        = UnityEditor.PlayerSettings.VRDaydream.maximumSupportedHeadTracking;
+
+                if (minTrackingState == UnityEditor.XR.Daydream.SupportedHeadTracking.ThreeDoF
+                    && maxTrackingState == UnityEditor.XR.Daydream.SupportedHeadTracking.ThreeDoF)
+                {
+                    return false;
+                }
+                else if (
+                    minTrackingState == UnityEditor.XR.Daydream.SupportedHeadTracking.ThreeDoF
+                    && maxTrackingState == UnityEditor.XR.Daydream.SupportedHeadTracking.SixDoF)
+                {
+                    if (InstantPreview.IsActive
+                        && InstantPreview.Instance.supportsPositionalHeadTracking.isValid)
+                    {
+                        return InstantPreview.Instance.supportsPositionalHeadTracking.value;
+                    }
+                    else
+                    {
+                        return GvrHeadset.editorSupportsPositionalHeadTracking;
+                    }
+                }
+                else // Positional head tracking required.
+                {
+                    if (InstantPreview.IsActive
+                        && InstantPreview.Instance.supportsPositionalHeadTracking.isValid
+                        && !InstantPreview.Instance.supportsPositionalHeadTracking.value)
+                    {
+                        string err_msg = "XRSettings > Daydream > Positional Head Tracking is "
+                                + "'required', but the connected device only supports "
+                                + "orientation.";
+                        if (!printedErrorMessages.Contains(err_msg))
+                        {
+                            Debug.LogError(err_msg);
+                            printedErrorMessages.Add(err_msg);
+                        }
+                    }
+                    return true;
+                }
+#else // UNITY_EDITOR
+                return false;
+#endif // UNITY_EDITOR
             }
         }
 
         public void PollEventState(ref HeadsetState state)
         {
 #if UNITY_ANDROID && UNITY_EDITOR
-            if (InstantPreview.Instance != null)
+            if (InstantPreview.IsActive)
             {
                 if (InstantPreview.Instance.events.Count > 0)
                 {
-                    InstantPreview.UnityGvrEvent eventState = InstantPreview.Instance.events.Dequeue();
+                    InstantPreview.UnityGvrEvent eventState
+                        = InstantPreview.Instance.events.Dequeue();
                     switch (eventState.type)
                     {
                         case InstantPreview.GvrEventType.GVR_EVENT_NONE:
@@ -96,9 +150,11 @@ namespace Gvr.Internal
                                 break;
                         }
 
-                        state.recenterEventFlags = eventState.gvr_recenter_event_data.recenter_event_flags;
+                        state.recenterEventFlags
+                            = eventState.gvr_recenter_event_data.recenter_event_flags;
                         GvrMathHelpers.GvrMatrixToUnitySpace(
-                            eventState.gvr_recenter_event_data.start_space_from_tracking_space_transform,
+                            eventState.gvr_recenter_event_data
+                                .start_space_from_tracking_space_transform,
                             out state.recenteredPosition,
                             out state.recenteredRotation);
                     }
@@ -117,7 +173,7 @@ namespace Gvr.Internal
         public bool TryGetFloorHeight(ref float floorHeight)
         {
 #if UNITY_ANDROID && UNITY_EDITOR
-            if (InstantPreview.Instance != null)
+            if (InstantPreview.IsActive)
             {
                 if (InstantPreview.Instance.floorHeight.isValid)
                 {
@@ -134,12 +190,14 @@ namespace Gvr.Internal
         public bool TryGetRecenterTransform(ref Vector3 position, ref Quaternion rotation)
         {
 #if UNITY_ANDROID && UNITY_EDITOR
-            if (InstantPreview.Instance != null)
+            if (InstantPreview.IsActive)
             {
                 if (InstantPreview.Instance.recenterTransform.isValid)
                 {
                     GvrMathHelpers.GvrMatrixToUnitySpace(
-                        InstantPreview.Instance.recenterTransform.value, out position, out rotation);
+                        InstantPreview.Instance.recenterTransform.value,
+                        out position,
+                        out rotation);
                 }
 
                 return InstantPreview.Instance.recenterTransform.isValid;
@@ -153,11 +211,12 @@ namespace Gvr.Internal
         public bool TryGetSafetyRegionType(ref GvrSafetyRegionType safetyType)
         {
 #if UNITY_ANDROID && UNITY_EDITOR
-            if (InstantPreview.Instance != null)
+            if (InstantPreview.IsActive)
             {
                 if (InstantPreview.Instance.safetyRegionType.isValid)
                 {
-                    safetyType = (GvrSafetyRegionType)InstantPreview.Instance.safetyRegionType.value;
+                    safetyType
+                        = (GvrSafetyRegionType)InstantPreview.Instance.safetyRegionType.value;
                 }
 
                 return InstantPreview.Instance.safetyRegionType.isValid;
@@ -170,7 +229,7 @@ namespace Gvr.Internal
         public bool TryGetSafetyCylinderInnerRadius(ref float innerRadius)
         {
 #if UNITY_ANDROID && UNITY_EDITOR
-            if (InstantPreview.Instance != null)
+            if (InstantPreview.IsActive)
             {
                 if (InstantPreview.Instance.safetyCylinderEnterRadius.isValid)
                 {
@@ -187,7 +246,7 @@ namespace Gvr.Internal
         public bool TryGetSafetyCylinderOuterRadius(ref float outerRadius)
         {
 #if UNITY_ANDROID && UNITY_EDITOR
-            if (InstantPreview.Instance != null)
+            if (InstantPreview.IsActive)
             {
                 if (InstantPreview.Instance.safetyCylinderExitRadius.isValid)
                 {

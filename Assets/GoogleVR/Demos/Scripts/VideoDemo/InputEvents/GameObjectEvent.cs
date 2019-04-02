@@ -22,6 +22,7 @@ namespace GoogleVR.VideoDemo
     using UnityEngine;
     using UnityEngine.Events;
 
+    /// <summary>A `UnityEvent` wrapper for GameObject events.</summary>
     [Serializable]
     public class GameObjectEvent : UnityEvent<GameObject>
     {

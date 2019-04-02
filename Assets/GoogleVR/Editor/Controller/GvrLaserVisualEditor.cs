@@ -16,15 +16,52 @@
 // </copyright>
 //-----------------------------------------------------------------------
 
-using UnityEngine;
-using UnityEditor;
 using System.Collections;
+using UnityEditor;
+using UnityEngine;
 
-/// Custom editor for GvrLaserVisual.
-/// Shows the relationship between the shrinkLaser property and other related properties.
+/// <summary>Custom editor for `GvrLaserVisual`.</summary>
+/// <remarks>
+/// Shows the relationship between the `shrinkLaser` property and other related properties.
+/// </remarks>
 [CustomEditor(typeof(GvrLaserVisual)), CanEditMultipleObjects]
 public class GvrLaserVisualEditor : Editor
 {
+    /// <summary>The name of the **laser color** property.</summary>
+    public const string LASER_COLOR_PROP_NAME = "laserColor";
+
+    /// <summary>The name of the **laser color end** property.</summary>
+    public const string LASER_COLOR_END_PROP_NAME = "laserColorEnd";
+
+    /// <summary>The name of the **max laser distance** property.</summary>
+    public const string MAX_LASER_DISTANCE_PROP_NAME = "maxLaserDistance";
+
+    /// <summary>The name of the **shrink laser** property.</summary>
+    public const string SHRINK_LASER_PROP_NAME = "shrinkLaser";
+
+    /// <summary>The name of the **shrunk scale** property.</summary>
+    public const string SHURNK_SCALE_PROP_NAME = "shrunkScale";
+
+    /// <summary>The name of the **begin shrinking angle (degrees)** property.</summary>
+    public const string BEGIN_SHRINKING_ANGLE_DEGREES_PROP_NAME = "beginShrinkAngleDegrees";
+
+    /// <summary>The name of the **end shrinking angle (degrees)** property.</summary>
+    public const string END_SHRINKING_ANGLE_DEGREES_PROP_NAME = "endShrinkAngleDegrees";
+
+    /// <summary>The name of the **interpolation speed** property.</summary>
+    public const string LERP_SPEED_PROP_NAME = "lerpSpeed";
+
+    /// <summary>The name of the **interpolation threshold** property.</summary>
+    public const string LERP_THRESHOLD_PROP_NAME = "lerpThreshold";
+
+    /// <summary>The name of the **reticle** property.</summary>
+    public const string RETICLE_PROP_NAME = "reticle";
+
+    /// <summary>The name of the **controller** property.</summary>
+    public const string CONTROLLER_PROP_NAME = "controller";
+
+    private const string ITEM_PREFIX = "• ";
+
     private SerializedProperty laserColor;
     private SerializedProperty laserColorEnd;
     private SerializedProperty maxLaserDistance;
@@ -37,35 +74,9 @@ public class GvrLaserVisualEditor : Editor
     private SerializedProperty reticle;
     private SerializedProperty controller;
 
-    public const string LASER_COLOR_PROP_NAME = "laserColor";
-    public const string LASER_COLOR_END_PROP_NAME = "laserColorEnd";
-    public const string MAX_LASER_DISTANCE_PROP_NAME = "maxLaserDistance";
-    public const string SHRINK_LASER_PROP_NAME = "shrinkLaser";
-    public const string SHURNK_SCALE_PROP_NAME = "shrunkScale";
-    public const string BEGIN_SHRINKING_ANGLE_DEGREES_PROP_NAME = "beginShrinkAngleDegrees";
-    public const string END_SHRINKING_ANGLE_DEGREES_PROP_NAME = "endShrinkAngleDegrees";
-    public const string LERP_SPEED_PROP_NAME = "lerpSpeed";
-    public const string LERP_THRESHOLD_PROP_NAME = "lerpThreshold";
-    public const string RETICLE_PROP_NAME = "reticle";
-    public const string CONTROLLER_PROP_NAME = "controller";
-
-    private const string ITEM_PREFIX = "• ";
-
-    void OnEnable()
-    {
-        laserColor = serializedObject.FindProperty(LASER_COLOR_PROP_NAME);
-        laserColorEnd = serializedObject.FindProperty(LASER_COLOR_END_PROP_NAME);
-        maxLaserDistance = serializedObject.FindProperty(MAX_LASER_DISTANCE_PROP_NAME);
-        shrinkLaser = serializedObject.FindProperty(SHRINK_LASER_PROP_NAME);
-        shrunkScale = serializedObject.FindProperty(SHURNK_SCALE_PROP_NAME);
-        beginShrinkAngleDegrees = serializedObject.FindProperty(BEGIN_SHRINKING_ANGLE_DEGREES_PROP_NAME);
-        endShrinkAngleDegrees = serializedObject.FindProperty(END_SHRINKING_ANGLE_DEGREES_PROP_NAME);
-        lerpSpeed = serializedObject.FindProperty(LERP_SPEED_PROP_NAME);
-        lerpThreshold = serializedObject.FindProperty(LERP_THRESHOLD_PROP_NAME);
-        reticle = serializedObject.FindProperty(RETICLE_PROP_NAME);
-        controller = serializedObject.FindProperty(CONTROLLER_PROP_NAME);
-    }
-
+    /// @cond
+    /// <summary>A builtin method of the `Editor` class.</summary>
+    /// <remarks>Implement this function to make a custom inspector.</remarks>
     public override void OnInspectorGUI()
     {
         serializedObject.Update();
@@ -119,5 +130,27 @@ public class GvrLaserVisualEditor : Editor
         EditorGUILayout.Space();
 
         serializedObject.ApplyModifiedProperties();
+    }
+
+    /// @endcond
+    /// <summary>This MonoBehavior's OnEnable behavior.</summary>
+    private void OnEnable()
+    {
+        laserColor = serializedObject.FindProperty(LASER_COLOR_PROP_NAME);
+        laserColorEnd = serializedObject.FindProperty(LASER_COLOR_END_PROP_NAME);
+        maxLaserDistance = serializedObject.FindProperty(MAX_LASER_DISTANCE_PROP_NAME);
+        shrinkLaser = serializedObject.FindProperty(SHRINK_LASER_PROP_NAME);
+        shrunkScale = serializedObject.FindProperty(SHURNK_SCALE_PROP_NAME);
+
+        beginShrinkAngleDegrees = serializedObject.FindProperty(
+            BEGIN_SHRINKING_ANGLE_DEGREES_PROP_NAME);
+
+        endShrinkAngleDegrees = serializedObject.FindProperty(
+            END_SHRINKING_ANGLE_DEGREES_PROP_NAME);
+
+        lerpSpeed = serializedObject.FindProperty(LERP_SPEED_PROP_NAME);
+        lerpThreshold = serializedObject.FindProperty(LERP_THRESHOLD_PROP_NAME);
+        reticle = serializedObject.FindProperty(RETICLE_PROP_NAME);
+        controller = serializedObject.FindProperty(CONTROLLER_PROP_NAME);
     }
 }

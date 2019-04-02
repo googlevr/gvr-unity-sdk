@@ -27,19 +27,52 @@ using System.Text.RegularExpressions;
 
 namespace Gvr.Internal
 {
+    /// <summary>A class module for handling Instant Preview.</summary>
+    /// <remarks><para>
+    /// Handles connecting to the Instant Preview Unity plugin.
+    /// </para><para>
+    /// Serves as an interface for retrieving many headset-oriented fields.
+    /// </para><para>
+    /// Streams video data to the Instant Preview Unity plugin.
+    /// </para></remarks>
     [HelpURL("https://developers.google.com/vr/unity/reference/class/InstantPreview")]
     public class InstantPreview : MonoBehaviour
     {
+        /// <summary>
+        /// Gets whether Instant Preview is currently connected to and running on a remote device.
+        /// </summary>
+        public static bool IsActive
+        {
+            get
+            {
+#if UNITY_EDITOR
+                return Gvr.Internal.InstantPreview.Instance != null
+                       && Gvr.Internal.InstantPreview.Instance.enabled
+                       && Gvr.Internal.InstantPreview.Instance.IsCurrentlyConnected;
+#else
+                return false;
+#endif // UNITY_EDITOR
+            }
+        }
+
         private const string NoDevicesFoundAdbResult = "error: no devices/emulators found";
 
+        /// <summary>Gets or sets this singleton's instance.</summary>
         internal static InstantPreview Instance { get; set; }
 
+        /// <summary>The .dll filename of the Instant Preview Unity plugin.</summary>
         internal const string dllName = "instant_preview_unity_plugin";
 
+        /// <summary>Video resolutions for streaming to the connected device.</summary>
         public enum Resolutions : int
         {
+            /// A high-resolution image.
             Big,
+
+            /// A regular-resolution image.
             Regular,
+
+            /// A window-sized image.
             WindowSized,
         }
 
@@ -49,36 +82,70 @@ namespace Gvr.Internal
             public int height;
         }
 
+        /// <summary>Resolution of video stream.</summary>
+        /// <remarks>Higher = more expensive / better visual quality.</remarks>
         [Tooltip("Resolution of video stream. Higher = more expensive / better visual quality.")]
         public Resolutions OutputResolution = Resolutions.Big;
 
+        /// <summary>Options for anti-aliasing sampling.</summary>
         public enum MultisampleCounts
         {
+            /// <summary>Take one sample per frame.</summary>
             One,
+
+            /// <summary>Take two samples per frame.</summary>
             Two,
+
+            /// <summary>Take four samples per frame.</summary>
             Four,
+
+            /// <summary>Take eight samples per frame.</summary>
             Eight,
         }
 
+        /// <summary>Anti-aliasing for video preview.</summary>
+        /// <remarks>Higher = more expensive / better visual quality.</remarks>
         [Tooltip("Anti-aliasing for video preview. Higher = more expensive / better visual quality.")]
         public MultisampleCounts MultisampleCount = MultisampleCounts.One;
 
+        /// <summary>Bit rates for video codec streaming.</summary>
         public enum BitRates
         {
+            /// <summary>A bit rate of 2000kb/s.  The lowest available bit rate.</summary>
             _2000,
+
+            /// <summary>A bit rate of 4000kb/s.</summary>
             _4000,
+
+            /// <summary>A bit rate of 8000kb/s.</summary>
             _8000,
+
+            /// <summary>A bit rate of 16000kb/s.</summary>
             _16000,
+
+            /// <summary>A bit rate of 24000kb/s.</summary>
             _24000,
+
+            /// <summary>A bit rate of 32000kb/s.  The highest available bit rate</summary>
             _32000,
         }
 
+        /// <summary>Video codec streaming bit rate.</summary>
+        /// <remarks>Higher = more expensive / better visual quality.</remarks>
         [Tooltip("Video codec streaming bit rate. Higher = more expensive / better visual quality.")]
         public BitRates BitRate = BitRates._16000;
 
+        /// <summary>
+        /// If true, installs the Instant Preview app if it isn't found on the connected device.
+        /// </summary>
         [Tooltip("Installs the Instant Preview app if it isn't found on the connected device.")]
         public bool InstallApkOnRun = true;
 
+        /// <summary>An .apk file containing the Instant Preview app.</summary>
+        /// <remarks>
+        /// Will be installed on connected devices which don't already have it, or which have an
+        /// out-of-date version.
+        /// </remarks>
         public UnityEngine.Object InstantPreviewApk;
 
         struct UnityRect
@@ -97,26 +164,63 @@ namespace Gvr.Internal
             public UnityRect rightEyeViewSize;
         }
 
+        /// <summary>A Unity C#-compliant wrapper for a boolean.</summary>
+        /// <remarks><para>
+        /// This is also defined on the Instant Preview plugin in native C++.
+        /// </para><para>
+        /// If `isValid` is `false`, `value` should be ignored.
+        /// </para></remarks>
+        public struct UnityBoolAtom
+        {
+            [MarshalAs(UnmanagedType.I1)]
+            public bool value;
+            [MarshalAs(UnmanagedType.I1)]
+            public bool isValid;
+        }
+
+        /// <summary>A Unity C#-compliant wrapper for a float.</summary>
+        /// <remarks><para>
+        /// This is also defined on the Instant Preview plugin in native C++.
+        /// </para><para>
+        /// If `isValid` is `false`, `value` should be ignored.
+        /// </para></remarks>
         public struct UnityFloatAtom
         {
             public float value;
+            [MarshalAs(UnmanagedType.I1)]
             public bool isValid;
         }
 
+        /// <summary>A Unity C#-compliant wrapper for an integer.</summary>
+        /// <remarks><para>
+        /// This is also defined on the Instant Preview plugin in native C++.
+        /// </para><para>
+        /// If `isValid` is `false`, `value` should be ignored.
+        /// </para></remarks>
         public struct UnityIntAtom
         {
             public int value;
+            [MarshalAs(UnmanagedType.I1)]
             public bool isValid;
         }
 
+        /// <summary>A Unity C#-compliant wrapper for a 4x4 matrix.</summary>
+        /// <remarks><para>
+        /// This is also defined on the Instant Preview plugin in native C++.
+        /// </para><para>
+        /// If `isValid` is `false`, `value` should be ignored.
+        /// </para></remarks>
         public struct UnityGvrMat4fAtom
         {
             public Matrix4x4 value;
+            [MarshalAs(UnmanagedType.I1)]
             public bool isValid;
         }
 
         struct UnityGlobalGvrProperties
         {
+            internal UnityBoolAtom supportsPositionalHeadTracking;
+            internal UnityBoolAtom supportsSeeThrough;
             internal UnityFloatAtom floorHeight;
             internal UnityGvrMat4fAtom recenterTransform;
             internal UnityIntAtom safetyRegionType;
@@ -124,43 +228,118 @@ namespace Gvr.Internal
             internal UnityFloatAtom safetyCylinderExitRadius;
         }
 
+        /// <summary>GVR Event Types. Associated with ephemeral (one-frame-long) events.</summary>
         public enum GvrEventType
         {
+            /// <summary>A default value. If this is seen, something has gone wrong.</summary>
             GVR_EVENT_NONE,
+
+            /// <summary>Indicates a recenter event.</summary>
+            /// <remarks>
+            /// This should always be accompanied by a`GvrRecenterEventType` providing additional
+            /// details.
+            /// </remarks>
             GVR_EVENT_RECENTER,
+
+            /// <summary>Indicates that the safety region has been exited.</summary>
             GVR_EVENT_SAFETY_REGION_EXIT,
+
+            /// <summary>Indicates that the safety region has been entered.</summary>
             GVR_EVENT_SAFETY_REGION_ENTER,
+
+            /// <summary>Indicates that head tracking has resumed.</summary>
             GVR_EVENT_HEAD_TRACKING_RESUMED,
+
+            /// <summary>Indicates that head tracking has paused.</summary>
             GVR_EVENT_HEAD_TRACKING_PAUSED,
         }
 
+        /// <summary>
+        /// GVR Recenter Event Types. Provides details for `GvrEventType.GVR_EVENT_RECENTER`.
+        /// </summary>
         public enum GvrRecenterEventType
         {
+            /// <summary>A default value. If this is seen, something has gone wrong.</summary>
             GVR_RECENTER_EVENT_NONE,
+
+            /// <summary>Indicates that the recenter event occurred because of a restart.</summary>
             GVR_RECENTER_EVENT_RESTART,
+
+            /// <summary>Indicates that the recenter event occurred because of a realign.</summary>
             GVR_RECENTER_EVENT_ALIGNED,
+
+            /// <summary>
+            /// Indicates that the recenter event occurred because the headset was donned.
+            /// </summary>
             GVR_RECENTER_EVENT_DON,
         }
 
+        /// <summary>
+        /// Accompanies a `GvrEventType.GVR_EVENT_RECENTER`.  Provides additional details about
+        /// the recenter event.
+        /// </summary>
         internal struct UnityGvrRecenterEventData
         {
+            /// <summary>The type of recenter event.</summary>
             internal GvrRecenterEventType recenter_type;
+
+            /// <summary>Recenter event flags.</summary>
             internal uint recenter_event_flags;
+
+            /// <summary>The offset from the initial start-space.</summary>
+            /// <remarks>
+            /// Allows the app to continue to stream from the same point of reference, while keeping
+            /// the post-recenter orientation consistent.
+            /// </summary>
             internal Matrix4x4 start_space_from_tracking_space_transform;
         }
 
+        /// <summary>GVR event details, received any time an event occurs.</summary>
+        /// <remarks>This is also defined on the Instant Preview plugin in native C++.</remarks>
         internal struct UnityGvrEvent
         {
-            // Timestamp in nanos.
+            /// <summary>Timestamp in nanoseconds.</summary>
             internal long timestamp;
+
+            /// <summary>The event type.</summary>
             internal GvrEventType type;
+
+            /// <summary>The event's flags.</summary>
             internal uint flags;
 
-            // Not null iff event type is GVR_EVENT_RECENTER.
+            /// <summary>Additional details on recenter events.</summary>
+            /// <remarks>Not null if and only if event type is `GVR_EVENT_RECENTER`.</remarks>
             internal UnityGvrRecenterEventData gvr_recenter_event_data;
         }
 
+        /// <summary>GVR User Preferences.</summary>
+        /// <remarks>
+        /// Associated with options set by the user in the Daydream app.</remarks>
+        [System.Serializable]
+        public struct UnityGvrUserPreferences
+        {
+            /// <summary>The user's handedness preference.</summary>
+            public GvrSettings.UserPrefsHandedness handedness;
+        }
+
+        /// <summary>If `true`, overrides user preferences received from remote device with those
+        /// set in the InstantPreview editor inspector.</summary>
+        [Tooltip("Override user preferences from remote device with Editor preferences.")]
+        public bool overrideDeviceUserPrefs = false;
+
+        [HideInInspector]
+        /// <summary>The User Preferences to use if `overrideDeviceUserPrefs` is `true`.</summary>
+        public UnityGvrUserPreferences editorUserPrefs;
+
+        /// <summary>The User Preferences to use if `overrideDeviceUserPrefs` is `false`.</summary>
+        public UnityGvrUserPreferences deviceUserPrefs { get; private set; }
+
 #if UNITY_EDITOR
+        private readonly string[] RequiredAndroidFeatures = {
+            "feature:android.software.vr.mode",
+            "feature:android.hardware.vr.high_performance",
+        };
+
         static ResolutionSize[] resolutionSizes = new ResolutionSize[]
         {
             new ResolutionSize()
@@ -212,6 +391,9 @@ namespace Gvr.Internal
         private static extern bool GetGvrEvent(ref UnityGvrEvent outputEvent);
 
         [DllImport(dllName)]
+        private static extern bool GetGvrUserPreferences(ref UnityGvrUserPreferences outputUserPrefs);
+
+        [DllImport(dllName)]
         private static extern IntPtr GetRenderEventFunc();
 
         [DllImport(dllName)]
@@ -220,6 +402,13 @@ namespace Gvr.Internal
         [DllImport(dllName)]
         private static extern void GetVersionString(StringBuilder dest, uint n);
 
+        /// <summary>
+        /// Gets whether this module is currently connected to a running Instant Preview app.
+        /// </summary>
+        /// <value>
+        /// Value `true` if this module is currently connected to a running Instant Preview app,
+        /// `false` otherwise.
+        /// </value>
         public bool IsCurrentlyConnected
         {
             get { return connected; }
@@ -240,16 +429,64 @@ namespace Gvr.Internal
         List<Camera> camerasLastFrame = new List<Camera>();
         private bool connected;
 
+        /// <summary>Gets whether the connected device supports positional tracking.</summary>
+        public UnityBoolAtom supportsPositionalHeadTracking { get; private set; }
+
+        /// <summary>Gets whether the connected device supports see-through mode.</summary>
+        public UnityBoolAtom supportsSeeThrough { get; private set; }
+
+        /// <summary>Gets the current height the headset is off its perceived floor.</summary>
+        /// <remarks>The `value` is valid only if `floorHeight.isValid == true`.</remarks>
         public UnityFloatAtom floorHeight { get; private set; }
 
+        /// <summary>Gets the last recenter's offset transform.</summary>
+        /// <remarks>The `value` is valid only if `recenterTransform.isValid == true`.</remarks>
         public UnityGvrMat4fAtom recenterTransform { get; private set; }
 
+        /// <summary>Gets the type of the safety region.</summary>
+        /// <remarks>The `value` is valid only if `safetyRegionType.isValid == true`.</remarks>
         public UnityIntAtom safetyRegionType { get; private set; }
 
+        /// <summary>Gets the reentry radius of a cylindrical safety region.</summary>
+        /// <remarks><para>
+        /// Entering the safety cylinder means stepping close enough to its center to suppress an
+        /// active warning.
+        /// </para><para>
+        /// The `value` is valid only if `safetyCylinderEnterRadius.isValid == true`.
+        /// </para></remarks>
         public UnityFloatAtom safetyCylinderEnterRadius { get; private set; }
 
+        /// <summary>Gets the exit radius of a cylindrical safety region.</summary>
+        /// <remarks><para>
+        /// Exiting the safety cylinder means stepping far enough from its center to prompt a
+        /// warning.
+        /// </para><para>
+        /// The `value` is valid only if `safetyCylinderExitRadius.isValid == true`.
+        /// </para></remarks>
         public UnityFloatAtom safetyCylinderExitRadius { get; private set; }
 
+        /// <summary>Gets the user's handedness preference.</summary>
+        public GvrSettings.UserPrefsHandedness handedness
+        {
+            get
+            {
+                if (overrideDeviceUserPrefs)
+                {
+                    return editorUserPrefs.handedness;
+                }
+                else
+                {
+                    return deviceUserPrefs.handedness;
+                }
+            }
+        }
+
+        /// <summary>A queue for active GVR events.</summary>
+        /// <remarks>
+        /// This is used because events only trigger for one frame, and in some high-CPU edge cases
+        /// the Instant Preview stream may run at a different speed than the Unity player.
+        /// Because they are stored on a queue, the Unity player can guarantee it will eventually
+        /// trigger them all.</remarks>
         internal Queue<UnityGvrEvent> events = new Queue<UnityGvrEvent>();
 
         void Awake()
@@ -273,7 +510,6 @@ namespace Gvr.Internal
             var sb = new StringBuilder(256);
             GetVersionString(sb, (uint)sb.Capacity);
             var pluginIPVersionName = sb.ToString();
-            Debug.Log("Instant Preview Version: " + pluginIPVersionName);
 
             // Tries to install Instant Preview apk if set to do so.
             if (InstallApkOnRun)
@@ -298,18 +534,32 @@ namespace Gvr.Internal
                         string unityAPKVersionName = null;
 
                         // Gets version of apk installed on device (to remove, if dated).
-                        RunCommand(InstantPreviewHelper.AdbPath,
+                        RunCommand(InstantPreviewHelper.adbPath,
                                 "shell dumpsys package com.google.instantpreview | grep versionName",
                                 out output, out errors);
-                        if (!string.IsNullOrEmpty(output) && string.IsNullOrEmpty(errors))
-                        {
-                            deviceIPVersionName = output.Substring(output.IndexOf('=') + 1);
-                        }
 
                         // Early outs if no device is connected.
                         if (string.Compare(errors, NoDevicesFoundAdbResult) == 0)
                         {
                             return;
+                        }
+
+                        if (!string.IsNullOrEmpty(output) && string.IsNullOrEmpty(errors))
+                        {
+                            deviceIPVersionName = output.Substring(output.IndexOf('=') + 1);
+                        }
+
+                        // Ensures connected device is Daydream-compatible before continuing.
+                        RunCommand(InstantPreviewHelper.adbPath,
+                                "shell pm list features", out output, out errors);
+                        foreach (string feature in RequiredAndroidFeatures)
+                        {
+                            if (output.IndexOf(feature) == -1)
+                            {
+                                Debug.Log(
+                                    "Instant Preview disabled; device is not Daydream-compatible.");
+                                return;
+                            }
                         }
 
                         // Prints errors and exits on failure.
@@ -319,8 +569,10 @@ namespace Gvr.Internal
                             return;
                         }
 
+                        Debug.Log("Instant Preview Version: " + pluginIPVersionName);
+
                         // Gets version of Unity's local .apk version (to install, if needed).
-                        RunCommand(InstantPreviewHelper.AaptPath,
+                        RunCommand(InstantPreviewHelper.aaptPath,
                                 string.Format("dump badging {0}", apkPath),
                                 out output, out errors);
                         if (!string.IsNullOrEmpty(output) && string.IsNullOrEmpty(errors))
@@ -341,7 +593,7 @@ namespace Gvr.Internal
                         }
                         else
                         {
-                            Debug.Log(string.Format("Failed to run: {0} dump badging {1}", InstantPreviewHelper.AaptPath, apkPath));
+                            Debug.Log(string.Format("Failed to run: {0} dump badging {1}", InstantPreviewHelper.aaptPath, apkPath));
                         }
 
                         // Determines if Unity plugin and Unity's local .apk IP file are the same version, and exits if not.
@@ -369,11 +621,11 @@ namespace Gvr.Internal
                                 deviceIPVersionName, unityAPKVersionName));
                             }
 
-                            RunCommand(InstantPreviewHelper.AdbPath,
+                            RunCommand(InstantPreviewHelper.adbPath,
                                         string.Format("uninstall com.google.instantpreview", apkPath),
                                         out output, out errors);
 
-                            RunCommand(InstantPreviewHelper.AdbPath,
+                            RunCommand(InstantPreviewHelper.adbPath,
                                         string.Format("install \"{0}\"", apkPath),
                                         out output, out errors);
 
@@ -396,13 +648,17 @@ namespace Gvr.Internal
                             }
                         }
 
-                        StartInstantPreviewActivity(InstantPreviewHelper.AdbPath);
+                        StartInstantPreviewActivity(InstantPreviewHelper.adbPath);
                     }).Start();
                 }
             }
             else
             {
-                new Thread(() => { StartInstantPreviewActivity(InstantPreviewHelper.AdbPath); }).Start();
+                Debug.Log("Instant Preview Version: " + pluginIPVersionName);
+                new Thread(() =>
+                {
+                    StartInstantPreviewActivity(InstantPreviewHelper.adbPath);
+                }).Start();
             }
         }
 
@@ -420,8 +676,12 @@ namespace Gvr.Internal
                 if (GetHeadPose(out headPose, out timestamp))
                 {
                     SetEditorEmulatorsEnabled(false);
-                    camera.transform.localRotation = Quaternion.LookRotation(headPose.GetColumn(2), headPose.GetColumn(1));
-                    camera.transform.localPosition = camera.transform.localRotation * headPose.GetRow(3) * -1;
+                    camera.transform.localRotation =
+                        Quaternion.LookRotation(headPose.GetColumn(2), headPose.GetColumn(1)) *
+                        EditorCameraOriginDict.Get(camera).rotation;
+                    camera.transform.localPosition =
+                        camera.transform.localRotation * headPose.GetRow(3) * -1 +
+                        EditorCameraOriginDict.Get(camera).position;
                 }
                 else
                 {
@@ -513,6 +773,10 @@ namespace Gvr.Internal
             UnityGlobalGvrProperties unityGlobalGvrProperties = new UnityGlobalGvrProperties();
             if (GetGlobalGvrProperties(ref unityGlobalGvrProperties))
             {
+                supportsPositionalHeadTracking
+                    = unityGlobalGvrProperties.supportsPositionalHeadTracking;
+
+                supportsSeeThrough = unityGlobalGvrProperties.supportsSeeThrough;
                 floorHeight = unityGlobalGvrProperties.floorHeight;
                 recenterTransform = unityGlobalGvrProperties.recenterTransform;
                 safetyRegionType = unityGlobalGvrProperties.safetyRegionType;
@@ -527,6 +791,15 @@ namespace Gvr.Internal
             while (GetGvrEvent(ref unityGvrEvent))
             {
                 events.Enqueue(unityGvrEvent);
+            }
+        }
+
+        void UpdateUserPreferences()
+        {
+            UnityGvrUserPreferences unityGvrUserPreferences = new UnityGvrUserPreferences();
+            if (GetGvrUserPreferences(ref unityGvrUserPreferences))
+            {
+                deviceUserPrefs = unityGvrUserPreferences;
             }
         }
 
@@ -556,6 +829,7 @@ namespace Gvr.Internal
 
             UpdateProperties();
             UpdateEvents();
+            UpdateUserPreferences();
         }
 
         void OnPostRender()
@@ -768,7 +1042,10 @@ namespace Gvr.Internal
         {
             string output;
             string errors;
-            RunCommand(adbPath, "shell monkey -p com.google.instantpreview -c android.intent.category.LAUNCHER 1", out output, out errors);
+            RunCommand(adbPath,
+                       "shell am start -n com.google.instantpreview/.InstantPreviewActivity",
+                       out output,
+                       out errors);
 
             // Early outs if no device is connected.
             if (string.Compare(errors, NoDevicesFoundAdbResult) == 0)
@@ -838,6 +1115,13 @@ namespace Gvr.Internal
             }
         }
 #else
+        /// <summary>
+        /// Gets whether this module is currently connected to a running Instant Preview app.
+        /// </summary>
+        /// <value>
+        /// Value `true` if this module is currently connected to a running Instant Preview app,
+        /// `false` otherwise.
+        /// </value>
         public bool IsCurrentlyConnected
         {
             get { return false; }

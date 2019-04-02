@@ -24,20 +24,24 @@ using UnityEngine.XR;
 using XRSettings = UnityEngine.VR.VRSettings;
 #endif  // UNITY_2017_2_OR_NEWER
 
+/// <summary>
 /// Used to recenter only the controllers, required for scenes that have no clear forward direction.
+/// </summary>
+/// <remarks>
 /// Details: https://developers.google.com/vr/distribute/daydream/design-requirements#UX-D6
-///
+/// <para>
 /// Works by offsetting the orientation of the transform when a recenter occurs to correct for the
 /// orientation change caused by the recenter event.
-///
-/// Usage: Place on the parent of the camera that should have it's orientation corrected.
-[HelpURL("https://developers.google.com/vr/unity/reference/class/GvrRecenterOnlyController")]
+/// </para><para>
+/// Usage: Place on the parent of the camera that should have its orientation corrected.
+/// </para></remarks>
+[HelpURL("https://developers.google.com/vr/reference/unity/class/GvrRecenterOnlyController")]
 public class GvrRecenterOnlyController : MonoBehaviour
 {
     private Quaternion lastAppliedYawCorrection = Quaternion.identity;
     private Quaternion yawCorrection = Quaternion.identity;
 
-    void Update()
+    private void Update()
     {
         bool connected = false;
         foreach (var hand in Gvr.Internal.ControllerUtils.AllHands)
@@ -71,9 +75,8 @@ public class GvrRecenterOnlyController : MonoBehaviour
 
 #if UNITY_EDITOR
         // Compatibility for Instant Preview.
-        if (Gvr.Internal.InstantPreview.Instance != null &&
-          Gvr.Internal.InstantPreview.Instance.enabled &&
-          Gvr.Internal.ControllerUtils.AnyButton(GvrControllerButton.System))
+        if (Gvr.Internal.InstantPreview.IsActive &&
+            Gvr.Internal.ControllerUtils.AnyButton(GvrControllerButton.System))
           {
             return;
         }
@@ -87,7 +90,7 @@ public class GvrRecenterOnlyController : MonoBehaviour
         yawCorrection = GetYawCorrection();
     }
 
-    void OnDisable()
+    private void OnDisable()
     {
         yawCorrection = Quaternion.identity;
         RemoveLastYawCorrection();

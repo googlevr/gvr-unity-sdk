@@ -21,19 +21,27 @@ using UnityEngine;
 /// @cond
 namespace Gvr.Internal
 {
-    /// Factory that provides a concrete implementation of IHeadsetProvider for the
-    /// current platform.
+    /// <summary>
+    /// Factory that provides a concrete implementation of `IHeadsetProvider` for the current
+    /// platform.
+    /// </summary>
     static class HeadsetProviderFactory
     {
-        /// Provides a concrete implementation of IHeadsetProvider appropriate for the current
-        /// platform. This method never returns null. In the worst case, it might return a dummy
+        /// <summary>
+        /// Provides a concrete implementation of `IHeadsetProvider` appropriate for the current
+        /// platform.
+        /// <summary>
+        /// <remarks>
+        /// This method never returns null. In the worst case, it might return a dummy
         /// provider if the platform is not supported. For demo purposes the emulator controller
         /// is returned in the editor and in Unity Standalone (desktop) builds, for use inside the
         /// desktop player.
+        /// </remarks>
+        /// <returns>An implemented `IHeadsetProvider` appropriate for the platform.</returns>
         static internal IHeadsetProvider CreateProvider()
         {
-// Use emualtor in editor, GVR SDK support on Android standalone headsets, and a
-// dummy implementation otherwise..
+            // Use emualtor in editor, GVR SDK support on Daydream 6DoF headsets, and a
+            // dummy implementation otherwise.
 #if UNITY_EDITOR
             return new EditorHeadsetProvider();
 #elif UNITY_ANDROID
@@ -41,7 +49,7 @@ namespace Gvr.Internal
             return new AndroidNativeHeadsetProvider();
 #else
             // Platform not supported.
-            Debug.LogWarning("No Google VR standalone headset / 6DoF support on " +
+            Debug.LogWarning("No GoogleVR 6DoF headset support on " +
                 Application.platform + " platform.");
             return new DummyHeadsetProvider();
 #endif  // UNITY_EDITOR || UNITY_ANDROID

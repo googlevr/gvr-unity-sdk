@@ -2,21 +2,15 @@
 
 The following files:
 - Assets/GoogleVR/Plugins/Android/gvr.aar
+- Assets/GoogleVR/Plugins/Android/gvr-exoplayersupport-release.aar
 - Assets/GoogleVR/Plugins/Android/gvr-keyboard.aar
-- Assets/GoogleVR/Plugins/Android/libs/armeabi-v7a/libaudioplugingvrunity.so
-- Assets/GoogleVR/Plugins/Android/libs/armeabi-v7a/libgvrvideo.so
-- Assets/GoogleVR/Plugins/Android/libs/x86/libaudioplugingvrunity.so
-- Assets/GoogleVR/Plugins/Android/libs/x86/libgvrvideo.so
-- Assets/GoogleVR/Plugins/iOS/libaudioplugingvrunity.a
-- Assets/GoogleVR/Plugins/x86/audioplugingvrunity.dll
+- Assets/GoogleVR/Plugins/Android/gvr-keyboardsupport-release.aar
+- Assets/GoogleVR/Plugins/Android/gvr-permissionsupport-release.aar
 - Assets/GoogleVR/Plugins/x86/instant_preview_shared.dll
 - Assets/GoogleVR/Plugins/x86/instant_preview_unity_plugin.dll
-- Assets/GoogleVR/Plugins/x86_64/audioplugingvrunity.bundle
-- Assets/GoogleVR/Plugins/x86_64/audioplugingvrunity.dll
 - Assets/GoogleVR/Plugins/x86_64/instant_preview_shared.dll
 - Assets/GoogleVR/Plugins/x86_64/instant_preview_unity_plugin.bundle
 - Assets/GoogleVR/Plugins/x86_64/instant_preview_unity_plugin.dll
-- Assets/GoogleVR/Plugins/x86_64/libaudioplugingvrunity.so
 
 are licensed as follows:
 
@@ -26,6 +20,7 @@ Covered by the **Google APIs Terms of Service** at
 ===============================================================================
 
 The following files:
+- Assets/GoogleVR/Beta/Shaders/GvrSeeThroughUI.shader
 - Assets/GoogleVR/Scripts/EventSystem/InputModule/GvrPointerInputModule.cs
 - Assets/GoogleVR/Scripts/EventSystem/InputModule/GvrPointerInputModuleImpl.cs
 

@@ -23,7 +23,7 @@ Shader "GoogleVR/Reticle" {
   SubShader {
     Tags { "Queue"="Overlay" "IgnoreProjector"="True" "RenderType"="Transparent" }
     Pass {
-      Blend SrcAlpha OneMinusSrcAlpha
+      Blend SrcAlpha OneMinusSrcAlpha, OneMinusDstAlpha One
       AlphaTest Off
       Cull Back
       Lighting Off

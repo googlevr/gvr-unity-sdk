@@ -3,12 +3,19 @@ apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 24
-    buildToolsVersion "24.0.2"
     defaultConfig {
         minSdkVersion 19
         targetSdkVersion 24
         versionCode 1
         versionName "1.0"
+        ndk {
+	    abiFilters  'armeabi-v7a', 'arm64-v8a', 'x86'
+	}
+        externalNativeBuild {
+            cmake {
+                arguments '-DANDROID_STL=c++_static'
+            }
+        }
     }
     buildTypes {
         release {
@@ -16,10 +23,15 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
+    externalNativeBuild {
+        cmake {
+            path 'src/main/cpp/CMakeLists.txt'
+	}
+    }
 }
 
 dependencies {
-    compile 'com.google.android.exoplayer:exoplayer:r1.5.11'
+    implementation 'com.google.android.exoplayer:exoplayer:r1.5.11'
 }
 
 task makeexoplayeraar(type:Zip) {

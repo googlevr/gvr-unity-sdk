@@ -21,15 +21,18 @@ using UnityEngine;
 
 namespace Gvr.Internal
 {
+    /// <summary>
     /// Manages cursor lock state while developer is using editor head and controller emulation.
+    /// </summary>
     public class GvrCursorHelper
     {
-        // Whether MouseControllerProvider is currently tracking mouse movement.
+        /// <summary>Whether MouseControllerProvider is currently tracking mouse movement.</summary>
         private static bool cachedHeadEmulationActive;
 
-        // Whether GvrEditorEmulator is currently tracking mouse movement.
+        /// <summary>Whether GvrEditorEmulator is currently tracking mouse movement.</summary>
         private static bool cachedControllerEmulationActive;
 
+        /// <summary>Sets a value indicating whether head emulation is active.</summary>
         public static bool HeadEmulationActive
         {
             set
@@ -39,6 +42,7 @@ namespace Gvr.Internal
             }
         }
 
+        /// <summary>Sets a value indicating whether controller emulation is active.</summary>
         public static bool ControllerEmulationActive
         {
             set

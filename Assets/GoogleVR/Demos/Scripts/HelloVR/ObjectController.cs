@@ -21,22 +21,25 @@ namespace GoogleVR.HelloVR
     using UnityEngine;
     using UnityEngine.EventSystems;
 
+    /// <summary>Controls interactable teleporting objects in the Demo scene.</summary>
     [RequireComponent(typeof(Collider))]
     public class ObjectController : MonoBehaviour
     {
+        /// <summary>
+        /// The material to use when this object is inactive (not being gazed at).
+        /// </summary>
+        public Material inactiveMaterial;
+
+        /// <summary>The material to use when this object is active (gazed at).</summary>
+        public Material gazedAtMaterial;
+
         private Vector3 startingPosition;
         private Renderer myRenderer;
 
-        public Material inactiveMaterial;
-        public Material gazedAtMaterial;
-
-        void Start()
-        {
-            startingPosition = transform.localPosition;
-            myRenderer = GetComponent<Renderer>();
-            SetGazedAt(false);
-        }
-
+        /// <summary>Sets this instance's GazedAt state.</summary>
+        /// <param name="gazedAt">
+        /// Value `true` if this object is being gazed at, `false` otherwise.
+        /// </param>
         public void SetGazedAt(bool gazedAt)
         {
             if (inactiveMaterial != null && gazedAtMaterial != null)
@@ -46,6 +49,7 @@ namespace GoogleVR.HelloVR
             }
         }
 
+        /// <summary>Resets this instance and its siblings to their starting positions.</summary>
         public void Reset()
         {
             int sibIdx = transform.GetSiblingIndex();
@@ -58,6 +62,7 @@ namespace GoogleVR.HelloVR
             }
         }
 
+        /// <summary>Calls the Recenter event.</summary>
         public void Recenter()
         {
 #if !UNITY_EDITOR
@@ -70,6 +75,8 @@ namespace GoogleVR.HelloVR
 #endif  // !UNITY_EDITOR
         }
 
+        /// <summary>Teleport this instance randomly when triggered by a pointer click.</summary>
+        /// <param name="eventData">The pointer click event which triggered this call.</param>
         public void TeleportRandomly(BaseEventData eventData)
         {
             // Only trigger on left input button, which maps to
@@ -97,7 +104,7 @@ namespace GoogleVR.HelloVR
                 0) * Vector3.forward;
 
             // New location between 1.5m and 3.5m.
-            float distance = 2 * Random.value + 1.5f;
+            float distance = (2 * Random.value) + 1.5f;
             Vector3 newPos = direction * distance;
 
             // Limit vertical position to be fully in the room.
@@ -106,6 +113,13 @@ namespace GoogleVR.HelloVR
 
             randomSib.SetActive(true);
             gameObject.SetActive(false);
+            SetGazedAt(false);
+        }
+
+        private void Start()
+        {
+            startingPosition = transform.localPosition;
+            myRenderer = GetComponent<Renderer>();
             SetGazedAt(false);
         }
     }

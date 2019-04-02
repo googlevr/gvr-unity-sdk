@@ -22,6 +22,7 @@ namespace GoogleVR.VideoDemo
     using UnityEngine;
     using UnityEngine.Events;
 
+    /// <summary>A `UnityEvent` wrapper for Vector3 events.</summary>
     [Serializable]
     public class Vector3Event : UnityEvent<Vector3>
     {

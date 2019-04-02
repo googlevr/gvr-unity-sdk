@@ -25,7 +25,7 @@ using Gvr;
 namespace Gvr.Internal
 {
     // Internal representation of state for the headset.
-    struct HeadsetState
+    public struct HeadsetState
     {
         internal GvrEventType eventType;
         internal int eventFlags;
@@ -39,6 +39,9 @@ namespace Gvr.Internal
         internal Vector3 recenteredPosition;
         internal Quaternion recenteredRotation;
 
+        /// <summary>
+        /// An initialization method for this struct to set its values to their defaults.
+        /// </summary>
         public void Initialize()
         {
             eventType = GvrEventType.Invalid;
